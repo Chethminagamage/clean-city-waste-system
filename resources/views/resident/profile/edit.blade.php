@@ -35,8 +35,6 @@
         @else
             <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}" class="w-24 h-24 rounded-full object-cover mb-3" id="imagePreview">
         @endif
-
-        {{-- ✅ Image input goes outside of image section but inside the form --}}
     </div>
 
     {{-- ✅ Main Form --}}
@@ -61,6 +59,15 @@
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
             <input type="text" name="contact" value="{{ old('contact', $user->contact) }}" class="w-full px-4 py-3 border border-gray-300 rounded">
+        </div>
+
+        {{-- ✅ 2FA Toggle --}}
+        <div>
+            <label class="inline-flex items-center mt-4">
+                <input type="checkbox" name="two_factor_enabled" class="form-checkbox text-green-600"
+                    {{ $user->two_factor_enabled ? 'checked' : '' }}>
+                <span class="ml-2 text-sm text-gray-700">Enable Two-Factor Authentication (2FA)</span>
+            </label>
         </div>
 
         <hr class="my-6">
@@ -90,7 +97,6 @@
 </div>
 @endsection
 
-{{-- ✅ Live Image Preview --}}
 @push('scripts')
 <script>
 document.getElementById('profile_image').addEventListener('change', function(e) {

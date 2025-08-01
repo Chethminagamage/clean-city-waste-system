@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Resident\ResidentProfileController;
 use App\Http\Controllers\Resident\ResidentReportController;
+use App\Http\Controllers\Admin\AdminUserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -88,6 +89,16 @@ Route::middleware(['auth', 'role:resident'])->prefix('resident')->group(function
 
 /*
 |--------------------------------------------------------------------------
+| Two-Factor Authentication Routes (Modal Flow)
+|--------------------------------------------------------------------------
+*/
+
+Route::post('/2fa/verify', [App\Http\Controllers\TwoFactorController::class, 'verifyOtp'])->name('2fa.verify');
+Route::post('/resident/toggle-2fa', [ResidentProfileController::class, 'toggle2FA'])->name('resident.2fa.toggle');
+Route::post('/2fa/resend', [TwoFactorController::class, 'resendOtp'])->name('2fa.resend');
+
+/*
+|--------------------------------------------------------------------------
 | Admin Routes
 |--------------------------------------------------------------------------
 */
@@ -115,6 +126,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/logout', [AdminLoginController::class, 'logout'])->name('logout');
     });
 });
+
+Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/users', [AdminUserController::class, 'index'])->name('users');
+    Route::post('/users/{id}/toggle', [AdminUserController::class, 'toggleStatus'])->name('users.toggle');
+    Route::delete('/users/{id}', [AdminUserController::class, 'destroy'])->name('users.delete');
+});
+
+
 
 /*
 |--------------------------------------------------------------------------

@@ -250,11 +250,20 @@
 
                 <!-- User Info & Profile -->
                 <div class="hidden sm:flex items-center space-x-4">
-                    <span class="text-sm font-medium">
-                    {{ Auth::user()->first_name ?? '' }}
-                </span>
-                    <a href="{{ route('resident.profile.edit') }}" class="profile-icon w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-md">
-                        <i class="fas fa-user text-white"></i>
+                    <span class="text-sm font-medium text-gray-900">
+                        {{ auth()->user()->first_name ?? '' }}
+                    </span>
+
+                    <a href="{{ route('resident.profile.edit') }}" class="relative group">
+                        @if (auth()->user()->profile_image)
+                            <img src="{{ auth()->user()->profile_image_url }}"
+                                alt="Profile"
+                                class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-md hover:scale-105 transition-transform duration-200">
+                        @else
+                            <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-md hover:scale-105 transition-transform duration-200">
+                                <i class="fas fa-user text-white"></i>
+                            </div>
+                        @endif
                     </a>
                 </div>
 
@@ -272,8 +281,6 @@
                     
                     <!-- User info for mobile -->
                     <div class="px-4 py-2 border-t border-gray-200 mt-2">
-                        <p class="text-sm text-gray-600">Welcome back</p>
-                        <p class="text-sm font-bold text-green-700">{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</p>
                         <a href="{{ route('resident.profile.edit') }}" class="text-sm text-blue-600 hover:text-blue-800 mt-1 inline-block">View Profile</a>
                     </div>
                     

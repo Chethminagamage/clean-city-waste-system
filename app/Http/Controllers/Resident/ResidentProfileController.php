@@ -23,11 +23,12 @@ class ResidentProfileController extends Controller
             'contact' => 'nullable|string|max:20',
             'current_password' => 'required_with:new_password|nullable|string',
             'new_password' => 'nullable|string|min:8|confirmed',
-            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $user = Auth::user();
 
+        // ✅ Basic fields
         $user->name = $request->name;
         $user->email = $request->email;
         $user->contact = $request->contact;
@@ -42,7 +43,6 @@ class ResidentProfileController extends Controller
 
         // ✅ Handle profile image upload
         if ($request->hasFile('profile_image')) {
-            // Delete old image
             if ($user->profile_image && Storage::disk('public')->exists($user->profile_image)) {
                 Storage::disk('public')->delete($user->profile_image);
             }
@@ -50,6 +50,9 @@ class ResidentProfileController extends Controller
             $path = $request->file('profile_image')->store('profile_images', 'public');
             $user->profile_image = $path;
         }
+
+        // ✅ Handle 2FA toggle
+        $user->two_factor_enabled = $request->has('two_factor_enabled');
 
         $user->save();
 

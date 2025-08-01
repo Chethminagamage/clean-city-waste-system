@@ -8,6 +8,7 @@
     <script src="//unpkg.com/alpinejs" defer></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <style>
         /* Smooth scroll behavior */
         html {
@@ -446,6 +447,49 @@
             </div>
         </div>
     </footer>
+
+    <!-- ✅ Two-Factor Modal -->
+@if (session('show_2fa_modal'))
+    <div id="twoFactorModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-md w-full max-w-md shadow-xl">
+            <h2 class="text-lg font-semibold mb-4 text-center">Two-Factor Verification</h2>
+
+            {{-- ✅ Display error --}}
+            @if (session('otp_error'))
+                <div class="bg-red-100 text-red-700 p-2 text-sm rounded mb-3">
+                    {{ session('otp_error') }}
+                </div>
+            @endif
+
+            @if (session('otp_success'))
+                <div class="bg-green-100 text-green-700 p-2 text-sm rounded mb-3">
+                    {{ session('otp_success') }}
+                </div>
+            @endif
+
+            <form action="{{ route('2fa.verify') }}" method="POST">
+                @csrf
+                <input type="text" name="otp" class="w-full border p-2 rounded mb-4 text-center" placeholder="Enter OTP" required>
+
+                <div class="flex justify-between items-center">
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded w-full">Verify</button>
+                </div>
+            </form>
+
+            {{-- 🔁 Resend OTP --}}
+            <div class="text-center mt-4">
+                <form action="{{ route('2fa.resend') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="text-sm text-blue-600 hover:underline">Didn’t receive the code? Resend OTP</button>
+                </form>
+            </div>
+
+            <div class="text-center mt-3">
+                <button onclick="document.getElementById('twoFactorModal').remove()" class="text-sm text-gray-500 hover:underline">Cancel</button>
+            </div>
+        </div>
+    </div>
+@endif
 
     
 
