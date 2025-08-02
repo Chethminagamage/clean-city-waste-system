@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\Auth\LoginController as AdminLoginController;
 use App\Http\Controllers\Admin\BinReportController;
 use App\Http\Controllers\Admin\PickupController;
 use App\Http\Controllers\Admin\CollectorController;
+use App\Http\Controllers\Collector\CollectorDashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AlertController;
 use App\Http\Controllers\Admin\AnalyticsController;
@@ -69,22 +70,14 @@ Route::get('/email/verify/{id}/{hash}', function (Request $request, $id, $hash) 
 | Resident Routes
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:resident'])->prefix('resident')->group(function () {
-    // Dashboard
-    Route::get('/dashboard', [ResidentReportController::class, 'dashboard'])->name('resident.dashboard');
-
-    // Report Submission
-    Route::post('/report/store', [ResidentReportController::class, 'store'])->name('resident.report.store');
-
-    // Feedback
+Route::middleware(['auth', 'role:resident'])->prefix('resident')->name('resident.')->group(function () {
+    Route::get('/dashboard', [ResidentReportController::class, 'dashboard'])->name('dashboard');
+    Route::post('/report/store', [ResidentReportController::class, 'store'])->name('report.store');
     Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.submit');
 
-    // Profile
-    Route::middleware(['auth'])->prefix('resident')->group(function () {
-    Route::get('/profile/edit', [ResidentProfileController::class, 'edit'])->name('resident.profile.edit');
-    Route::post('/profile/update', [ResidentProfileController::class, 'update'])->name('resident.profile.update');
-    Route::post('/profile/remove-image', [ResidentProfileController::class, 'removeImage'])->name('resident.profile.image.remove');
-});
+    Route::get('/profile/edit', [ResidentProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile/update', [ResidentProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/remove-image', [ResidentProfileController::class, 'removeImage'])->name('profile.image.remove');
 });
 
 /*
@@ -92,8 +85,7 @@ Route::middleware(['auth', 'role:resident'])->prefix('resident')->group(function
 | Two-Factor Authentication Routes (Modal Flow)
 |--------------------------------------------------------------------------
 */
-
-Route::post('/2fa/verify', [App\Http\Controllers\TwoFactorController::class, 'verifyOtp'])->name('2fa.verify');
+Route::post('/2fa/verify', [TwoFactorController::class, 'verifyOtp'])->name('2fa.verify');
 Route::post('/resident/toggle-2fa', [ResidentProfileController::class, 'toggle2FA'])->name('resident.2fa.toggle');
 Route::post('/2fa/resend', [TwoFactorController::class, 'resendOtp'])->name('2fa.resend');
 
@@ -103,16 +95,11 @@ Route::post('/2fa/resend', [TwoFactorController::class, 'resendOtp'])->name('2fa
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')->name('admin.')->group(function () {
-    // Login
     Route::get('/login', [AdminLoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AdminLoginController::class, 'login'])->name('login.submit');
 
-    // Protected Admin Panel Routes
     Route::middleware(['auth:admin'])->group(function () {
-        Route::get('/dashboard', function () {
-            return view('admin.dashboard');
-        })->name('dashboard');
-
+        Route::get('/dashboard', fn () => view('admin.dashboard'))->name('dashboard');
         Route::get('/profile', [AdminProfileController::class, 'edit'])->name('profile.edit');
         Route::post('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
 
@@ -124,16 +111,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
 
         Route::post('/logout', [AdminLoginController::class, 'logout'])->name('logout');
+
+        Route::get('/users', [AdminUserController::class, 'index'])->name('users');
+        Route::post('/users/{id}/toggle', [AdminUserController::class, 'toggleStatus'])->name('users.toggle');
+        Route::delete('/users/{id}', [AdminUserController::class, 'destroy'])->name('users.delete');
+
+        Route::post('/collectors/store', [CollectorController::class, 'store'])->name('collectors.store');
+        Route::post('/collectors/update/{collector}', [CollectorController::class, 'update'])->name('collectors.update');
+        Route::post('/collectors/toggle-status/{collector}', [CollectorController::class, 'toggleStatus'])->name('collectors.toggle');
+        Route::delete('/collectors/delete/{collector}', [CollectorController::class, 'destroy'])->name('collectors.delete');
+
+        Route::post('/binreports/assign/{reportId}', [BinReportController::class, 'assignNearestCollector'])->name('assign.collector'); // auto
+        Route::get('/report/{id}/nearby-collectors', [BinReportController::class, 'getNearbyCollectors'])->name('report.nearby.collectors'); // ajax
+        Route::post('/assign-collector/{report}', [BinReportController::class, 'assignCollector'])->name('report.assign.collector'); // manual
     });
 });
-
-Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/users', [AdminUserController::class, 'index'])->name('users');
-    Route::post('/users/{id}/toggle', [AdminUserController::class, 'toggleStatus'])->name('users.toggle');
-    Route::delete('/users/{id}', [AdminUserController::class, 'destroy'])->name('users.delete');
-});
-
-
 
 /*
 |--------------------------------------------------------------------------
@@ -141,21 +133,20 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
 |--------------------------------------------------------------------------
 */
 Route::prefix('collector')->name('collector.')->group(function () {
-    // Collector Login
     Route::get('/login', [AuthenticatedSessionController::class, 'showCollectorLogin'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'loginCollector'])->name('login.submit');
+    Route::post('/logout', [AuthenticatedSessionController::class, 'logoutCollector'])->name('logout');
 
-    // Collector Dashboard
-    Route::middleware(['auth', 'role:collector'])->group(function () {
-        Route::get('/dashboard', function () {
-            return view('collector.dashboard');
-        })->name('dashboard');
+    Route::middleware(['auth:collector'])->group(function () {
+        Route::get('/dashboard', [CollectorDashboardController::class, 'index'])->name('dashboard');
+        Route::post('/update-location', [CollectorDashboardController::class, 'updateLocation'])->name('updateLocation');
+        Route::post('/report/{id}/collected', [CollectorDashboardController::class, 'markAsCollected'])->name('report.collected');
     });
 });
 
 /*
 |--------------------------------------------------------------------------
-| Optional Custom Email Verification
+| Custom Email Verification (Optional)
 |--------------------------------------------------------------------------
 */
 Route::get('/verify-email/{id}/{hash}', [VerifyEmailController::class, '__invoke'])

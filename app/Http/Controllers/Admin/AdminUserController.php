@@ -44,7 +44,7 @@ class AdminUserController extends Controller
             return back()->withErrors(['Invalid user.']);
         }
 
-        $user->status = $user->status === 'active' ? 'blocked' : 'active';
+        $user->status = $user->status === 1 ? 0 : 1;
         $user->save();
 
         return back()->with('success', 'User status updated.');

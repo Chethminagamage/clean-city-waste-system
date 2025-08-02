@@ -27,4 +27,9 @@ class WasteReport extends Model
     {
         return $this->belongsTo(User::class, 'resident_id');
     }
+
+    public function collector()
+    {
+        return $this->belongsTo(User::class, 'collector_id');
+    }
 }

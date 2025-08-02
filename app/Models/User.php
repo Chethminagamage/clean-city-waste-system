@@ -26,6 +26,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'two_factor_expires_at',
         'phone',         // ✅ Add if your profile form includes this
         'profile_image', // ✅ Optional for profile picture upload
+        'contact',
+        'location',
     ];
 
     /**

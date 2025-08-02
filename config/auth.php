@@ -35,20 +35,20 @@ return [
     |
     */
 
-    'guards' => [
+        'guards' => [
         'web' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'users', // default (used by resident)
         ],
 
         'admin' => [
             'driver' => 'session',
             'provider' => 'admins',
-    ],
+        ],
 
-        'resident' => [
-                'driver' => 'session',
-                'provider' => 'users', // or another provider if using a separate table/model
+        'collector' => [
+            'driver' => 'session',
+            'provider' => 'users',
         ],
     ],
 
