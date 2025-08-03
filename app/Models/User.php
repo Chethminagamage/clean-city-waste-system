@@ -28,6 +28,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'profile_image', // ✅ Optional for profile picture upload
         'contact',
         'location',
+        'latitude',
+        'longitude',
     ];
 
     /**

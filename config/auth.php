@@ -70,11 +70,7 @@ return [
     */
 
     'providers' => [
-        'users' => [
-            'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\User::class),
-        ],
-
+        
         'admins' => [
             'driver' => 'eloquent',
             'model' => App\Models\Admin::class,
@@ -86,8 +82,8 @@ return [
         ],
 
         'resident' => [
-    'driver' => 'session',
-    'provider' => 'users', // Or 'residents' if you use a separate model
+        'driver' => 'session',
+        'provider' => 'users', // Or 'residents' if you use a separate model
 ],
 
         // 'users' => [

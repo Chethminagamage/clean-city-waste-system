@@ -20,7 +20,12 @@ class CollectorDashboardController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('collector.dashboard', compact('collector', 'assignedReports'));
+        return view('collector.dashboard', [
+            'collector' => $collector,
+            'assignedReports' => $assignedReports,
+            'collectorLat' => $collector->latitude,
+            'collectorLng' => $collector->longitude,
+        ]);
     }
 
     public function updateLocation(Request $request)
