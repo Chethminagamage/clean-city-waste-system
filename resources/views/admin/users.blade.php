@@ -5,12 +5,6 @@
     <h1 class="text-3xl font-bold text-gray-800">User Management</h1>
 </div>
 
-@if(session('success'))
-    <div class="flex items-center justify-between bg-green-100 text-green-800 px-4 py-3 rounded mb-4">
-        <span>{{ session('success') }}</span>
-        <button onclick="this.parentElement.remove()" class="text-xl font-bold leading-none hover:text-green-900">&times;</button>
-    </div>
-@endif
 
 <form method="GET" action="{{ route('admin.users') }}" class="flex flex-wrap gap-3 mb-6 items-center">
     <input type="text" name="search" placeholder="Search by name/email"
