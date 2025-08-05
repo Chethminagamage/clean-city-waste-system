@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 use App\Models\User;
 use App\Mail\OTPVerificationMail;
+use Illuminate\Support\Facades\Hash;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -26,27 +27,29 @@ class AuthenticatedSessionController extends Controller
 
     public function store(LoginRequest $request): RedirectResponse
 {
-    $credentials = $request->only('email', 'password');
-
-    // First check if the credentials are correct
-    if (!Auth::validate($credentials)) {
-        return back()->withErrors(['email' => 'The provided credentials are incorrect.']);
-    }
-
-    // Get the user after validation
     $user = User::where('email', $request->email)->first();
 
-    // Check if user exists and is a resident
-    if (!$user || $user->role !== 'resident') {
+    // 1. Email not found
+    if (!$user) {
+        return back()->withErrors(['email' => 'No account found with this email address.']);
+    }
+
+    // 2. Incorrect password
+    if (!Hash::check($request->password, $user->password)) {
+        return back()->withErrors(['email' => 'Incorrect username or password.']);
+    }
+
+    // 3. Role check
+    if ($user->role !== 'resident') {
         return back()->withErrors(['email' => 'You are not authorized to log in as a resident.']);
     }
 
-    // Blocked account check
+    // 4. Blocked account check
     if ($user->status === 'blocked' || $user->status == 0) {
         return back()->withErrors(['email' => 'Your account has been blocked by the admin.']);
     }
 
-    // Email verification check
+    // 5. Email verification check
     if (!$user->hasVerifiedEmail()) {
         return redirect()->route('login')->with([
             'email_verify_alert' => true,
@@ -54,7 +57,7 @@ class AuthenticatedSessionController extends Controller
         ]);
     }
 
-    // 2FA check
+    // 6. Two-factor authentication (OTP)
     if ($user->two_factor_enabled) {
         $otp = rand(100000, 999999);
 
@@ -70,7 +73,7 @@ class AuthenticatedSessionController extends Controller
         return redirect()->route('login')->with('show_2fa_modal', true);
     }
 
-    // Regular login
+    // 7. Final login
     Auth::login($user);
     $request->session()->regenerate();
 
@@ -84,29 +87,33 @@ class AuthenticatedSessionController extends Controller
         'password' => 'required|string',
     ]);
 
-    $credentials = $request->only('email', 'password');
+    $user = User::where('email', $request->email)->first();
 
-    // Attempt login using the collector guard first
-    if (Auth::guard('collector')->attempt($credentials)) {
-        $user = Auth::guard('collector')->user();
-
-        // Check if role is collector and account is active
-        if ($user->role === 'collector' && $user->status == 1) {
-            $request->session()->regenerate();
-            return redirect()->route('collector.dashboard');
-        }
-
-        // If account is blocked, log out and show error
-        Auth::guard('collector')->logout();
-        return back()->withErrors([
-            'email' => 'Your account is blocked. Please contact admin.',
-        ]);
+    // 1. Email not found
+    if (!$user) {
+        return back()->withErrors(['email' => 'No account found with this email address.']);
     }
 
-    // Invalid credentials
-    return back()->withErrors([
-        'email' => 'Invalid email or password.',
-    ]);
+    // 2. Role check BEFORE login
+    if ($user->role !== 'collector') {
+        return back()->withErrors(['email' => 'You are not authorized to log in as a collector.']);
+    }
+
+    // 3. Password check
+    if (!Hash::check($request->password, $user->password)) {
+        return back()->withErrors(['email' => 'Incorrect password.']);
+    }
+
+    // 4. Account block check
+    if ($user->status !== 1) {
+        return back()->withErrors(['email' => 'Your account is blocked. Please contact admin.']);
+    }
+
+    // 5. All good — log in with guard
+    Auth::guard('collector')->login($user);
+    $request->session()->regenerate();
+
+    return redirect()->route('collector.dashboard');
 }
 
     public function destroy(Request $request): RedirectResponse
