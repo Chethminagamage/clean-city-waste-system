@@ -48,10 +48,13 @@
                 </td>
                 <td class="px-4 py-3 flex gap-2">
                     {{-- Toggle --}}
-                    <a href="{{ route('admin.collectors.toggle', $collector->id) }}"
-                       class="px-3 py-1 bg-emerald-500 text-white rounded text-xs hover:bg-emerald-600 transition">
-                       {{ $collector->status ? 'Block' : 'Unblock' }}
-                    </a>
+                    <form action="{{ route('admin.collectors.toggle', $collector->id) }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit"
+                            class="{{ $collector->status ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700' }} px-3 py-1 text-white rounded text-xs transition">
+                            {{ $collector->status ? 'Block' : 'Unblock' }}
+                        </button>
+                    </form>
 
                     {{-- Edit --}}
                     <button
@@ -62,7 +65,7 @@
 
                     {{-- Delete --}}
                     <form action="{{ route('admin.collectors.delete', $collector->id) }}" method="POST"
-                          onsubmit="return confirm('Are you sure to delete this collector?')">
+                        onsubmit="return confirm('Are you sure to delete this collector?')" class="inline">
                         @csrf
                         @method('DELETE')
                         <button class="px-3 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition">
@@ -150,7 +153,8 @@
 
         <h2 class="text-xl font-semibold mb-4">Edit Collector</h2>
         <form method="POST" id="editForm" class="space-y-4" action="">
-             @csrf
+            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+            @method('POST')
             
             <div>
                 <label class="block font-medium">Name</label>

@@ -78,34 +78,36 @@ class AuthenticatedSessionController extends Controller
 }
 
     public function loginCollector(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
+{
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required|string',
+    ]);
 
-        $credentials = $request->only('email', 'password');
+    $credentials = $request->only('email', 'password');
 
-        // Use collector guard
-        if (Auth::guard('collector')->attempt($credentials)) {
-            $user = Auth::guard('collector')->user();
+    // Attempt login using the collector guard first
+    if (Auth::guard('collector')->attempt($credentials)) {
+        $user = Auth::guard('collector')->user();
 
-            if ($user->role === 'collector') {
-                $request->session()->regenerate();
-                return redirect()->route('collector.dashboard');
-            }
-
-            // If role doesn't match, logout from collector guard
-            Auth::guard('collector')->logout();
-            return back()->withErrors([
-                'email' => 'You are not authorized to log in as a collector.',
-            ]);
+        // Check if role is collector and account is active
+        if ($user->role === 'collector' && $user->status == 1) {
+            $request->session()->regenerate();
+            return redirect()->route('collector.dashboard');
         }
 
+        // If account is blocked, log out and show error
+        Auth::guard('collector')->logout();
         return back()->withErrors([
-            'email' => 'The provided credentials are incorrect.',
+            'email' => 'Your account is blocked. Please contact admin.',
         ]);
     }
+
+    // Invalid credentials
+    return back()->withErrors([
+        'email' => 'Invalid email or password.',
+    ]);
+}
 
     public function destroy(Request $request): RedirectResponse
     {

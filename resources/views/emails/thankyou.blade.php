@@ -12,7 +12,7 @@
                     <!-- Header -->
                     <tr>
                         <td align="center" bgcolor="#38a169" style="padding: 30px 20px;">
-                            <h1 style="margin: 0; font-size: 28px; color: #ffffff;">Welcome to Clean City 🌱</h1>
+                            <h1 style="margin: 0; font-size: 28px; color: #ffffff;">Welcome to Clean City</h1>
                         </td>
                     </tr>
 
@@ -24,7 +24,7 @@
                                 Thank you for joining <strong>Clean City</strong> and supporting our vision of a cleaner, smarter community.
                             </p>
                             <p style="font-size: 16px; line-height: 1.6;">
-                                We're excited to have you with us! You'll soon receive notifications and updates on how we’re helping your area stay clean and green 🌍.
+                                We're excited to have you with us! You'll soon receive notifications and updates on how we’re helping your area stay clean and green.
                             </p>
                             <p style="font-size: 16px; line-height: 1.6;">
                                 If you have any questions or need help, feel free to reach out to our support team anytime.
@@ -35,7 +35,7 @@
                     <!-- Footer -->
                     <tr>
                         <td bgcolor="#f9fafb" style="padding: 25px 40px; text-align: center; font-size: 14px; color: #4a5568;">
-                            💚 <strong>The Clean City Team</strong><br>
+                            <strong>The Clean City Team</strong><br>
                             📧 <a href="mailto:contact@cleancity.gmail.com" style="color: #2f855a; text-decoration: none;">contact@cleancity.gmail.com</a><br>
                             📞 +94 81 456 7890
                         </td>

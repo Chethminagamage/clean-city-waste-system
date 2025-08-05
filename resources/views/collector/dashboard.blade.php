@@ -11,7 +11,7 @@
         <p class="text-gray-700">Your current location updates every <strong>30 seconds</strong>.</p>
         <p class="text-sm mt-2 text-gray-600">Last updated: <span id="updated-time">Never</span></p>
         <p class="text-sm text-gray-600">Latitude: <span id="lat-value">-</span>, Longitude: <span id="lng-value">-</span></p>
-        <p class="text-green-600 mt-1 hidden" id="update-success">✅ Location updated successfully</p>
+        <p class="text-green-600 mt-1 hidden" id="update-success">Location updated successfully</p>
     </div>
 
     <!-- Assigned Reports Section -->

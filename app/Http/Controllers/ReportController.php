@@ -25,7 +25,7 @@ class ReportController extends Controller
             'location'     => 'required|string|max:255',
             'zone'         => 'required|string|max:255',
             'bin_status'   => 'required|string|in:Full,Overflowing,Damaged,Normal',
-            'image'        => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'image'        => 'required|image|mimes:jpg,jpeg,png|max:2048',
             'remarks'      => 'nullable|string|max:1000',
         ]);
 

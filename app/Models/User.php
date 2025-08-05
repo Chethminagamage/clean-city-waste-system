@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Mail\CustomResetPasswordMail;
+use Illuminate\Support\Facades\Mail;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -66,5 +68,15 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->profile_image
             ? asset('storage/' . $this->profile_image)
             : asset('images/default-avatar.png');
+    }
+
+    public function sendPasswordResetNotification($token)
+    {
+        $resetUrl = url(route('password.reset', [
+            'token' => $token,
+            'email' => $this->getEmailForPasswordReset(),
+        ], false));
+
+        Mail::to($this->email)->send(new CustomResetPasswordMail($resetUrl, $this->name));
     }
 }

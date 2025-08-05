@@ -227,9 +227,9 @@
     </header>
 
     <!-- Login Section -->
-    <section class="min-h-screen bg-cover bg-center relative parallax-bg" style="background-image: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80')">
+    <section class="min-h-screen bg-cover bg-center relative parallax-bg" style="background-image: url('{{ asset('images/CTA2.jpg') }}');">
         <!-- Background overlay -->
-        <div class="absolute inset-0 bg-black/40"></div>
+        <div class="absolute inset-0 bg-black/50"></div>
         
         <!-- Content -->
         <div class="relative z-10 py-16 px-4">

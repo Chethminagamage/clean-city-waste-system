@@ -90,10 +90,14 @@ class CollectorController extends Controller
     public function toggleStatus($id)
     {
         $collector = User::where('role', 'collector')->findOrFail($id);
+
+        // Toggle the status
         $collector->status = !$collector->status;
         $collector->save();
 
-        return redirect()->back()->with('success', 'Collector status updated!');
+        $action = $collector->status ? 'unblocked' : 'blocked';
+
+        return redirect()->back()->with('success', "Collector has been {$action} successfully.");
     }
 
     public function destroy($id)
