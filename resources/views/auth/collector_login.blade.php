@@ -165,19 +165,19 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6">
             <div class="flex justify-between items-center py-3 sm:py-4">
                 <!-- Logo -->
-                <div class="flex items-center">
+                <a href="{{ route('landing.home') }}" class="flex items-center">
                     <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mr-2 sm:mr-3">
                     <div>
                         <span class="text-xl sm:text-2xl font-bold text-gray-800">Clean City</span>
-                        <p class="text-xs sm:text-sm text-orange-600 hidden sm:block">Your Waste, Our Responsibility</p>
+                        <p class="text-xs sm:text-sm text-green-600 hidden sm:block">Your Waste, Our Responsibility</p>
                     </div>
-                </div>
+                </a>
 
                 <!-- Navigation -->
                 <nav class="hidden lg:flex items-center space-x-8">
                     <div class="relative group">
-                        <a href="#" class="text-gray-700 hover:text-orange-500 font-medium flex items-center">
-                            Home <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        <a href="{{ route('landing.home') }}" class="text-gray-700 hover:text-orange-500 font-medium flex items-center">
+                            Home 
                         </a>
                     </div>
                     <div class="relative group">
@@ -212,7 +212,7 @@
             <!-- Mobile Navigation Menu -->
             <div id="mobile-menu" class="lg:hidden hidden bg-white border-t border-gray-200 py-4">
                 <nav class="flex flex-col space-y-4">
-                    <a href="#" class="text-gray-700 hover:text-orange-500 font-medium px-4 py-2">Home</a>
+                    <a href="{{ route('landing.home') }}" class="text-gray-700 hover:text-orange-500 font-medium px-4 py-2">Home</a>
                     <a href="#" class="text-gray-700 hover:text-orange-500 font-medium px-4 py-2">Service</a>
                     <a href="#" class="text-gray-700 hover:text-orange-500 font-medium px-4 py-2">Projects</a>
                     <a href="#" class="text-gray-700 hover:text-orange-500 font-medium px-4 py-2">Company</a>

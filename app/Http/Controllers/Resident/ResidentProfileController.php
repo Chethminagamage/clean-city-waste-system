@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use App\Mail\PasswordChangedNotification;
+use Illuminate\Support\Facades\Mail;
 
 class ResidentProfileController extends Controller
 {
@@ -33,12 +35,16 @@ class ResidentProfileController extends Controller
         $user->email = $request->email;
         $user->contact = $request->contact;
 
+        $passwordChanged = false;
+
         // ✅ Handle new password
         if ($request->filled('new_password')) {
             if (!Hash::check($request->current_password, $user->password)) {
                 return back()->withErrors(['current_password' => 'Current password is incorrect.']);
             }
+
             $user->password = Hash::make($request->new_password);
+            $passwordChanged = true;
         }
 
         // ✅ Handle profile image upload
@@ -55,6 +61,11 @@ class ResidentProfileController extends Controller
         $user->two_factor_enabled = $request->has('two_factor_enabled');
 
         $user->save();
+
+        // ✅ Send password changed email notification
+        if ($passwordChanged) {
+            Mail::to($user->email)->send(new PasswordChangedNotification($user));
+        }
 
         return back()->with('success', 'Profile updated successfully.');
     }
