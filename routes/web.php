@@ -25,11 +25,7 @@ use App\Http\Controllers\Resident\ResidentProfileController;
 use App\Http\Controllers\Resident\ResidentReportController;
 use App\Http\Controllers\Admin\AdminUserController;
 
-/*
-|--------------------------------------------------------------------------
-| Public Landing Page
-|--------------------------------------------------------------------------
-*/
+//Public Landing Page
 Route::get('/', function () {
     return view('home');
 })->name('landing.home');

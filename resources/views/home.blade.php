@@ -173,20 +173,20 @@
     <header class="bg-white/95 backdrop-blur-md sticky top-0 z-50 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6">
             <div class="flex justify-between items-center py-3 sm:py-4">
-                <!-- Logo -->
-                <div class="flex items-center">
+               <!-- Logo -->
+                <a href="{{ route('landing.home') }}" class="flex items-center">
                     <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mr-2 sm:mr-3">
                     <div>
                         <span class="text-xl sm:text-2xl font-bold text-gray-800">Clean City</span>
                         <p class="text-xs sm:text-sm text-green-600 hidden sm:block">Your Waste, Our Responsibility</p>
                     </div>
-                </div>
+                </a>
 
                 <!-- Navigation -->
                 <nav class="hidden lg:flex items-center space-x-8">
                     <div class="relative group">
-                        <a href="#" class="text-gray-700 hover:text-green-500 font-medium flex items-center">
-                            Home <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        <a href="{{ route('landing.home') }}" class="text-gray-700 hover:text-green-500 font-medium flex items-center">
+                            Home 
                         </a>
                     </div>
                     <div class="relative group">
