@@ -1,12 +1,12 @@
-<?php 
+<?php
 
 namespace App\Http\Controllers\Collector;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
 use App\Models\WasteReport;
+use App\Notifications\ReportStatusUpdated;
 
 class CollectorDashboardController extends Controller
 {
@@ -14,47 +14,93 @@ class CollectorDashboardController extends Controller
     {
         $collector = Auth::user();
 
-        // Fetch reports assigned to this collector
-        $assignedReports = WasteReport::with('resident')
-            ->where('collector_id', $collector->id)
-            ->orderBy('created_at', 'desc')
+        $activeReports = WasteReport::with('resident')
+            ->activeForCollector($collector->id)
+            ->orderByDesc('created_at')
+            ->get();
+
+        $completedReports = WasteReport::with('resident')
+            ->completedForCollector($collector->id)
+            ->orderByDesc('created_at')
+            ->get();
+
+        // Get ALL reports assigned to this collector (both active and completed)
+        $allAssignedReports = WasteReport::with('resident')
+            ->forCollector($collector->id)
+            ->orderByDesc('created_at')
             ->get();
 
         return view('collector.dashboard', [
-            'collector' => $collector,
-            'assignedReports' => $assignedReports,
-            'collectorLat' => $collector->latitude,
-            'collectorLng' => $collector->longitude,
+            'collector'         => $collector,
+            'activeReports'     => $activeReports,
+            'completedReports'  => $completedReports,
+            'assignedReports'   => $allAssignedReports, // Now includes both active and completed reports
+            'collectorLat'      => $collector->latitude,
+            'collectorLng'      => $collector->longitude,
         ]);
     }
 
     public function updateLocation(Request $request)
     {
         $request->validate([
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
+            'latitude'  => ['required','numeric'],
+            'longitude' => ['required','numeric'],
         ]);
 
         $user = Auth::user();
-        $user->latitude = $request->latitude;
-        $user->longitude = $request->longitude;
-        $user->location = $request->location ?? null;
+        $user->latitude  = (float) $request->latitude;
+        $user->longitude = (float) $request->longitude;
+        $user->location  = $request->input('location'); // nullable
         $user->save();
 
         return response()->json(['success' => true]);
     }
 
+    /**
+     * Mark a report as collected by this collector.
+     */
     public function markAsCollected($id)
     {
         $report = WasteReport::findOrFail($id);
 
         if ($report->collector_id !== Auth::id()) {
-            return redirect()->back()->with('error', 'Unauthorized');
+            return back()->with('error', 'Unauthorized');
         }
 
-        $report->status = 'Collected';
+        // Always use the model constant to avoid case/typo issues
+        $report->status = WasteReport::ST_COLLECTED; // 'collected'
+        // If you have a collected_at column, uncomment this:
+        // $report->collected_at = now();
         $report->save();
 
-        return redirect()->back()->with('success', 'Report marked as collected.');
+        // Notify resident if relation exists
+        if ($report->resident) {
+            $report->resident->notify(new ReportStatusUpdated($report, WasteReport::ST_COLLECTED));
+        }
+
+        return back()->with('success', 'Report marked as collected.');
+    }
+
+    /**
+     * (Optional) If you let collectors move an assigned report to in_progress.
+     */
+    public function startWork($id)
+    {
+        $report = WasteReport::findOrFail($id);
+
+        if ($report->collector_id !== Auth::id()) {
+            return back()->with('error', 'Unauthorized');
+        }
+
+        if ($report->status === WasteReport::ST_ASSIGNED) {
+            $report->status = WasteReport::ST_IN_PROGRESS;
+            $report->save();
+
+            if ($report->resident) {
+                $report->resident->notify(new ReportStatusUpdated($report, WasteReport::ST_IN_PROGRESS));
+            }
+        }
+
+        return back()->with('success', 'Report marked as in progress.');
     }
 }

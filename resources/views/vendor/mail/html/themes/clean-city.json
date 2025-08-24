@@ -1,0 +1,16 @@
+{
+    "body": "#ffffff",
+    "body-color": "#333333",
+    "button-bg": "#22c55e",
+    "button-color": "#ffffff",
+    "header-bg": "#22c55e",
+    "header-color": "#ffffff",
+    "footer-color": "#666666",
+    "table-inner-border-color": "#e9ecef",
+    "table-header-bg": "#f2f6f9",
+    "table-header-color": "#333333",
+    "table-alt-row-bg": "#f8fafc",
+    "link-color": "#22c55e",
+    "panel-bg": "#f8fafc",
+    "panel-color": "#333333"
+}

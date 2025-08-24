@@ -1,0 +1,22 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void {
+        Schema::create('collection_overrides', function (Blueprint $t) {
+            $t->id();
+            $t->foreignId('area_id')->constrained('areas')->cascadeOnDelete();
+            $t->date('date');
+            $t->enum('kind', ['blackout','extra']);
+            $t->time('start_time')->nullable(); // used for 'extra'
+            $t->time('end_time')->nullable();
+            $t->string('waste_type')->nullable();
+            $t->string('reason')->nullable();
+            $t->timestamps();
+        });
+    }
+    public function down(): void { Schema::dropIfExists('collection_overrides'); }
+};

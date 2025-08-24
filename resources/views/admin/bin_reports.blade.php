@@ -27,14 +27,28 @@
                         {{ $report->collector->name ?? '-' }}
                     </td>
                     <td class="py-2 px-4">
-                        @if (!$report->collector_id && $report->status === 'Pending')
-                            <button onclick="openAssignModal({{ $report->id }})"
-                                class="bg-blue-600 text-white text-sm px-4 py-1 rounded hover:bg-blue-700 transition">
-                                Assign
+                    @php $status = strtolower($report->status ?? ''); @endphp
+
+                    @if (empty($report->collector_id) && $status === 'pending')
+                        <button
+                        onclick="openAssignModal({{ $report->id }})"
+                        class="bg-blue-600 text-white text-sm px-4 py-1 rounded hover:bg-blue-700 transition">
+                        Assign
+                        </button>
+                    @elseif ($status === 'collected')
+                        <form action="{{ route('admin.reports.close', $report->id) }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit" class="bg-green-600 text-white text-sm px-4 py-1 rounded hover:bg-green-700 transition">
+                                Close Report
                             </button>
-                        @else
-                            <span class="text-green-600 text-sm">Assigned</span>
-                        @endif
+                        </form>
+                    @elseif ($status === 'closed')
+                        <span class="text-green-600 text-sm">Closed</span>
+                    @elseif (!empty($report->collector_id))
+                        <span class="text-blue-600 text-sm">Assigned</span>
+                    @else
+                        <span class="text-gray-500 text-sm">—</span>
+                    @endif
                     </td>
                 </tr>
             @empty

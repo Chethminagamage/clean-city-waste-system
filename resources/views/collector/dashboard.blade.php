@@ -33,13 +33,17 @@
                     </a>
                 @endif
 
-                @if ($report->status === 'Assigned')
+                @if ($report->status === 'assigned' || $report->status === 'in_progress')
                     <form method="POST" action="{{ route('collector.report.collected', $report->id) }}" class="inline-block">
                         @csrf
                         <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
                             Mark as Collected
                         </button>
                     </form>
+                @elseif ($report->status === 'collected')
+                    <p class="text-green-600 mt-2">✔️ Collected (Awaiting Admin Closure)</p>
+                @elseif ($report->status === 'closed')
+                    <p class="text-gray-600 mt-2">📁 Closed</p>
                 @else
                     <p class="text-green-600 mt-2">✔️ Collected</p>
                 @endif

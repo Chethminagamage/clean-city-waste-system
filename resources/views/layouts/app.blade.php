@@ -6,6 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'Laravel') }}</title>
+        <style>[x-cloak]{display:none !important}</style>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -32,5 +33,15 @@
                 @yield('content')
             </main>
         </div>
+        @if(session('success'))
+  <div class="mx-auto max-w-5xl mt-4 rounded-md bg-emerald-50 text-emerald-800 px-4 py-2">
+    {{ session('success') }}
+  </div>
+@endif
+@if(session('error'))
+  <div class="mx-auto max-w-5xl mt-4 rounded-md bg-red-50 text-red-700 px-4 py-2">
+    {{ session('error') }}
+  </div>
+@endif
     </body>
 </html>

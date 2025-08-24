@@ -91,11 +91,11 @@ class CollectorController extends Controller
     {
         $collector = User::where('role', 'collector')->findOrFail($id);
 
-        // Toggle the status
-        $collector->status = !$collector->status;
+        // Toggle the status between 'active' and 'blocked'
+        $collector->status = ($collector->status === 'active') ? 'blocked' : 'active';
         $collector->save();
 
-        $action = $collector->status ? 'unblocked' : 'blocked';
+        $action = ($collector->status === 'active') ? 'unblocked' : 'blocked';
 
         return redirect()->back()->with('success', "Collector has been {$action} successfully.");
     }

@@ -45,7 +45,7 @@ class AuthenticatedSessionController extends Controller
     }
 
     // 4. Blocked account check
-    if ($user->status === 'blocked' || $user->status == 0) {
+    if ($user->status === 'blocked') {
         return back()->withErrors(['email' => 'Your account has been blocked by the admin.']);
     }
 
@@ -105,7 +105,7 @@ class AuthenticatedSessionController extends Controller
     }
 
     // 4. Account block check
-    if ($user->status !== 1) {
+    if ($user->status === 'blocked') {
         return back()->withErrors(['email' => 'Your account is blocked. Please contact admin.']);
     }
 

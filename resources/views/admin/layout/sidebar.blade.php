@@ -93,6 +93,16 @@
                             @endif
                         </a>
                     </li>
+                    {{-- Collection Schedules --}}
+                    <li class="px-3 py-2 rounded-sm {{ request()->routeIs('admin.schedules.*') ? 'bg-white bg-opacity-20' : '' }}">
+                        <a class="flex items-center text-white hover:text-green-200 truncate transition duration-150 {{ request()->routeIs('admin.schedules.*') ? 'text-green-100' : 'text-green-200' }}" href="{{ route('admin.schedules.index') ?? '#' }}">
+                            <div class="flex items-center justify-center w-6 h-6 shrink-0">
+                                <i class="fas fa-calendar-alt text-lg"></i>
+                            </div>
+                            <span class="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200 whitespace-nowrap">Collection Schedules</span>
+                        </a>
+                    </li>
+
                     {{-- Analytics --}}
                     <li class="px-3 py-2 rounded-sm {{ request()->routeIs('admin.analytics') ? 'bg-white bg-opacity-20' : '' }}">
                         <a class="flex items-center text-white hover:text-green-200 truncate transition duration-150 {{ request()->routeIs('admin.analytics') ? 'text-green-100' : 'text-green-200' }}" href="{{ route('admin.analytics') ?? '#' }}">

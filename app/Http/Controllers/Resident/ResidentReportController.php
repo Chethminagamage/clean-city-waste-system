@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 
 class ResidentReportController extends Controller
 {
-    // Show Dashboard
+
     public function dashboard()
     {
         $residentId = Auth::id();
@@ -22,7 +22,6 @@ class ResidentReportController extends Controller
         return view('resident.dashboard', compact('reports'));
     }
 
-    // Store new report
     public function store(Request $request)
     {
         $request->validate([
@@ -32,15 +31,13 @@ class ResidentReportController extends Controller
             'report_date'        => 'required|date',
             'waste_type'         => 'required|string',
             'additional_details' => 'nullable|string|max:1000',
-            'image'              => 'required|image|mimes:jpeg,png,jpg|max:10240', // 10MB
+            'image'              => 'required|image|mimes:jpeg,png,jpg|max:10240', 
         ]);
 
-        // ✅ Enforce strict file check
         if (!$request->hasFile('image') || !$request->file('image')->isValid()) {
             return back()->withErrors(['image' => 'Please upload a valid image file.'])->withInput();
         }
 
-        // ✅ Safe to store
         $imagePath = $request->file('image')->store('reports', 'public');
 
         WasteReport::create([

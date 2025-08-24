@@ -79,4 +79,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
         Mail::to($this->email)->send(new CustomResetPasswordMail($resetUrl, $this->name));
     }
+
+    public function area() { return $this->belongsTo(\App\Models\Area::class); }
 }

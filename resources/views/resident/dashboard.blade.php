@@ -246,10 +246,37 @@
                             Submit Reports 
                         </a>
                     </div>
+                    <div class="relative group">
+                        <a href="{{ route('resident.reports.index') }}" 
+                        class="text-gray-700 hover:text-green-600 font-medium flex items-center transition-colors">
+                            Report History
+                        </a>
+                    </div>
+                    <div class="relative group">
+                        <a href="{{ route('resident.schedule.index') }}"
+                        class="text-gray-700 hover:text-green-600 font-medium flex items-center transition-colors">
+                            Collection Schedule
+                        </a>
+                    </div>
                 </nav>
 
                 <!-- User Info & Profile -->
                 <div class="hidden sm:flex items-center space-x-4">
+                    <!-- Notification Bell -->
+                    @auth
+                    @php $unread = auth()->user()->unreadNotifications()->count(); @endphp
+                    <a href="{{ route('notifications.index') }}" class="relative inline-flex items-center ml-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700 hover:text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                        @if($unread)
+                        <span class="absolute -top-1 -right-2 bg-red-600 text-white text-[10px] rounded-full px-1.5">
+                            {{ $unread }}
+                        </span>
+                        @endif
+                    </a>
+                    @endauth
+
                     <span class="text-sm font-medium text-gray-900">
                         {{ auth()->user()->first_name ?? '' }}
                     </span>
@@ -356,7 +383,7 @@
                                 </div>
                                 <span class="text-sm font-medium text-gray-700">Total Reports</span>
                             </div>
-                            <span class="text-2xl font-bold text-blue-600">3</span>
+                            <span class="text-2xl font-bold text-blue-600">{{ $stats['total'] ?? 0 }}</span>
                         </div>
                     </div>
 
@@ -368,7 +395,7 @@
                                 </div>
                                 <span class="text-sm font-medium text-gray-700">Pending</span>
                             </div>
-                            <span class="text-2xl font-bold text-orange-600">1</span>
+                            <span class="text-2xl font-bold text-orange-600">{{ $stats['pending'] ?? 0 }}</span>
                         </div>
                     </div>
 
@@ -380,7 +407,7 @@
                                 </div>
                                 <span class="text-sm font-medium text-gray-700">Scheduled</span>
                             </div>
-                            <span class="text-2xl font-bold text-purple-600">1</span>
+                            <span class="text-2xl font-bold text-purple-600">{{ $stats['scheduled'] ?? 0 }}</span>
                         </div>
                     </div>
 
@@ -392,12 +419,12 @@
                                 </div>
                                 <span class="text-sm font-medium text-gray-700">Collected</span>
                             </div>
-                            <span class="text-2xl font-bold text-green-600">1</span>
+                            <span class="text-2xl font-bold text-green-600">{{ $stats['collected'] ?? 0 }}</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Quick Tips -->
+                <!-- Quick Tips (inside same card) -->
                 <div class="mt-6 pt-6 border-t border-gray-100">
                     <div class="flex items-center gap-2 mb-3">
                         <i class="fas fa-lightbulb text-yellow-500"></i>
@@ -420,6 +447,7 @@
                 </div>
             </div>
         </div>
+        
 
         <!-- Submit Report Section -->
         <div id="submit-report" class="bg-white rounded-xl card-shadow p-6 mb-8">
@@ -598,10 +626,11 @@
                                     @endif
                                 </td>
                                 <td class="px-4 py-4">
-                                    <button class="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors">
-                                        View Details
-                                    </button>
-                                </td>
+  <a href="{{ route('resident.reports.show', $report->id) }}"
+     class="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors">
+     View Details
+  </a>
+</td>
                             </tr>
                         @empty
                             <tr>

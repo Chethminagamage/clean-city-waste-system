@@ -24,6 +24,10 @@ use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Resident\ResidentProfileController;
 use App\Http\Controllers\Resident\ResidentReportController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Resident\ReportHistoryController;
+use App\Http\Controllers\NotificationController;
+use Illuminate\Notifications\DatabaseNotification;
+use App\Http\Controllers\Resident\CollectionScheduleController;
 
 //Public Landing Page
 Route::get('/', function () {
@@ -76,6 +80,55 @@ Route::middleware(['auth', 'role:resident'])->prefix('resident')->name('resident
     Route::post('/profile/remove-image', [ResidentProfileController::class, 'removeImage'])->name('profile.image.remove');
 });
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/resident/dashboard', [\App\Http\Controllers\Resident\DashboardController::class, 'index'])
+        ->name('resident.dashboard');
+});
+
+Route::middleware(['auth'])->group(function () {
+    // Report routes
+    Route::get('/resident/reports', [ReportHistoryController::class,'index'])->name('resident.reports.index');
+    Route::get('/resident/reports/data', [ReportHistoryController::class,'data'])->name('resident.reports.data'); // filters+search JSON
+    Route::post('/resident/reports/{report}/cancel', [ReportHistoryController::class,'cancel'])->name('resident.reports.cancel');
+    Route::post('/resident/reports/{report}/duplicate', [ReportHistoryController::class,'duplicate'])->name('resident.reports.duplicate');
+    Route::get('/resident/reports/export/csv', [ReportHistoryController::class,'exportCsv'])->name('resident.reports.export.csv');
+    
+    // Report Feedback Routes
+    Route::get('/feedback/report/{reportId}', [FeedbackController::class, 'createForReport'])->name('feedback.report.create');
+    Route::post('/feedback/report/{reportId}', [FeedbackController::class, 'storeForReport'])->name('feedback.report.store');
+});
+
+Route::get('/resident/reports/{report}', [ReportHistoryController::class,'show'])
+    ->name('resident.reports.show');
+
+Route::get('/resident/reports/{report}/pdf', [ReportHistoryController::class, 'pdf'])
+    ->middleware('auth')        
+    ->name('resident.reports.pdf');
+
+Route::get('/resident/reports', [ReportHistoryController::class,'index'])->name('resident.reports.index');
+Route::get('/resident/reports/data', [ReportHistoryController::class,'data'])->name('resident.reports.data');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])
+        ->name('notifications.index');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markRead'])
+        ->name('notifications.read');
+    Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])
+        ->name('notifications.readAll');
+    Route::get('/notifications/{notification}', [NotificationController::class, 'show'])
+        ->name('notifications.show')
+        ->whereUuid('notification'); 
+    Route::get('/notifications/{notification}', [NotificationController::class, 'open'])
+        ->name('notifications.open');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/resident/schedule', [CollectionScheduleController::class, 'index'])
+        ->name('resident.schedule.index');
+});
+
+
+
 /*
 |--------------------------------------------------------------------------
 | Two-Factor Authentication Routes (Modal Flow)
@@ -105,6 +158,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/users', [UserController::class, 'index'])->name('users');
         Route::get('/alerts', [AlertController::class, 'index'])->name('alerts');
         Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
+        
+        // Collection Schedules CRUD
+        Route::resource('schedules', \App\Http\Controllers\Admin\CollectionScheduleController::class);
+        Route::post('/schedules/generate', [\App\Http\Controllers\Admin\CollectionScheduleController::class, 'generateSchedules'])->name('schedules.generate');
 
         Route::post('/logout', [AdminLoginController::class, 'logout'])->name('logout');
 
@@ -120,6 +177,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/binreports/assign/{reportId}', [BinReportController::class, 'assignNearestCollector'])->name('assign.collector'); // auto
         Route::get('/report/{id}/nearby-collectors', [BinReportController::class, 'getNearbyCollectors'])->name('report.nearby.collectors'); // ajax
         Route::post('/assign-collector/{report}', [BinReportController::class, 'assignCollector'])->name('report.assign.collector'); // manual
+        Route::post('/reports/{id}/close', [BinReportController::class, 'closeReport'])->name('reports.close'); // close collected report
     });
 });
 
@@ -139,6 +197,18 @@ Route::prefix('collector')->name('collector.')->group(function () {
         Route::post('/report/{id}/collected', [CollectorDashboardController::class, 'markAsCollected'])->name('report.collected');
     });
 });
+
+Route::middleware(['auth', 'role:collector'])->group(function () {
+    Route::patch('/collector/reports/{report}/collect',
+        [\App\Http\Controllers\Collector\CollectorDashboardController::class, 'markAsCollected']
+    )->name('collector.reports.collect');
+});
+
+Route::post('/collector/reports/{id}/start', [\App\Http\Controllers\Collector\CollectorDashboardController::class, 'startWork'])
+    ->name('collector.reports.start');
+
+Route::post('/collector/reports/{id}/collected', [\App\Http\Controllers\Collector\CollectorDashboardController::class, 'markAsCollected'])
+    ->name('collector.reports.markCollected');
 
 /*
 |--------------------------------------------------------------------------
