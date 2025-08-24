@@ -40,9 +40,9 @@ class FeedbackController extends Controller
             return redirect()->back()->with('error', 'You can only provide feedback for your own reports');
         }
         
-        // Check if report is closed
-        if (!$report->isClosed()) {
-            return redirect()->back()->with('error', 'You can only provide feedback for closed reports');
+        // Check if report is collected or closed (allow feedback for both)
+        if (!in_array(strtolower($report->status), ['collected', 'closed'])) {
+            return redirect()->back()->with('error', 'You can only provide feedback for collected or closed reports');
         }
         
         // Check if feedback already exists
@@ -70,9 +70,9 @@ class FeedbackController extends Controller
             return redirect()->back()->with('error', 'You can only provide feedback for your own reports');
         }
         
-        // Check if report is closed
-        if (!$report->isClosed()) {
-            return redirect()->back()->with('error', 'You can only provide feedback for closed reports');
+        // Check if report is collected or closed (allow feedback for both)
+        if (!in_array(strtolower($report->status), ['collected', 'closed'])) {
+            return redirect()->back()->with('error', 'You can only provide feedback for collected or closed reports');
         }
         
         // Check if feedback already exists

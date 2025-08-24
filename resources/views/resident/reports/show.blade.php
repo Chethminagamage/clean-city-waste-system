@@ -91,6 +91,33 @@
     </div>
   </div>
 
+  <!-- Display Flash Messages -->
+  @if(session('error'))
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 mb-6">
+      <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm">
+        <div class="flex items-center">
+          <svg class="w-5 h-5 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <p class="text-red-700 font-medium">{{ session('error') }}</p>
+        </div>
+      </div>
+    </div>
+  @endif
+
+  @if(session('success'))
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 mb-6">
+      <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg shadow-sm">
+        <div class="flex items-center">
+          <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          <p class="text-green-700 font-medium">{{ session('success') }}</p>
+        </div>
+      </div>
+    </div>
+  @endif
+
   <!-- Main Content -->
   <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8">
     <!-- Enhanced Status Card -->
@@ -129,15 +156,26 @@
         <div class="relative progress-timeline">
           <div class="flex justify-between items-center mobile-stack sm:flex-row">
             @foreach($statuses as $idx => $status)
+              @php
+                $isCompleted = $current !== false && $current >= $idx && strtolower($report->status) !== 'cancelled';
+                $isCancelled = $idx == 0 && strtolower($report->status) === 'cancelled';
+                
+                $iconClasses = $isCompleted 
+                  ? 'bg-gradient-to-r from-green-400 to-green-600 text-white shadow-lg shadow-green-200'
+                  : ($isCancelled 
+                    ? 'bg-gradient-to-r from-red-400 to-red-600 text-white shadow-lg shadow-red-200'
+                    : 'bg-gray-200 text-gray-400');
+                    
+                $labelClasses = $isCompleted
+                  ? 'text-green-700 bg-green-100'
+                  : ($isCancelled
+                    ? 'text-red-700 bg-red-100'
+                    : 'text-gray-500 bg-gray-100');
+              @endphp
+              
               <div class="flex flex-col items-center relative flex-1 group">
                 <!-- Enhanced Status Icon -->
-                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center mb-3 transition-all duration-500 transform group-hover:scale-110
-                  @if($current !== false && $current >= $idx && strtolower($report->status) !== 'cancelled') 
-                    bg-gradient-to-r from-green-400 to-green-600 text-white shadow-lg shadow-green-200
-                  @elseif($idx == 0 && strtolower($report->status) === 'cancelled') 
-                    bg-gradient-to-r from-red-400 to-red-600 text-white shadow-lg shadow-red-200
-                  @else 
-                    bg-gray-200 text-gray-400 @endif">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center mb-3 transition-all duration-500 transform group-hover:scale-110 {{ $iconClasses }}">
                   @if($idx == 0)
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -162,13 +200,7 @@
                 </div>
                 
                 <!-- Enhanced Status Label -->
-                <span class="text-xs sm:text-sm font-semibold text-center capitalize px-2 py-1 rounded-full transition-all duration-300
-                  @if($current !== false && $current >= $idx && strtolower($report->status) !== 'cancelled') 
-                    text-green-700 bg-green-100
-                  @elseif($idx == 0 && strtolower($report->status) === 'cancelled') 
-                    text-red-700 bg-red-100
-                  @else 
-                    text-gray-500 bg-gray-100 @endif">
+                <span class="text-xs sm:text-sm font-semibold text-center capitalize px-2 py-1 rounded-full transition-all duration-300 {{ $labelClasses }}">
                   @if($status === 'enroute')
                     En Route
                   @else
@@ -178,11 +210,12 @@
                 
                 <!-- Enhanced Connection Line -->
                 @if(!$loop->last)
-                  <div class="hidden sm:block absolute top-6 left-1/2 w-full h-1 -z-10 transform translate-x-1/2 rounded-full transition-all duration-500
-                    @if($current !== false && $current > $idx && strtolower($report->status) !== 'cancelled') 
-                      bg-gradient-to-r from-green-400 to-green-500 shadow-sm
-                    @else 
-                      bg-gray-300 @endif">
+                  @php
+                    $lineClasses = ($current !== false && $current > $idx && strtolower($report->status) !== 'cancelled')
+                      ? 'bg-gradient-to-r from-green-400 to-green-500 shadow-sm'
+                      : 'bg-gray-300';
+                  @endphp
+                  <div class="hidden sm:block absolute top-6 left-1/2 w-full h-1 -z-10 transform translate-x-1/2 rounded-full transition-all duration-500 {{ $lineClasses }}">
                   </div>
                 @endif
               </div>
@@ -439,7 +472,12 @@
     @endif
 
     <!-- Enhanced Actions Section -->
-    <div class="grid md:grid-cols-2 gap-6">
+    @php
+      $gridClasses = in_array(strtolower($report->status), ['collected', 'closed']) 
+        ? 'grid gap-6 lg:grid-cols-3 md:grid-cols-2' 
+        : 'grid gap-6 md:grid-cols-2';
+    @endphp
+    <div class="{{ $gridClasses }}">
       <!-- Download PDF Button -->
       <a href="{{ route('resident.reports.pdf', $report->id) }}" 
          class="group bg-gradient-to-r from-green-500 to-green-600 text-white py-4 px-6 rounded-2xl font-bold text-center hover:from-green-600 hover:to-green-700 transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center justify-center space-x-3">
@@ -448,6 +486,17 @@
         </svg>
         <span>Download PDF Report</span>
       </a>
+      
+      <!-- Feedback Button - Show for completed/closed reports -->
+      @if(in_array(strtolower($report->status), ['collected', 'closed']))
+        <a href="{{ route('feedback.report.create', $report->id) }}" 
+           class="group bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 px-6 rounded-2xl font-bold text-center hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center justify-center space-x-3">
+          <svg class="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+          </svg>
+          <span>Give Feedback</span>
+        </a>
+      @endif
       
       <!-- Cancel Report or Info Card -->
       @if(strtolower($report->status) === 'pending')
@@ -465,14 +514,31 @@
           </button>
         </form>
       @else
-        <div class="bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl p-6 text-center shadow-lg border border-gray-200">
-          <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-gray-300 to-gray-400 rounded-2xl mb-4 shadow-lg">
-            <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        @php
+          $infoCardClasses = in_array(strtolower($report->status), ['collected', 'closed'])
+            ? 'bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl p-6 text-center shadow-lg border border-gray-200 lg:col-span-1'
+            : 'bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl p-6 text-center shadow-lg border border-gray-200';
+        @endphp
+        <div class="{{ $infoCardClasses }}">
+          <div class="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-gray-300 to-gray-400 rounded-2xl mb-4 shadow-lg">
+            <svg class="w-6 h-6 sm:w-8 sm:h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
           </div>
-          <h4 class="font-bold text-gray-700 mb-2">Report Processing</h4>
-          <p class="text-sm text-gray-600 leading-relaxed">Reports can only be cancelled while in pending status. Your report is currently being processed.</p>
+          <h4 class="font-bold text-gray-700 mb-2 text-sm sm:text-base">
+            @if(in_array(strtolower($report->status), ['collected', 'closed']))
+              Report Completed
+            @else
+              Report Processing
+            @endif
+          </h4>
+          <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
+            @if(in_array(strtolower($report->status), ['collected', 'closed']))
+              Your waste has been successfully collected. You can provide feedback about the service.
+            @else
+              Reports can only be cancelled while in pending status. Your report is currently being processed.
+            @endif
+          </p>
         </div>
       @endif
     </div>
