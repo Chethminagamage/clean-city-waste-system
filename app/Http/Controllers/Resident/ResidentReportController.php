@@ -49,7 +49,7 @@ class ResidentReportController extends Controller
             'waste_type'         => $request->waste_type,
             'additional_details' => $request->additional_details,
             'image_path'         => $imagePath,
-            'status'             => 'Pending',
+            'status'             => 'pending',
         ]);
 
         return redirect()->route('resident.dashboard')->with('success', 'Report submitted successfully!');

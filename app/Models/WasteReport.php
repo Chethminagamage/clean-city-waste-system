@@ -29,6 +29,7 @@ class WasteReport extends Model
     protected $fillable = [
         'resident_id',
         'collector_id',
+        'reference_code',
         'location',
         'latitude',
         'longitude',
@@ -48,6 +49,32 @@ class WasteReport extends Model
         'report_date'=> 'datetime',
         'status'     => 'string',
     ];
+
+    /**
+     * Boot the model to auto-generate reference codes
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($report) {
+            if (empty($report->reference_code)) {
+                $report->reference_code = self::generateReferenceCode();
+            }
+        });
+    }
+
+    /**
+     * Generate a unique reference code for the report
+     */
+    public static function generateReferenceCode()
+    {
+        do {
+            $code = 'WR-' . strtoupper(substr(uniqid(), -8));
+        } while (self::where('reference_code', $code)->exists());
+
+        return $code;
+    }
 
     /**
      * Always store status in lowercase to avoid mismatches like "Assigned" vs "assigned"

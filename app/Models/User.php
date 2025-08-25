@@ -26,6 +26,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'role',
         'two_factor_code',
         'two_factor_expires_at',
+        'two_factor_enabled',
         'phone',         // ✅ Add if your profile form includes this
         'profile_image', // ✅ Optional for profile picture upload
         'contact',
@@ -56,6 +57,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'two_factor_expires_at' => 'datetime',
+            'two_factor_enabled' => 'boolean',
             'password' => 'hashed',
         ];
     }
@@ -67,7 +69,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->profile_image
             ? asset('storage/' . $this->profile_image)
-            : asset('images/default-avatar.png');
+            : "https://ui-avatars.com/api/?name=" . urlencode($this->name) . "&background=059669&color=ffffff&size=256";
     }
 
     public function sendPasswordResetNotification($token)

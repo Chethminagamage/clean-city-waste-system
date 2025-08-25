@@ -78,6 +78,7 @@ Route::middleware(['auth', 'role:resident'])->prefix('resident')->name('resident
     Route::get('/profile/edit', [ResidentProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile/update', [ResidentProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/remove-image', [ResidentProfileController::class, 'removeImage'])->name('profile.image.remove');
+    Route::post('/toggle-2fa', [ResidentProfileController::class, 'toggle2FA'])->name('2fa.toggle');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -104,9 +105,6 @@ Route::get('/resident/reports/{report}', [ReportHistoryController::class,'show']
 Route::get('/resident/reports/{report}/pdf', [ReportHistoryController::class, 'pdf'])
     ->middleware('auth')        
     ->name('resident.reports.pdf');
-
-Route::get('/resident/reports', [ReportHistoryController::class,'index'])->name('resident.reports.index');
-Route::get('/resident/reports/data', [ReportHistoryController::class,'data'])->name('resident.reports.data');
 
 Route::middleware('auth')->group(function () {
     Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])
@@ -135,7 +133,6 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::post('/2fa/verify', [TwoFactorController::class, 'verifyOtp'])->name('2fa.verify');
-Route::post('/resident/toggle-2fa', [ResidentProfileController::class, 'toggle2FA'])->name('resident.2fa.toggle');
 Route::post('/2fa/resend', [TwoFactorController::class, 'resendOtp'])->name('2fa.resend');
 
 /*
