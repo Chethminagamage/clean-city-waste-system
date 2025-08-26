@@ -62,6 +62,23 @@
                         Collection Schedule
                     </a>
                 </div>
+                <div class="relative group">
+                    <a href="{{ route('resident.feedback.index') }}"
+                    class="text-gray-700 hover:text-green-600 font-medium flex items-center transition-colors">
+                        My Feedback
+                        @auth
+                        @php 
+                            $newResponses = auth()->user()->notifications()
+                                ->where('data->type', 'feedback_response')
+                                ->whereNull('read_at')
+                                ->count(); 
+                        @endphp
+                        @if($newResponses)
+                            <span class="ml-1 bg-green-600 text-white text-xs rounded-full px-1.5 py-0.5">{{ $newResponses }}</span>
+                        @endif
+                        @endauth
+                    </a>
+                </div>
             </nav>
 
             <!-- User Info & Profile -->

@@ -14,8 +14,8 @@
             </button>
             {{-- Logo --}}
             <div class="flex items-center justify-center lg:justify-start w-full lg:w-auto">
-                <div class="flex items-center justify-center w-8 h-8 bg-white bg-opacity-20 rounded-lg shrink-0">
-                    <i class="fas fa-recycle text-white text-lg"></i>
+                <div class="flex items-center justify-center w-8 h-8 bg-white rounded-lg shrink-0 p-1">
+                    <img src="{{ asset('images/logo.png') }}" alt="Clean City Logo" class="w-6 h-6 object-contain">
                 </div>
                 <div class="ml-3 lg:sidebar-expanded:block 2xl:block hidden">
                     <h1 class="text-lg font-bold text-white">Clean City</h1>
@@ -86,9 +86,13 @@
                                 </div>
                                 <span class="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200 whitespace-nowrap">Alerts</span>
                             </div>
-                            @if(($alertCount ?? 0) > 0)
+                            @php
+                                $admin = \App\Models\Admin::first();
+                                $unreadCount = $admin ? $admin->unreadNotifications()->count() : 0;
+                            @endphp
+                            @if($unreadCount > 0)
                                 <div class="flex shrink-0 ml-2 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                                    <span class="inline-flex items-center justify-center h-5 w-5 text-xs font-medium text-white bg-red-500 rounded-full">{{ $alertCount }}</span>
+                                    <span class="inline-flex items-center justify-center h-5 w-5 text-xs font-medium text-white bg-red-500 rounded-full">{{ $unreadCount }}</span>
                                 </div>
                             @endif
                         </a>
@@ -110,6 +114,15 @@
                                 <i class="fas fa-chart-bar text-lg"></i>
                             </div>
                             <span class="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200 whitespace-nowrap">Analytics</span>
+                        </a>
+                    </li>
+                    {{-- Feedback Management --}}
+                    <li class="px-3 py-2 rounded-sm {{ request()->routeIs('admin.feedback.*') ? 'bg-white bg-opacity-20' : '' }}">
+                        <a class="flex items-center text-white hover:text-green-200 truncate transition duration-150 {{ request()->routeIs('admin.feedback.*') ? 'text-green-100' : 'text-green-200' }}" href="{{ route('admin.feedback.index') ?? '#' }}">
+                            <div class="flex items-center justify-center w-6 h-6 shrink-0">
+                                <i class="fas fa-comments text-lg"></i>
+                            </div>
+                            <span class="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200 whitespace-nowrap">Feedback</span>
                         </a>
                     </li>
                     {{-- My Profile --}}

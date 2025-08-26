@@ -138,6 +138,17 @@ class BinReportController extends Controller
 
         return redirect()->back()->with('success', 'Collector assigned successfully.');
     }
+
+    /**
+     * Show detailed view of a specific report
+     */
+    public function show($id)
+    {
+        $report = WasteReport::with(['resident', 'collector'])
+            ->findOrFail($id);
+            
+        return view('admin.report_details', compact('report'));
+    }
     
     /**
      * Close a collected report
@@ -159,5 +170,51 @@ class BinReportController extends Controller
         }
         
         return redirect()->back()->with('success', 'Report has been closed successfully.');
+    }
+
+    /**
+     * Cancel a pending or assigned report
+     */
+    public function cancelReport($id)
+    {
+        $report = WasteReport::findOrFail($id);
+        
+        if (!in_array($report->status, [WasteReport::ST_PENDING, WasteReport::ST_ASSIGNED])) {
+            return redirect()->back()->with('error', 'Only pending or assigned reports can be cancelled.');
+        }
+        
+        $report->status = 'cancelled';
+        $report->collector_id = null; // Remove collector assignment if any
+        $report->save();
+        
+        // Notify resident and collector if applicable
+        if ($report->resident) {
+            $report->resident->notify(new ReportStatusUpdated($report, 'cancelled'));
+        }
+        
+        return redirect()->back()->with('success', 'Report has been cancelled successfully.');
+    }
+
+    /**
+     * Add admin note to a report
+     */
+    public function addNote(Request $request, $id)
+    {
+        $request->validate([
+            'note' => 'required|string|max:1000'
+        ]);
+        
+        $report = WasteReport::findOrFail($id);
+        
+        // Add the note to the dedicated admin_notes field
+        $existingNotes = $report->admin_notes ?? '';
+        $adminNote = "Admin Note (" . now()->format('Y-m-d H:i') . "): " . $request->note;
+        
+        $report->admin_notes = $existingNotes 
+            ? $existingNotes . "\n\n" . $adminNote 
+            : $adminNote;
+        $report->save();
+        
+        return redirect()->back()->with('success', 'Admin note added successfully.');
     }
 }

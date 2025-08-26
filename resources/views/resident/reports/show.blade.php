@@ -14,8 +14,11 @@
     .btn-hover {
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    
-    .btn-hover:hover {
+    .catch(error => {
+    clearTimeout(timeoutId); // Clear the timeout
+    console.error('Error:', error);
+    // Show the actual error message instead of generic network error
+    alert(error.message || 'An error occurred while processing your request. The request may have been processed - please refresh the page to check.');   .btn-hover:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     }
@@ -237,7 +240,7 @@
               </div>
               <div class="flex-1">
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Submitted</p>
-                <p class="text-base font-bold text-gray-800 mt-1">{{ optional($report->created_at)->format('M d, Y \a\t H:i') }}</p>
+                <p class="text-base font-bold text-gray-800 mt-1">{{ optional($report->created_at)->format('M d, Y \a\t h:i A') }}</p>
               </div>
             </div>
           </div>
@@ -300,8 +303,16 @@
         @if($report->collector)
           <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
             <div class="relative">
-              <div class="w-16 h-16 sm:w-18 sm:h-18 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-lg sm:text-xl font-bold shadow-xl">
-                {{ substr($report->collector->name, 0, 1) }}
+              <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl overflow-hidden shadow-xl border-3 border-white">
+                @if($report->collector->profile_image)
+                  <img src="{{ asset('storage/' . $report->collector->profile_image) }}" 
+                       alt="{{ $report->collector->name }}" 
+                       class="w-full h-full object-cover">
+                @else
+                  <div class="w-full h-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center text-white text-lg sm:text-xl font-bold">
+                    {{ substr($report->collector->name, 0, 1) }}
+                  </div>
+                @endif
               </div>
               <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-3 border-white flex items-center justify-center shadow-lg">
                 <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -420,9 +431,29 @@
 
     <!-- Actions Section -->
     @php
-      $gridClasses = in_array(strtolower($report->status), ['collected', 'closed']) 
-        ? 'grid gap-6 lg:grid-cols-3 md:grid-cols-2' 
-        : 'grid gap-6 md:grid-cols-2';
+      // Count how many actions we'll have
+      $actionCount = 1; // Download PDF is always available
+      
+      if ($report->canBeMarkedUrgent()) {
+        $actionCount++;
+      }
+      
+      if (in_array(strtolower($report->status), ['collected', 'closed'])) {
+        $actionCount++; // Feedback button
+      }
+      
+      if (strtolower($report->status) === 'pending') {
+        $actionCount++; // Cancel button
+      } else {
+        $actionCount++; // Info card
+      }
+      
+      // Determine grid classes based on action count
+      $gridClasses = match(true) {
+        $actionCount >= 4 => 'grid gap-6 lg:grid-cols-4 md:grid-cols-2',
+        $actionCount === 3 => 'grid gap-6 lg:grid-cols-3 md:grid-cols-2',
+        default => 'grid gap-6 md:grid-cols-2'
+      };
     @endphp
     <div class="{{ $gridClasses }}">
       <!-- Download PDF Button -->
@@ -433,6 +464,30 @@
         </svg>
         <span>Download PDF Report</span>
       </a>
+
+      <!-- Report Full Bin Button -->
+      @if ($report->canBeMarkedUrgent())
+        <button onclick="markUrgent({{ $report->id }})"
+                class="btn-hover bg-gradient-to-r from-red-500 to-red-600 text-white py-4 px-6 rounded-2xl font-bold text-center shadow-xl flex items-center justify-center space-x-3">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+          </svg>
+          <span>Report Full Bin</span>
+        </button>
+      @elseif ($report->is_urgent)
+        <div class="bg-gradient-to-r from-red-100 to-red-200 rounded-2xl p-6 text-center shadow-lg border border-red-300">
+          <div class="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-red-400 to-red-500 rounded-2xl mb-4 shadow-lg">
+            <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+            </svg>
+          </div>
+          <h3 class="text-lg sm:text-xl font-bold text-red-800 mb-2">Marked as Urgent</h3>
+          <p class="text-sm text-red-700">Admin has been notified</p>
+          @if($report->urgent_message)
+            <p class="text-xs text-red-600 mt-2 italic">"{{ $report->urgent_message }}"</p>
+          @endif
+        </div>
+      @endif
       
       <!-- Feedback Button - Show for completed/closed reports -->
       @if(in_array(strtolower($report->status), ['collected', 'closed']))
@@ -526,7 +581,7 @@
                     Completed
                   </span>
                 </div>
-                <p class="text-gray-600 text-sm mt-2">{{ $report->created_at->format('l, M d, Y \a\t H:i') }}</p>
+                <p class="text-gray-600 text-sm mt-2">{{ $report->created_at->format('l, M d, Y \a\t h:i A') }}</p>
                 <p class="text-gray-500 text-xs mt-1">Your waste collection request was successfully submitted</p>
               </div>
             </div>
@@ -610,6 +665,100 @@
 
   @if($lat && $lng)
   <script>
+// Mark report as urgent functionality
+function markUrgent(reportId) {
+  const message = prompt("Please provide a reason for marking this as urgent (optional):");
+  if (message === null) return; // User cancelled
+  
+  // Show loading state
+  const urgentBtn = document.querySelector(`button[onclick="markUrgent(${reportId})"]`);
+  if (urgentBtn) {
+    urgentBtn.disabled = true;
+    urgentBtn.innerHTML = `
+      <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span>Processing...</span>`;
+  }
+  
+  // Create a timeout to handle slow responses
+  const timeoutId = setTimeout(() => {
+    alert('The request is taking longer than expected. The report will be marked as urgent - please refresh the page in a moment to see the update.');
+  }, 3000); // Show message after 3 seconds
+  
+  // AJAX request to mark as urgent
+  fetch(`/resident/reports/${reportId}/urgent`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({ message: message })
+  })
+  .then(response => {
+    clearTimeout(timeoutId); // Clear the timeout since we got a response
+    // Check if the response is ok
+    if (!response.ok) {
+      // Try to get error message from response
+      return response.text().then(errorText => {
+        // Check if response is JSON
+        try {
+          const errorData = JSON.parse(errorText);
+          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        } catch (e) {
+          // Response is not JSON (likely HTML error page)
+          console.error('Non-JSON response received:', errorText);
+          throw new Error(`Server error (${response.status}). The request may have been processed - please refresh the page.`);
+        }
+      });
+    }
+    return response.text().then(text => {
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        console.error('Invalid JSON response:', text);
+        throw new Error('Invalid response from server. The request may have been processed - please refresh the page.');
+      }
+    });
+  })
+  .then(data => {
+    if (data.success) {
+      // Show success message
+      alert(data.message || 'Report has been marked as urgent and admin has been notified.');
+      // Reload page to show updated state
+      window.location.reload();
+    } else {
+      // Show error message
+      alert(data.message || 'Failed to mark report as urgent. Please try again.');
+      // Reset button
+      if (urgentBtn) {
+        urgentBtn.disabled = false;
+        urgentBtn.innerHTML = `
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+          </svg>
+          <span>Report Full Bin</span>`;
+      }
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    // Show the actual error message instead of generic network error
+    alert(error.message || 'An error occurred while processing your request. Please try refreshing the page.');
+    // Reset button
+    if (urgentBtn) {
+      urgentBtn.disabled = false;
+      urgentBtn.innerHTML = `
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+        </svg>
+        <span>Report Full Bin</span>`;
+    }
+  });
+}
+
 function initReportMap() {
   const loading = document.getElementById("mapLoading");
   

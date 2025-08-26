@@ -58,7 +58,7 @@
                     {{-- Block/Unblock --}}
                     <form method="POST" action="{{ route('admin.users.toggle', $user->id) }}">
                         @csrf
-                        <button class="px-3 py-1 text-white rounded text-xs transition {{ $user->status ? 'bg-emerald-500' : 'bg-emerald-500 hover:bg-emerald-600' }}" type="submit">
+                        <button class="px-3 py-1 text-white rounded text-xs transition {{ $user->status ? 'bg-red-500 hover:bg-red-600' : 'bg-emerald-500 hover:bg-emerald-600' }}" type="submit">
                             {{ $user->status ? 'Block' : 'Unblock' }}
                         </button>
                     </form>

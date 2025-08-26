@@ -21,11 +21,13 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AlertController;
 use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\AdminProfileController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Resident\ResidentProfileController;
 use App\Http\Controllers\Resident\ResidentReportController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Resident\ReportHistoryController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ResidentFeedbackController;
 use Illuminate\Notifications\DatabaseNotification;
 use App\Http\Controllers\Resident\CollectionScheduleController;
 
@@ -97,6 +99,16 @@ Route::middleware(['auth'])->group(function () {
     // Report Feedback Routes
     Route::get('/feedback/report/{reportId}', [FeedbackController::class, 'createForReport'])->name('feedback.report.create');
     Route::post('/feedback/report/{reportId}', [FeedbackController::class, 'storeForReport'])->name('feedback.report.store');
+    
+    // General feedback routes
+    Route::get('/feedback', [FeedbackController::class, 'create'])->name('feedback.create');
+    Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
+    
+    // Resident feedback management routes
+    Route::get('/resident/feedback', [ResidentFeedbackController::class, 'index'])->name('resident.feedback.index');
+    Route::get('/resident/feedback/{id}', [ResidentFeedbackController::class, 'show'])->name('resident.feedback.show');
+    Route::post('/resident/feedback/mark-responses-read', [ResidentFeedbackController::class, 'markResponsesRead'])->name('resident.feedback.mark_responses_read');
+    Route::post('/resident/feedback/{id}/rate-response', [ResidentFeedbackController::class, 'rateResponse'])->name('resident.feedback.rate_response');
 });
 
 Route::get('/resident/reports/{report}', [ReportHistoryController::class,'show'])
@@ -105,6 +117,10 @@ Route::get('/resident/reports/{report}', [ReportHistoryController::class,'show']
 Route::get('/resident/reports/{report}/pdf', [ReportHistoryController::class, 'pdf'])
     ->middleware('auth')        
     ->name('resident.reports.pdf');
+
+Route::post('/resident/reports/{report}/urgent', [ResidentReportController::class, 'markUrgent'])
+    ->middleware('auth')
+    ->name('resident.reports.urgent');
 
 Route::middleware('auth')->group(function () {
     Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])
@@ -145,7 +161,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/login', [AdminLoginController::class, 'login'])->name('login.submit');
 
     Route::middleware(['auth:admin'])->group(function () {
-        Route::get('/dashboard', fn () => view('admin.dashboard'))->name('dashboard');
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('/profile', [AdminProfileController::class, 'edit'])->name('profile.edit');
         Route::post('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
 
@@ -154,6 +170,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/collectors', [CollectorController::class, 'index'])->name('collectors');
         Route::get('/users', [UserController::class, 'index'])->name('users');
         Route::get('/alerts', [AlertController::class, 'index'])->name('alerts');
+        Route::post('/alerts/{notification}/mark-read', [AlertController::class, 'markAsRead'])->name('alerts.markRead');
+        Route::post('/alerts/mark-all-read', [AlertController::class, 'markAllAsRead'])->name('alerts.markAllRead');
         Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
         
         // Collection Schedules CRUD
@@ -175,6 +193,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/report/{id}/nearby-collectors', [BinReportController::class, 'getNearbyCollectors'])->name('report.nearby.collectors'); // ajax
         Route::post('/assign-collector/{report}', [BinReportController::class, 'assignCollector'])->name('report.assign.collector'); // manual
         Route::post('/reports/{id}/close', [BinReportController::class, 'closeReport'])->name('reports.close'); // close collected report
+        Route::get('/reports/{id}', [BinReportController::class, 'show'])->name('reports.show'); // view report details
+        Route::post('/reports/{id}/cancel', [BinReportController::class, 'cancelReport'])->name('reports.cancel'); // cancel report
+        Route::post('/reports/{id}/add-note', [BinReportController::class, 'addNote'])->name('reports.add_note'); // add admin note
+        
+        // Feedback Management Routes
+        Route::get('/feedback', [\App\Http\Controllers\Admin\FeedbackController::class, 'index'])->name('feedback.index');
+        Route::get('/feedback/export', [\App\Http\Controllers\Admin\FeedbackController::class, 'export'])->name('feedback.export');
+        Route::get('/feedback/{id}', [\App\Http\Controllers\Admin\FeedbackController::class, 'show'])->name('feedback.show');
+        Route::post('/feedback/{id}/respond', [\App\Http\Controllers\Admin\FeedbackController::class, 'respond'])->name('feedback.respond');
+        Route::post('/feedback/{id}/resolve', [\App\Http\Controllers\Admin\FeedbackController::class, 'markResolved'])->name('feedback.resolve');
     });
 });
 
@@ -190,22 +218,19 @@ Route::prefix('collector')->name('collector.')->group(function () {
 
     Route::middleware(['auth:collector'])->group(function () {
         Route::get('/dashboard', [CollectorDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/profile', [CollectorDashboardController::class, 'profile'])->name('profile');
+        Route::put('/profile', [CollectorDashboardController::class, 'updateProfile'])->name('profile.update');
+        Route::put('/password', [CollectorDashboardController::class, 'updatePassword'])->name('password.update');
+        Route::put('/profile/picture', [CollectorDashboardController::class, 'updateProfilePicture'])->name('profile.picture');
+        Route::delete('/profile/picture', [CollectorDashboardController::class, 'removeProfilePicture'])->name('profile.picture.remove');
+        Route::get('/reports', [CollectorDashboardController::class, 'allReports'])->name('reports.all');
+        Route::get('/reports/completed', [CollectorDashboardController::class, 'completedReports'])->name('reports.completed');
+        Route::get('/report/{id}/details', [CollectorDashboardController::class, 'reportDetails'])->name('report.details');
         Route::post('/update-location', [CollectorDashboardController::class, 'updateLocation'])->name('updateLocation');
-        Route::post('/report/{id}/collected', [CollectorDashboardController::class, 'markAsCollected'])->name('report.collected');
+        Route::post('/report/{id}/confirm', [CollectorDashboardController::class, 'confirmAssignment'])->name('report.confirm');
+        Route::post('/report/{id}/start', [CollectorDashboardController::class, 'startWork'])->name('report.start');
     });
 });
-
-Route::middleware(['auth', 'role:collector'])->group(function () {
-    Route::patch('/collector/reports/{report}/collect',
-        [\App\Http\Controllers\Collector\CollectorDashboardController::class, 'markAsCollected']
-    )->name('collector.reports.collect');
-});
-
-Route::post('/collector/reports/{id}/start', [\App\Http\Controllers\Collector\CollectorDashboardController::class, 'startWork'])
-    ->name('collector.reports.start');
-
-Route::post('/collector/reports/{id}/collected', [\App\Http\Controllers\Collector\CollectorDashboardController::class, 'markAsCollected'])
-    ->name('collector.reports.markCollected');
 
 /*
 |--------------------------------------------------------------------------

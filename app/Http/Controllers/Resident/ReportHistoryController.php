@@ -18,7 +18,7 @@ class ReportHistoryController extends Controller
         $report = WasteReport::with([
             'collector' => function ($q) {
                 // must include 'id' when selecting subset for relations
-                $q->select('id','name','contact','latitude','longitude');
+                $q->select('id','name','contact','latitude','longitude','profile_image');
             },
         ])
         ->where('resident_id', $req->user()->id)

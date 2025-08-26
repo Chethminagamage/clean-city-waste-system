@@ -15,7 +15,7 @@ class WasteReport extends Model
      */
     public const ST_PENDING     = 'pending';
     public const ST_ASSIGNED    = 'assigned';
-    public const ST_IN_PROGRESS = 'in_progress';
+    public const ST_ENROUTE     = 'enroute';
     public const ST_COLLECTED   = 'collected';
     public const ST_CLOSED      = 'closed';
     public const ST_DECLINED    = 'declined';
@@ -38,6 +38,10 @@ class WasteReport extends Model
         'status',
         'waste_type',
         'additional_details',
+        'admin_notes',
+        'is_urgent',
+        'urgent_reported_at',
+        'urgent_message',
     ];
 
     /**
@@ -48,6 +52,8 @@ class WasteReport extends Model
         'longitude'  => 'float',
         'report_date'=> 'datetime',
         'status'     => 'string',
+        'is_urgent'  => 'boolean',
+        'urgent_reported_at' => 'datetime',
     ];
 
     /**
@@ -110,7 +116,7 @@ class WasteReport extends Model
     public function scopeActiveForCollector($query, int $collectorId)
     {
         return $query->forCollector($collectorId)
-            ->whereIn('status', [self::ST_ASSIGNED, self::ST_IN_PROGRESS]);
+            ->whereIn('status', [self::ST_ASSIGNED, self::ST_ENROUTE]);
     }
 
     public function scopeCompletedForCollector($query, int $collectorId)
@@ -151,5 +157,49 @@ class WasteReport extends Model
     public function hasFeedback(): bool
     {
         return $this->feedback()->exists();
+    }
+    
+    /**
+     * Check if report can be marked as urgent (bin full)
+     * Only allow after 4 hours and if not already urgent, collected, or closed
+     */
+    public function canBeMarkedUrgent(): bool
+    {
+        // Don't allow if already urgent
+        if ($this->is_urgent) {
+            return false;
+        }
+        
+        // Don't allow if already collected or closed
+        if (in_array($this->status, [self::ST_COLLECTED, self::ST_CLOSED])) {
+            return false;
+        }
+        
+        // Only allow after 4 hours
+        return $this->created_at->addHours(4)->isPast();
+    }
+    
+    /**
+     * Mark this report as urgent (bin full)
+     */
+    public function markAsUrgent(string $message = 'My bin is full - needs urgent collection'): bool
+    {
+        // Only allow marking as urgent if not already collected or closed
+        if (in_array($this->status, [self::ST_COLLECTED, self::ST_CLOSED])) {
+            return false;
+        }
+        
+        // Only allow one urgent notification per report
+        if ($this->is_urgent) {
+            return false;
+        }
+        
+        $this->update([
+            'is_urgent' => true,
+            'urgent_reported_at' => now(),
+            'urgent_message' => $message,
+        ]);
+        
+        return true;
     }
 }

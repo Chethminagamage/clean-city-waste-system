@@ -319,10 +319,26 @@
         </div>
     </header>
 
+    <!-- Welcome Banner -->
+    <div class="bg-gradient-to-r from-green-500 to-green-600 text-white shadow-xl">
+        <div class="container mx-auto px-4 sm:px-6 py-4 sm:py-5">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-home text-lg sm:text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg sm:text-2xl font-bold">Hello, {{ Auth::user()->name ?? 'Resident' }}!</h1>
+                        <p class="text-green-100 text-xs sm:text-sm">Welcome to your Clean City dashboard. Report waste and track collection status.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Content -->
     <main id="home" class="max-w-7xl mx-auto px-6 py-8">
         
-
         <!-- Top Section -->
         <div class="grid lg:grid-cols-3 gap-6 mb-8">
             <!-- Location Map -->
@@ -596,21 +612,29 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-4">
-                                    @if ($report->status === 'Pending')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                    @if ($report->status === 'pending')
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                             <i class="fas fa-clock mr-1"></i>Pending
                                         </span>
-                                    @elseif ($report->status === 'Scheduled')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                            <i class="fas fa-calendar-alt mr-1"></i>Scheduled
+                                    @elseif ($report->status === 'assigned')
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            <i class="fas fa-user-check mr-1"></i>Assigned
                                         </span>
-                                    @elseif ($report->status === 'Collected')
+                                    @elseif ($report->status === 'enroute')
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                            <i class="fas fa-truck mr-1"></i>Enroute
+                                        </span>
+                                    @elseif ($report->status === 'collected')
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                             <i class="fas fa-check mr-1"></i>Collected
                                         </span>
+                                    @elseif ($report->status === 'closed')
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                            <i class="fas fa-check-double mr-1"></i>Closed
+                                        </span>
                                     @else
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                            {{ $report->status }}
+                                            {{ ucfirst($report->status) }}
                                         </span>
                                     @endif
                                 </td>
@@ -671,43 +695,24 @@
                     const map = new google.maps.Map(document.getElementById('map'), {
                         zoom: 15,
                         center: userLocation,
-                        styles: [
-                            {
-                                "featureType": "water",
-                                "elementType": "geometry",
-                                "stylers": [{"color": "#e9e9e9"}, {"lightness": 17}]
-                            },
-                            {
-                                "featureType": "landscape",
-                                "elementType": "geometry",
-                                "stylers": [{"color": "#f5f5f5"}, {"lightness": 20}]
-                            },
-                            {
-                                "featureType": "road.highway",
-                                "elementType": "geometry.fill",
-                                "stylers": [{"color": "#ffffff"}, {"lightness": 17}]
-                            },
-                            {
-                                "featureType": "road.highway",
-                                "elementType": "geometry.stroke",
-                                "stylers": [{"color": "#ffffff"}, {"lightness": 29}, {"weight": 0.2}]
-                            },
-                            {
-                                "featureType": "road.arterial",
-                                "elementType": "geometry",
-                                "stylers": [{"color": "#ffffff"}, {"lightness": 18}]
-                            },
-                            {
-                                "featureType": "road.local",
-                                "elementType": "geometry",
-                                "stylers": [{"color": "#ffffff"}, {"lightness": 16}]
-                            },
-                            {
-                                "featureType": "poi",
-                                "elementType": "geometry",
-                                "stylers": [{"color": "#f5f5f5"}, {"lightness": 21}]
-                            }
-                        ]
+                        mapTypeId: google.maps.MapTypeId.HYBRID, // Satellite view with street labels
+                        mapTypeControl: true,
+                        mapTypeControlOptions: {
+                            style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+                            position: google.maps.ControlPosition.TOP_CENTER,
+                            mapTypeIds: [
+                                google.maps.MapTypeId.ROADMAP,
+                                google.maps.MapTypeId.SATELLITE,
+                                google.maps.MapTypeId.HYBRID,
+                                google.maps.MapTypeId.TERRAIN
+                            ]
+                        },
+                        streetViewControl: true,
+                        fullscreenControl: true,
+                        zoomControl: true,
+                        scaleControl: true,
+                        rotateControl: true,
+                        tilt: 0 // Start with flat view, user can tilt if supported
                     });
                     
                     // Create custom marker

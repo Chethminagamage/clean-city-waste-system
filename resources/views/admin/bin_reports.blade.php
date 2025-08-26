@@ -1,113 +1,118 @@
 @extends('admin.layout.app')
 
 @section('content')
-    <h1 class="text-2xl font-bold mb-4">Submitted Bin Reports</h1>
+    <div class="p-6">
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Submitted Bin Reports</h1>
+            <p class="text-gray-600">Manage and track all waste collection reports</p>
+        </div>
 
-    <table class="min-w-full bg-white border rounded shadow">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="py-2 px-4">User</th>
-                <th class="py-2 px-4">Location</th>
-                <th class="py-2 px-4">Type</th>
-                <th class="py-2 px-4">Status</th>
-                <th class="py-2 px-4">Submitted</th>
-                <th class="py-2 px-4">Collector</th>
-                <th class="py-2 px-4">Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($reports as $report)
-                <tr class="border-t">
-                    <td class="py-2 px-4">{{ $report->resident->name ?? 'N/A' }}</td>
-                    <td class="py-2 px-4">{{ $report->location }}</td>
-                    <td class="py-2 px-4">{{ $report->waste_type ?? 'N/A' }}</td>
-                    <td class="py-2 px-4">{{ $report->status }}</td>
-                    <td class="py-2 px-4">{{ \Carbon\Carbon::parse($report->created_at)->format('Y-m-d') }}</td>
-                    <td class="py-2 px-4">
-                        {{ $report->collector->name ?? '-' }}
-                    </td>
-                    <td class="py-2 px-4">
-                    @php $status = strtolower($report->status ?? ''); @endphp
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">User</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">Location</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Type</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">Status</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">Submitted</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Collector</th>
+                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @forelse ($reports as $report)
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-4 py-3 whitespace-nowrap w-40">
+                                    <div class="flex items-center">
+                                        <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                                            <i class="fas fa-user text-blue-600 text-xs"></i>
+                                        </div>
+                                        <div class="text-sm font-medium text-gray-900 truncate">
+                                            {{ $report->resident->name ?? 'N/A' }}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 w-48">
+                                    <div class="text-sm text-gray-900 truncate max-w-48" title="{{ $report->location }}">
+                                        {{ $report->location }}
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap w-24">
+                                    @php
+                                        $typeColors = [
+                                            'organic' => 'bg-green-100 text-green-800',
+                                            'plastic' => 'bg-blue-100 text-blue-800',
+                                            'hazardous' => 'bg-red-100 text-red-800',
+                                            'e-waste' => 'bg-purple-100 text-purple-800',
+                                            'mixed' => 'bg-gray-100 text-gray-800'
+                                        ];
+                                        $typeColor = $typeColors[strtolower($report->waste_type ?? '')] ?? 'bg-gray-100 text-gray-800';
+                                    @endphp
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full {{ $typeColor }}">
+                                        {{ $report->waste_type ?? 'N/A' }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap w-28">
+                                    @php
+                                        $statusColors = [
+                                            'pending' => 'bg-yellow-100 text-yellow-800',
+                                            'assigned' => 'bg-blue-100 text-blue-800',
+                                            'enroute' => 'bg-purple-100 text-purple-800',
+                                            'enroute' => 'bg-purple-100 text-purple-800',
+                                            'collected' => 'bg-green-100 text-green-800',
+                                            'closed' => 'bg-gray-100 text-gray-800',
+                                            'cancelled' => 'bg-red-100 text-red-800'
+                                        ];
+                                        $statusColor = $statusColors[strtolower($report->status ?? '')] ?? 'bg-gray-100 text-gray-800';
+                                    @endphp
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full {{ $statusColor }}">
+                                        {{ ucfirst($report->status) }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 w-28">
+                                    {{ \Carbon\Carbon::parse($report->created_at)->format('M d') }}
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap w-32">
+                                    @if($report->collector)
+                                        <div class="flex items-center">
+                                            <div class="w-5 h-5 bg-orange-100 rounded-full flex items-center justify-center mr-1 flex-shrink-0">
+                                                <i class="fas fa-truck text-orange-600 text-xs"></i>
+                                            </div>
+                                            <div class="text-sm text-gray-900 truncate">{{ $report->collector->name }}</div>
+                                        </div>
+                                    @else
+                                        <span class="text-gray-400 text-sm">Unassigned</span>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-center w-32">
+                                    <!-- Single View Button -->
+                                    <a href="{{ route('admin.reports.show', $report->id) }}" 
+                                       class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                                       title="View Details">
+                                        <i class="fas fa-eye mr-2"></i>View
+                                    </a>
+                                </td>
+                            </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-6 py-12 text-center">
+                                <div class="text-gray-400">
+                                    <i class="fas fa-inbox text-4xl mb-4"></i>
+                                    <p class="text-lg font-medium">No reports submitted yet</p>
+                                    <p class="text-sm">Reports will appear here once residents submit them</p>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
 
-                    @if (empty($report->collector_id) && $status === 'pending')
-                        <button
-                        onclick="openAssignModal({{ $report->id }})"
-                        class="bg-blue-600 text-white text-sm px-4 py-1 rounded hover:bg-blue-700 transition">
-                        Assign
-                        </button>
-                    @elseif ($status === 'collected')
-                        <form action="{{ route('admin.reports.close', $report->id) }}" method="POST" class="inline">
-                            @csrf
-                            <button type="submit" class="bg-green-600 text-white text-sm px-4 py-1 rounded hover:bg-green-700 transition">
-                                Close Report
-                            </button>
-                        </form>
-                    @elseif ($status === 'closed')
-                        <span class="text-green-600 text-sm">Closed</span>
-                    @elseif (!empty($report->collector_id))
-                        <span class="text-blue-600 text-sm">Assigned</span>
-                    @else
-                        <span class="text-gray-500 text-sm">—</span>
-                    @endif
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="7" class="text-center py-4 text-gray-500">No reports submitted yet.</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
-
-    <div class="mt-4">
-        {{ $reports->links() }}
-    </div>
-
-    <!-- Assign Modal -->
-    <div id="assignModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white p-6 rounded w-[400px] shadow-xl">
-            <h2 class="text-lg font-semibold mb-4">Select Nearest Collector</h2>
-            <form method="POST" id="assignForm">
-                @csrf
-                <select id="collector_select" name="collector_id" class="w-full p-2 border rounded mb-4" required></select>
-                <div class="flex justify-end gap-2">
-                    <button type="button" onclick="closeModal()" class="text-gray-600">Cancel</button>
-                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Assign</button>
-                </div>
-            </form>
+        <!-- Pagination -->
+        <div class="mt-6">
+            {{ $reports->links() }}
         </div>
     </div>
-
-    <!-- Scripts -->
-    <script>
-        function openAssignModal(reportId) {
-            fetch(`/admin/report/${reportId}/nearby-collectors`)
-                .then(res => res.json())
-                .then(data => {
-                    const select = document.getElementById('collector_select');
-                    select.innerHTML = '';
-
-                    if (data.length === 0) {
-                        const option = document.createElement('option');
-                        option.text = 'No nearby collectors found';
-                        option.disabled = true;
-                        select.appendChild(option);
-                    } else {
-                        data.forEach(collector => {
-                            const option = document.createElement('option');
-                            option.value = collector.id;
-                            option.text = `${collector.name} (${collector.distance.toFixed(2)} km)`;
-                            select.appendChild(option);
-                        });
-                    }
-
-                    document.getElementById('assignForm').action = `/admin/assign-collector/${reportId}`;
-                    document.getElementById('assignModal').classList.remove('hidden');
-                });
-        }
-
-        function closeModal() {
-            document.getElementById('assignModal').classList.add('hidden');
-        }
-    </script>
 @endsection

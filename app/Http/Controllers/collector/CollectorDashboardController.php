@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Collector;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rules;
 use App\Models\WasteReport;
 use App\Notifications\ReportStatusUpdated;
 
@@ -57,9 +60,9 @@ class CollectorDashboardController extends Controller
     }
 
     /**
-     * Mark a report as collected by this collector.
+     * Confirm assignment and change status to enroute
      */
-    public function markAsCollected($id)
+    public function confirmAssignment($id)
     {
         $report = WasteReport::findOrFail($id);
 
@@ -67,22 +70,22 @@ class CollectorDashboardController extends Controller
             return back()->with('error', 'Unauthorized');
         }
 
-        // Always use the model constant to avoid case/typo issues
-        $report->status = WasteReport::ST_COLLECTED; // 'collected'
-        // If you have a collected_at column, uncomment this:
-        // $report->collected_at = now();
-        $report->save();
+        if ($report->status === WasteReport::ST_ASSIGNED) {
+            $report->status = WasteReport::ST_ENROUTE;
+            $report->save();
 
-        // Notify resident if relation exists
-        if ($report->resident) {
-            $report->resident->notify(new ReportStatusUpdated($report, WasteReport::ST_COLLECTED));
+            if ($report->resident) {
+                $report->resident->notify(new ReportStatusUpdated($report, WasteReport::ST_ENROUTE));
+            }
+
+            return back()->with('success', 'Assignment confirmed. Resident has been notified that you are enroute.');
         }
 
-        return back()->with('success', 'Report marked as collected.');
+        return back()->with('error', 'This report cannot be confirmed at this time.');
     }
 
     /**
-     * (Optional) If you let collectors move an assigned report to in_progress.
+     * Mark report as collected (transition from enroute to collected)
      */
     public function startWork($id)
     {
@@ -92,15 +95,189 @@ class CollectorDashboardController extends Controller
             return back()->with('error', 'Unauthorized');
         }
 
-        if ($report->status === WasteReport::ST_ASSIGNED) {
-            $report->status = WasteReport::ST_IN_PROGRESS;
+        if ($report->status === WasteReport::ST_ENROUTE) {
+            $report->status = WasteReport::ST_COLLECTED;
             $report->save();
 
             if ($report->resident) {
-                $report->resident->notify(new ReportStatusUpdated($report, WasteReport::ST_IN_PROGRESS));
+                $report->resident->notify(new ReportStatusUpdated($report, WasteReport::ST_COLLECTED));
             }
+
+            return back()->with('success', 'Marked as collected successfully.');
         }
 
-        return back()->with('success', 'Report marked as in progress.');
+        return back()->with('error', 'This report cannot be collected at this time.');
+    }
+
+    /**
+     * Get report details for the modal view
+     */
+    public function reportDetails($id)
+    {
+        $report = WasteReport::with('resident')
+            ->where('collector_id', Auth::id())
+            ->findOrFail($id);
+
+        return response()->json([
+            'id' => $report->id,
+            'reference_code' => $report->reference_code ?? '#' . $report->id,
+            'waste_type' => $report->waste_type,
+            'location' => $report->location,
+            'latitude' => $report->latitude,
+            'longitude' => $report->longitude,
+            'status' => $report->status,
+            'priority' => $report->priority ?? 'Normal',
+            'description' => $report->description,
+            'created_at' => $report->created_at->format('M d, Y h:i A'),
+            'updated_at' => $report->updated_at->format('M d, Y h:i A'),
+            'resident' => $report->resident ? [
+                'name' => $report->resident->name,
+                'email' => $report->resident->email,
+                'contact' => $report->resident->contact ?? 'Not provided'
+            ] : null,
+            'images' => $report->images ?? [], // If you have image attachments
+            'additional_notes' => $report->additional_notes ?? null
+        ]);
+    }
+
+    /**
+     * Show all reports page
+     */
+    public function allReports()
+    {
+        $collector = Auth::user();
+
+        $assignedReports = WasteReport::with('resident')
+            ->forCollector($collector->id)
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('collector.all-reports', [
+            'assignedReports' => $assignedReports,
+            'collectorLat' => $collector->latitude,
+            'collectorLng' => $collector->longitude,
+        ]);
+    }
+
+    /**
+     * Show completed reports page
+     */
+    public function completedReports()
+    {
+        $collector = Auth::user();
+
+        $completedReports = WasteReport::with('resident')
+            ->completedForCollector($collector->id)
+            ->orderByDesc('updated_at')
+            ->get();
+
+        return view('collector.completed-reports', [
+            'completedReports' => $completedReports,
+            'collectorLat' => $collector->latitude,
+            'collectorLng' => $collector->longitude,
+        ]);
+    }
+
+    /**
+     * Show collector profile page
+     */
+    public function profile()
+    {
+        $collector = Auth::user();
+
+        // Get stats for the profile
+        $allReports = WasteReport::forCollector($collector->id)->get();
+        $completedReportsCount = WasteReport::completedForCollector($collector->id)->count();
+        $activeReportsCount = WasteReport::activeForCollector($collector->id)->count();
+
+        return view('collector.profile', [
+            'totalReports' => $allReports->count(),
+            'completedReports' => $completedReportsCount,
+            'activeReports' => $activeReportsCount,
+        ]);
+    }
+
+    /**
+     * Update collector profile information
+     */
+    public function updateProfile(Request $request)
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . Auth::id()],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'emergency_contact' => ['nullable', 'string', 'max:20'],
+            'address' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $user = Auth::user();
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->contact = $request->phone;
+        $user->save();
+
+        return back()->with('success', 'Profile updated successfully.');
+    }
+
+    /**
+     * Update collector password
+     */
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        $user = Auth::user();
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return back()->with('success', 'Password updated successfully.');
+    }
+
+    /**
+     * Update collector profile picture
+     */
+    public function updateProfilePicture(Request $request)
+    {
+        $request->validate([
+            'profile_image' => 'required|image|mimes:jpeg,png,jpg|max:2048', // 2MB max
+        ]);
+
+        $user = Auth::user();
+
+        // Delete old profile image if exists
+        if ($user->profile_image && Storage::disk('public')->exists($user->profile_image)) {
+            Storage::disk('public')->delete($user->profile_image);
+        }
+
+        // Store new profile image
+        $path = $request->file('profile_image')->store('profile-pictures', 'public');
+        
+        // Update user profile
+        $user->profile_image = $path;
+        $user->save();
+
+        return back()->with('success', 'Profile picture updated successfully.');
+    }
+
+    /**
+     * Remove collector profile picture
+     */
+    public function removeProfilePicture()
+    {
+        $user = Auth::user();
+
+        // Delete profile image if exists
+        if ($user->profile_image && Storage::disk('public')->exists($user->profile_image)) {
+            Storage::disk('public')->delete($user->profile_image);
+        }
+
+        // Remove from user record
+        $user->profile_image = null;
+        $user->save();
+
+        return response()->json(['success' => true, 'message' => 'Profile picture removed successfully.']);
     }
 }

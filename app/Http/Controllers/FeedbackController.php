@@ -10,22 +10,33 @@ use App\Models\WasteReport;
 class FeedbackController extends Controller
 {
     /**
+     * Show the general feedback form
+     */
+    public function create()
+    {
+        return view('feedback.general');
+    }
+
+    /**
      * Store general feedback
      */
     public function store(Request $request)
     {
         $request->validate([
             'feedback_type' => 'required|string|max:255',
-            'message' => 'nullable|string|max:500',
+            'rating' => 'required|integer|between:1,5',
+            'message' => 'nullable|string|max:1000',
         ]);
 
         Feedback::create([
             'user_id' => Auth::id(),
             'feedback_type' => $request->feedback_type,
+            'rating' => $request->rating,
             'message' => $request->message,
+            'status' => 'pending'
         ]);
 
-        return redirect()->back()->with('success', 'Feedback submitted successfully!');
+        return redirect()->back()->with('success', 'Feedback submitted successfully! We appreciate your input.');
     }
     
     /**

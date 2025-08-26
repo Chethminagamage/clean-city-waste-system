@@ -24,13 +24,17 @@
                 
                 {{-- Notifications --}}
                 <div class="relative inline-flex">
-                    <button class="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 transition duration-150 rounded-full">
+                    <a href="{{ route('admin.alerts') }}" class="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 transition duration-150 rounded-full">
                         <span class="sr-only">Notifications</span>
                         <i class="fas fa-bell w-4 h-4"></i>
-                        @if(($notificationCount ?? 0) > 0)
+                        @php
+                            $admin = \App\Models\Admin::first();
+                            $notificationCount = $admin ? $admin->unreadNotifications()->count() : 0;
+                        @endphp
+                        @if($notificationCount > 0)
                             <div class="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></div>
                         @endif
-                    </button>
+                    </a>
                 </div>
                 
                 {{-- User --}}

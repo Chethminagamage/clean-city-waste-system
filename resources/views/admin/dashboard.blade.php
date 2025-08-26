@@ -15,8 +15,8 @@
             <h2 class="text-lg font-semibold text-gray-800 mb-2">Reports Submitted</h2>
             <div class="text-xs font-semibold text-gray-400 uppercase mb-1">Total</div>
             <div class="flex items-start">
-                <div class="text-3xl font-bold text-gray-800 mr-2">220</div>
-                <div class="text-sm font-semibold text-white px-1.5 bg-green-500 rounded-full">+12%</div>
+                <div class="text-3xl font-bold text-gray-800 mr-2">{{ $totalReports }}</div>
+                <div class="text-sm font-semibold text-white px-1.5 bg-green-500 rounded-full">+{{ $pendingReports }} Pending</div>
             </div>
         </div>
         <div class="grow flex flex-col justify-center">
@@ -39,8 +39,8 @@
             <h2 class="text-lg font-semibold text-gray-800 mb-2">Collections Done</h2>
             <div class="text-xs font-semibold text-gray-400 uppercase mb-1">Total</div>
             <div class="flex items-start">
-                <div class="text-3xl font-bold text-gray-800 mr-2">148</div>
-                <div class="text-sm font-semibold text-white px-1.5 bg-blue-500 rounded-full">+18%</div>
+                <div class="text-3xl font-bold text-gray-800 mr-2">{{ $completedReports }}</div>
+                <div class="text-sm font-semibold text-white px-1.5 bg-blue-500 rounded-full">Completed</div>
             </div>
         </div>
         <div class="grow flex flex-col justify-center">
@@ -84,16 +84,22 @@
                     </div>
                 </div>
             </header>
-            <h2 class="text-lg font-semibold text-gray-800 mb-2">Alerts</h2>
+            <h2 class="text-lg font-semibold text-gray-800 mb-2">Urgent Alerts</h2>
             <div class="text-xs font-semibold text-gray-400 uppercase mb-1">Active</div>
             <div class="flex items-start">
-                <div class="text-3xl font-bold text-gray-800 mr-2">5</div>
-                <div class="text-sm font-semibold text-white px-1.5 bg-red-500 rounded-full">Critical: 2</div>
+                <div class="text-3xl font-bold text-gray-800 mr-2">{{ $urgentNotifications->count() }}</div>
+                @if($urgentReports > 0)
+                    <div class="text-sm font-semibold text-white px-1.5 bg-red-500 rounded-full">Critical: {{ $urgentReports }}</div>
+                @endif
             </div>
         </div>
         <div class="grow flex flex-col justify-center">
             <div class="flex items-center justify-between text-red-500 text-sm font-semibold px-5 py-3">
-                <div>Requires attention</div>
+                @if($urgentNotifications->count() > 0)
+                    <a href="{{ route('admin.alerts') }}" class="hover:underline">View Alerts</a>
+                @else
+                    <div>No urgent alerts</div>
+                @endif
             </div>
         </div>
     </div>
@@ -170,6 +176,54 @@
         </div>
     </div>
 </div>
+
+{{-- Urgent Reports Section --}}
+@if($recentUrgentReports->count() > 0)
+<div class="col-span-full bg-white shadow-lg rounded-sm border border-gray-200 mb-8">
+    <header class="px-5 py-4 border-b border-gray-100 bg-red-50">
+        <div class="flex items-center justify-between">
+            <h2 class="font-semibold text-gray-800 flex items-center space-x-2">
+                <i class="fas fa-exclamation-triangle text-red-500"></i>
+                <span>🚨 Urgent Bin Reports</span>
+            </h2>
+            <a href="{{ route('admin.alerts') }}" class="text-red-600 hover:text-red-800 text-sm font-medium">View All</a>
+        </div>
+    </header>
+    <div class="p-5">
+        <div class="space-y-4">
+            @foreach($recentUrgentReports as $report)
+            <div class="flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
+                        <i class="fas fa-trash text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-gray-900">{{ $report->reference_code }}</div>
+                        <div class="text-sm text-gray-600">📍 {{ $report->location }}</div>
+                        <div class="text-sm text-gray-500">
+                            Reported by: <span class="font-medium">{{ $report->resident->name ?? 'Unknown' }}</span>
+                            • {{ $report->urgent_reported_at->diffForHumans() }}
+                        </div>
+                        @if($report->urgent_message)
+                        <div class="text-sm text-red-700 italic mt-1">"{{ $report->urgent_message }}"</div>
+                        @endif
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="px-3 py-1 text-xs font-semibold bg-red-100 text-red-800 rounded-full">
+                        {{ ucfirst($report->status) }}
+                    </span>
+                    <a href="{{ route('admin.reports.show', $report->id) }}" 
+                       class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        Handle
+                    </a>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</div>
+@endif
 
 {{-- Quick Actions --}}
 <div class="col-span-full xl:col-span-6 bg-white shadow-lg rounded-sm border border-gray-200 mb-8">
