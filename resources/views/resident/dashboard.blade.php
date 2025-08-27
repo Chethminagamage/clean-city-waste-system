@@ -281,17 +281,39 @@
                         {{ auth()->user()->first_name ?? '' }}
                     </span>
 
-                    <a href="{{ route('resident.profile.edit') }}" class="relative group">
-                        @if (auth()->user()->profile_image)
-                            <img src="{{ auth()->user()->profile_image_url }}"
-                                alt="Profile"
-                                class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-md hover:scale-105 transition-transform duration-200">
-                        @else
-                            <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-md hover:scale-105 transition-transform duration-200">
-                                <i class="fas fa-user text-white"></i>
+                    <!-- Profile Dropdown -->
+                    <div class="relative group">
+                        <a href="{{ route('resident.profile.edit') }}" class="relative">
+                            @if (auth()->user()->profile_image)
+                                <img src="{{ auth()->user()->profile_image_url }}"
+                                    alt="Profile"
+                                    class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-md hover:scale-105 transition-transform duration-200">
+                            @else
+                                <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-md hover:scale-105 transition-transform duration-200">
+                                    <i class="fas fa-user text-white"></i>
+                                </div>
+                            @endif
+                        </a>
+                        
+                        <!-- Dropdown Menu -->
+                        <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                            <div class="py-2">
+                                <a href="{{ route('resident.profile.edit') }}" class="block px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors duration-200">
+                                    <i class="fas fa-user-circle mr-2"></i>
+                                    My Profile
+                                </a>
+                                
+                                <div class="border-t border-gray-100 my-1"></div>
+                                <form method="POST" action="{{ route('logout') }}" id="logout-form" class="logout-form">
+                                    @csrf
+                                    <button type="submit" class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition-colors duration-200">
+                                        <i class="fas fa-sign-out-alt mr-2"></i>
+                                        Logout
+                                    </button>
+                                </form>
                             </div>
-                        @endif
-                    </a>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Mobile Menu Button -->
@@ -820,29 +842,29 @@
             });
         }
 
-        // Form validation enhancement
-        const form = document.querySelector('form');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                const wasteType = document.getElementById('waste_type').value;
-                if (!wasteType) {
+        // Form validation enhancement - only for the waste report form
+        const reportForm = document.querySelector('#submit-report form');
+        if (reportForm) {
+            reportForm.addEventListener('submit', function(e) {
+                const wasteType = document.getElementById('waste_type');
+                if (wasteType && !wasteType.value) {
                     e.preventDefault();
-                    document.getElementById('waste_type').classList.add('border-red-500');
-                    document.getElementById('waste_type').focus();
+                    wasteType.classList.add('border-red-500');
+                    wasteType.focus();
                     
                     // Show error message
                     const errorMsg = document.createElement('p');
                     errorMsg.className = 'text-red-500 text-sm mt-1';
                     errorMsg.textContent = 'Please select a waste type';
                     
-                    const existingError = document.getElementById('waste_type').parentNode.querySelector('.text-red-500');
+                    const existingError = wasteType.parentNode.querySelector('.text-red-500');
                     if (!existingError) {
-                        document.getElementById('waste_type').parentNode.appendChild(errorMsg);
+                        wasteType.parentNode.appendChild(errorMsg);
                     }
                     
                     setTimeout(() => {
                         errorMsg.remove();
-                        document.getElementById('waste_type').classList.remove('border-red-500');
+                        wasteType.classList.remove('border-red-500');
                     }, 3000);
                 }
             });

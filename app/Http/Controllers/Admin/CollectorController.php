@@ -111,13 +111,15 @@ class CollectorController extends Controller
     public function updateLocation(Request $request)
     {
         $request->validate([
-            'latitude' => 'required',
-            'longitude' => 'required',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'location' => 'nullable|string|max:255'
         ]);
 
         $user = auth()->user();
-        $user->latitude = $request->latitude;
-        $user->longitude = $request->longitude;
+        $user->latitude = (float) $request->latitude;
+        $user->longitude = (float) $request->longitude;
+        $user->location = $request->location;
         $user->save();
 
         return response()->json(['success' => true]);

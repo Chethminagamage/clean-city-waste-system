@@ -46,8 +46,8 @@
                 <td class="px-4 py-3">{{ $user->email }}</td>
                 <td class="px-4 py-3">
                     <span class="px-2 py-1 text-xs rounded 
-                        {{ $user->status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                        {{ $user->status ? 'Active' : 'Blocked' }}
+                        {{ $user->status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                        {{ ucfirst($user->status) }}
                     </span>
                 </td>
                 <td class="px-4 py-3">
@@ -58,8 +58,8 @@
                     {{-- Block/Unblock --}}
                     <form method="POST" action="{{ route('admin.users.toggle', $user->id) }}">
                         @csrf
-                        <button class="px-3 py-1 text-white rounded text-xs transition {{ $user->status ? 'bg-red-500 hover:bg-red-600' : 'bg-emerald-500 hover:bg-emerald-600' }}" type="submit">
-                            {{ $user->status ? 'Block' : 'Unblock' }}
+                        <button class="px-3 py-1 text-white rounded text-xs transition {{ $user->status === 'active' ? 'bg-red-500 hover:bg-red-600' : 'bg-emerald-500 hover:bg-emerald-600' }}" type="submit">
+                            {{ $user->status === 'active' ? 'Block' : 'Unblock' }}
                         </button>
                     </form>
 

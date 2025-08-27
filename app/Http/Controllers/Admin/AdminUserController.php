@@ -44,10 +44,12 @@ class AdminUserController extends Controller
             return back()->withErrors(['Invalid user.']);
         }
 
-        $user->status = $user->status === 1 ? 0 : 1;
+        // Toggle between 'active' and 'blocked'
+        $user->status = $user->status === 'active' ? 'blocked' : 'active';
         $user->save();
 
-        return back()->with('success', 'User status updated.');
+        $action = $user->status === 'active' ? 'unblocked' : 'blocked';
+        return back()->with('success', "User has been {$action} successfully.");
     }
 
     public function destroy($id)

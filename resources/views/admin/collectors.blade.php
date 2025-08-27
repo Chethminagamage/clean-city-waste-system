@@ -40,19 +40,17 @@
                 <td class="px-4 py-3">{{ $collector->location ?? '-' }}</td>
                 <td class="px-4 py-3 text-sm text-gray-600">{{ $collector->created_at->format('d M Y') }}</td>
                 <td class="px-4 py-3">
-                    @if ($collector->status)
-                        <span class="text-green-600 font-semibold">Active</span>
-                    @else
-                        <span class="text-red-600 font-semibold">Inactive</span>
-                    @endif
+                    <span class="{{ $collector->status === 'active' ? 'text-green-600' : 'text-red-600' }} font-semibold">
+                        {{ ucfirst($collector->status) }}
+                    </span>
                 </td>
                 <td class="px-4 py-3 flex gap-2">
                     {{-- Toggle --}}
                     <form action="{{ route('admin.collectors.toggle', $collector->id) }}" method="POST" class="inline">
                         @csrf
                         <button type="submit"
-                            class="{{ $collector->status ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700' }} px-3 py-1 text-white rounded text-xs transition">
-                            {{ $collector->status ? 'Block' : 'Unblock' }}
+                            class="{{ $collector->status === 'active' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700' }} px-3 py-1 text-white rounded text-xs transition">
+                            {{ $collector->status === 'active' ? 'Block' : 'Unblock' }}
                         </button>
                     </form>
 
