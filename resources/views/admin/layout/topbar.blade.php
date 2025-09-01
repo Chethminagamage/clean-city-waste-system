@@ -29,10 +29,27 @@
                         <i class="fas fa-bell w-4 h-4"></i>
                         @php
                             $admin = \App\Models\Admin::first();
-                            $notificationCount = $admin ? $admin->unreadNotifications()->count() : 0;
+                            $notificationCount = 0;
+                            $urgentCount = 0;
+                            $newReportCount = 0;
+                            
+                            if ($admin) {
+                                $notificationCount = $admin->unreadNotifications()->count();
+                                $urgentCount = $admin->unreadNotifications()
+                                    ->where('data->type', 'urgent_bin_report')
+                                    ->count();
+                                $newReportCount = $admin->unreadNotifications()
+                                    ->where('data->type', 'new_waste_report')
+                                    ->count();
+                            }
                         @endphp
                         @if($notificationCount > 0)
                             <div class="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></div>
+                            @if($newReportCount > 0)
+                                <div class="absolute -bottom-1 -right-1 bg-blue-500 text-white text-xs rounded-full px-1.5 py-0.5 text-[10px] border border-white">
+                                    {{ $newReportCount }}
+                                </div>
+                            @endif
                         @endif
                     </a>
                 </div>
@@ -50,10 +67,6 @@
                     <!-- Admin Dropdown Menu -->
                     <div class="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                         <div class="py-2">
-                            <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 transition-colors duration-200">
-                                <i class="fas fa-tachometer-alt mr-2"></i>
-                                Dashboard
-                            </a>
                             
                             <div class="border-t border-gray-100 my-1"></div>
                             <form method="POST" action="{{ route('admin.logout') }}">

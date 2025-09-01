@@ -98,7 +98,7 @@
                 </a>
                 @endauth
 
-                                <span class="text-sm font-medium text-gray-900">
+                <span class="text-sm font-medium text-gray-900">
                     {{ auth()->user()->first_name ?? '' }}
                 </span>
 

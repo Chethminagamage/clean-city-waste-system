@@ -40,7 +40,7 @@ class ResidentReportController extends Controller
 
         $imagePath = $request->file('image')->store('reports', 'public');
 
-        WasteReport::create([
+        $report = WasteReport::create([
             'resident_id'        => Auth::id(),
             'location'           => $request->location,
             'latitude'           => $request->latitude,
@@ -51,6 +51,12 @@ class ResidentReportController extends Controller
             'image_path'         => $imagePath,
             'status'             => 'pending',
         ]);
+        
+        // Notify all admins about the new report
+        $admins = \App\Models\Admin::all();
+        foreach ($admins as $admin) {
+            $admin->notify(new \App\Notifications\NewWasteReport($report));
+        }
 
         return redirect()->route('resident.dashboard')->with('success', 'Report submitted successfully!');
     }

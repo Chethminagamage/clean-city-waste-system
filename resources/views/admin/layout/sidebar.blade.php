@@ -43,11 +43,22 @@
                     </li>
                     {{-- Bin Reports --}}
                     <li class="px-3 py-2 rounded-sm {{ request()->routeIs('admin.binreports') ? 'bg-white bg-opacity-20' : '' }}">
-                        <a class="flex items-center text-white hover:text-green-200 truncate transition duration-150 {{ request()->routeIs('admin.binreports') ? 'text-green-100' : 'text-green-200' }}" href="{{ route('admin.binreports') ?? '#' }}">
-                            <div class="flex items-center justify-center w-6 h-6 shrink-0">
-                                <i class="fas fa-clipboard-list text-lg"></i>
+                        <a class="flex items-center justify-between text-white hover:text-green-200 truncate transition duration-150 {{ request()->routeIs('admin.binreports') ? 'text-green-100' : 'text-green-200' }}" href="{{ route('admin.binreports') ?? '#' }}">
+                            <div class="flex items-center">
+                                <div class="flex items-center justify-center w-6 h-6 shrink-0">
+                                    <i class="fas fa-clipboard-list text-lg"></i>
+                                </div>
+                                <span class="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200 whitespace-nowrap">Bin Reports</span>
                             </div>
-                            <span class="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200 whitespace-nowrap">Bin Reports</span>
+                            @php
+                                $admin = \App\Models\Admin::first();
+                                $newReportCount = $admin ? $admin->unreadNotifications()->where('data->type', 'new_waste_report')->count() : 0;
+                            @endphp
+                            @if($newReportCount > 0)
+                                <div class="flex shrink-0 ml-2 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+                                    <span class="inline-flex items-center justify-center h-5 w-5 text-xs font-medium text-white bg-blue-500 rounded-full">{{ $newReportCount }}</span>
+                                </div>
+                            @endif
                         </a>
                     </li>
                     {{-- Pickups --}}

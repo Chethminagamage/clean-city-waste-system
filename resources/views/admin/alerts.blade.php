@@ -56,6 +56,8 @@
                     <div class="w-12 h-12 bg-gradient-to-br {{ is_null($notification->read_at) ? 'from-red-100 to-red-200' : 'from-gray-100 to-gray-200' }} rounded-xl flex items-center justify-center">
                         @if($notification->data['type'] === 'urgent_bin_report')
                             <i class="fas fa-exclamation-triangle {{ is_null($notification->read_at) ? 'text-red-600' : 'text-gray-600' }} text-lg"></i>
+                        @elseif($notification->data['type'] === 'new_waste_report')
+                            <i class="fas fa-trash-alt {{ is_null($notification->read_at) ? 'text-blue-600' : 'text-gray-600' }} text-lg"></i>
                         @else
                             <i class="fas fa-bell {{ is_null($notification->read_at) ? 'text-red-600' : 'text-gray-600' }}"></i>
                         @endif
