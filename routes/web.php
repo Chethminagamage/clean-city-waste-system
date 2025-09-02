@@ -30,11 +30,15 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ResidentFeedbackController;
 use Illuminate\Notifications\DatabaseNotification;
 use App\Http\Controllers\Resident\CollectionScheduleController;
+use App\Http\Controllers\ThemeController;
 
 //Public Landing Page
 Route::get('/', function () {
     return view('home');
 })->name('landing.home');
+
+// Theme toggle route
+Route::post('/theme/toggle', [ThemeController::class, 'toggle'])->name('theme.toggle');
 
 /*
 |--------------------------------------------------------------------------

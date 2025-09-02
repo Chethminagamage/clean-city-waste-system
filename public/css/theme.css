@@ -1,0 +1,94 @@
+/* Light theme (default) */
+:root {
+  --bg-color: #f8fafc;
+  --text-color: #1a202c;
+  --border-color: #e2e8f0;
+  --header-bg: #ffffff;
+  --card-bg: #ffffff;
+  --button-bg: #4299e1;
+  --button-text: #ffffff;
+  --sidebar-bg: #f8fafc;
+  --hover-bg: #edf2f7;
+  --input-bg: #ffffff;
+  --input-text: #1a202c;
+  --input-border: #cbd5e0;
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Dark theme */
+[data-theme="dark"] {
+  --bg-color: #1a202c;
+  --text-color: #f7fafc;
+  --border-color: #4a5568;
+  --header-bg: #2d3748;
+  --card-bg: #2d3748;
+  --button-bg: #4299e1;
+  --button-text: #ffffff;
+  --sidebar-bg: #2d3748;
+  --hover-bg: #4a5568;
+  --input-bg: #2d3748;
+  --input-text: #f7fafc;
+  --input-border: #4a5568;
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px 0 rgba(0, 0, 0, 0.24);
+}
+
+/* Apply theme variables to elements */
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: all 0.3s ease;
+}
+
+.card, .bg-white {
+  background-color: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-color);
+}
+
+.border {
+  border-color: var(--border-color) !important;
+}
+
+.bg-gray-100, .bg-gray-50 {
+  background-color: var(--bg-color) !important;
+}
+
+.text-gray-800, .text-gray-900, .text-black {
+  color: var(--text-color) !important;
+}
+
+input, select, textarea {
+  background-color: var(--input-bg) !important;
+  color: var(--input-text) !important;
+  border-color: var(--input-border) !important;
+}
+
+.shadow {
+  box-shadow: var(--shadow) !important;
+}
+
+/* Navbar specific */
+nav {
+  background-color: var(--header-bg) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Toggle button styles */
+.theme-toggle-btn {
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.theme-toggle-btn:hover {
+  background-color: var(--hover-bg);
+}
+
+/* Animation for smooth theme transition */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
