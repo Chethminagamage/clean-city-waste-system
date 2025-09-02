@@ -21,12 +21,6 @@
             <a href="#" class="hover:text-green-300 transition-colors"><i class="fab fa-youtube"></i></a>
             <a href="#" class="hover:text-green-300 transition-colors"><i class="fab fa-pinterest"></i></a>
             <a href="#" class="hover:text-green-300 transition-colors"><i class="fab fa-instagram"></i></a>
-            <!-- Theme Toggle Button -->
-            <div class="theme-toggle-btn ml-2" id="theme-toggle" title="Switch to Dark Mode">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-                </svg>
-            </div>
         </div>
     </div>
 </div>

@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\PickupController;
 use App\Http\Controllers\Admin\CollectorController;
 use App\Http\Controllers\Collector\CollectorDashboardController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\TawkWebhookController;
 use App\Http\Controllers\Admin\AlertController;
 use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\AdminProfileController;
@@ -30,15 +31,11 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ResidentFeedbackController;
 use Illuminate\Notifications\DatabaseNotification;
 use App\Http\Controllers\Resident\CollectionScheduleController;
-use App\Http\Controllers\ThemeController;
 
 //Public Landing Page
 Route::get('/', function () {
     return view('home');
 })->name('landing.home');
-
-// Theme toggle route
-Route::post('/theme/toggle', [ThemeController::class, 'toggle'])->name('theme.toggle');
 
 /*
 |--------------------------------------------------------------------------
@@ -250,4 +247,11 @@ Route::get('/verify-email/{id}/{hash}', [VerifyEmailController::class, '__invoke
 | Laravel Breeze / Fortify Auth (Resident)
 |--------------------------------------------------------------------------
 */
+
+/*
+|--------------------------------------------------------------------------
+| Chat & Communication Routes
+|--------------------------------------------------------------------------
+*/
+Route::post('/webhook/tawk', [TawkWebhookController::class, 'handleWebhook'])->name('tawk.webhook');
 require __DIR__ . '/auth.php';
