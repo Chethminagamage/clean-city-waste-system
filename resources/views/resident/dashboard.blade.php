@@ -1,16 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="{{ session('theme', 'light') }}">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Resident Dashboard | Clean City</title>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgyETTNM7hQ-P9BETdNwTbMr6ggGr73oY&callback=initMap" async defer></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <!-- Theme CSS and JS -->
-    <link rel="stylesheet" href="{{ asset('css/theme.css') }}">
-    <script src="{{ asset('js/theme.js') }}" defer></script>
     
     <style>
         .card-shadow {
@@ -262,10 +258,33 @@
                             Collection Schedule
                         </a>
                     </div>
+                    <div class="relative group">
+                    <a href="{{ route('resident.feedback.index') }}"
+                    class="text-gray-700 hover:text-green-600 font-medium flex items-center transition-colors">
+                        My Feedback
+                        @auth
+                        @php 
+                            $newResponses = auth()->user()->notifications()
+                                ->where('data->type', 'feedback_response')
+                                ->whereNull('read_at')
+                                ->count(); 
+                        @endphp
+                        @if($newResponses)
+                            <span class="ml-1 bg-green-600 text-white text-xs rounded-full px-1.5 py-0.5">{{ $newResponses }}</span>
+                        @endif
+                        @endauth
+                    </a>
+                </div>
                 </nav>
 
                 <!-- User Info & Profile -->
                 <div class="hidden sm:flex items-center space-x-4">
+                     <!-- Theme Toggle Button -->
+                <button class="theme-toggle-btn text-gray-700 hover:text-green-600" aria-label="Toggle dark mode" title="Switch theme">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                    </svg>
+                </button>
                     <!-- Notification Bell -->
                     @auth
                     @php $unread = auth()->user()->unreadNotifications()->count(); @endphp
@@ -912,5 +931,7 @@
             });
         });
     </script>
+    
+    @include('partials.chat-widget')
 </body>
 </html>

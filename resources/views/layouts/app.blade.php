@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="{{ session('theme', 'light') }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,10 +15,6 @@
         <!-- Tailwind CSS and Font Awesome -->
         <script src="https://cdn.tailwindcss.com"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-        
-        <!-- Theme CSS and JS -->
-        <link rel="stylesheet" href="{{ asset('css/theme.css') }}">
-        <script src="{{ asset('js/theme.js') }}" defer></script>
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -42,5 +38,7 @@
     {{ session('error') }}
   </div>
 @endif
+    
+    @include('partials.chat-widget')
     </body>
 </html>

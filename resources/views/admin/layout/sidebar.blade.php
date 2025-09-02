@@ -88,6 +88,18 @@
                             <span class="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200 whitespace-nowrap">Users</span>
                         </a>
                     </li>
+                    {{-- Chat Management --}}
+                    <li class="px-3 py-2 rounded-sm">
+                        <a class="flex items-center text-white hover:text-green-200 truncate transition duration-150" href="https://dashboard.tawk.to/" target="_blank">
+                            <div class="flex items-center justify-center w-6 h-6 shrink-0">
+                                <i class="fas fa-comments text-lg"></i>
+                            </div>
+                            <span class="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200 whitespace-nowrap">Chat Management</span>
+                            <span class="flex items-center justify-center ml-2 w-4 h-4 text-xs">
+                                
+                            </span>
+                        </a>
+                    </li>
                     {{-- Alerts --}}
                     <li class="px-3 py-2 rounded-sm {{ request()->routeIs('admin.alerts') ? 'bg-white bg-opacity-20' : '' }}">
                         <a class="flex items-center justify-between text-white hover:text-green-200 truncate transition duration-150 {{ request()->routeIs('admin.alerts') ? 'text-green-100' : 'text-green-200' }}" href="{{ route('admin.alerts') ?? '#' }}">
