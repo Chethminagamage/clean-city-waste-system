@@ -14,11 +14,9 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\Admin\Auth\LoginController as AdminLoginController;
 use App\Http\Controllers\Admin\BinReportController;
-use App\Http\Controllers\Admin\PickupController;
 use App\Http\Controllers\Admin\CollectorController;
 use App\Http\Controllers\Collector\CollectorDashboardController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\TawkWebhookController;
 use App\Http\Controllers\Admin\AlertController;
 use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\AdminProfileController;
@@ -165,9 +163,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('/profile', [AdminProfileController::class, 'edit'])->name('profile.edit');
         Route::post('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
+        Route::delete('/profile/photo', [AdminProfileController::class, 'removePhoto'])->name('profile.remove-photo');
 
         Route::get('/binreports', [BinReportController::class, 'index'])->name('binreports');
-        Route::get('/pickups', [PickupController::class, 'index'])->name('pickups');
         Route::get('/collectors', [CollectorController::class, 'index'])->name('collectors');
         Route::get('/users', [UserController::class, 'index'])->name('users');
         Route::get('/alerts', [AlertController::class, 'index'])->name('alerts');
@@ -253,5 +251,5 @@ Route::get('/verify-email/{id}/{hash}', [VerifyEmailController::class, '__invoke
 | Chat & Communication Routes
 |--------------------------------------------------------------------------
 */
-Route::post('/webhook/tawk', [TawkWebhookController::class, 'handleWebhook'])->name('tawk.webhook');
+
 require __DIR__ . '/auth.php';

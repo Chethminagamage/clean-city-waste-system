@@ -83,4 +83,20 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     public function area() { return $this->belongsTo(\App\Models\Area::class); }
+
+    /**
+     * Relationship: User has many waste reports as collector
+     */
+    public function wasteReports()
+    {
+        return $this->hasMany(WasteReport::class, 'collector_id');
+    }
+
+    /**
+     * Relationship: User has many waste reports as resident
+     */
+    public function reportedWastes()
+    {
+        return $this->hasMany(WasteReport::class, 'resident_id');
+    }
 }

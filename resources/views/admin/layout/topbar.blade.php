@@ -57,9 +57,17 @@
                 {{-- User --}}
                 <div class="relative inline-flex group">
                     <button class="inline-flex justify-center items-center">
-                        <img class="w-8 h-8 rounded-full" src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Admin User') }}&background=16a34a&color=fff" width="32" height="32" alt="User" />
+                        @if(auth('admin')->user()->profile_photo)
+                            <img class="w-8 h-8 rounded-full object-cover" 
+                                 src="{{ Storage::url(auth('admin')->user()->profile_photo) }}" 
+                                 alt="Admin Profile" />
+                        @else
+                            <img class="w-8 h-8 rounded-full" 
+                                 src="https://ui-avatars.com/api/?name={{ urlencode(auth('admin')->user()->name ?? 'Admin User') }}&background=16a34a&color=fff" 
+                                 alt="Admin Profile" />
+                        @endif
                         <div class="flex items-center truncate">
-                            <span class="truncate ml-2 text-sm font-medium text-gray-600 group-hover:text-gray-800">{{ auth()->user()->name ?? 'Admin User' }}</span>
+                            <span class="truncate ml-2 text-sm font-medium text-gray-600 group-hover:text-gray-800">{{ auth('admin')->user()->name ?? 'Admin User' }}</span>
                             <i class="fas fa-chevron-down ml-1 text-xs text-gray-400 group-hover:text-gray-600"></i>
                         </div>
                     </button>
@@ -67,7 +75,10 @@
                     <!-- Admin Dropdown Menu -->
                     <div class="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                         <div class="py-2">
-                            
+                            <a href="{{ route('admin.profile.edit') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                                <i class="fas fa-user mr-2"></i>
+                                My Profile
+                            </a>
                             <div class="border-t border-gray-100 my-1"></div>
                             <form method="POST" action="{{ route('admin.logout') }}">
                                 @csrf
