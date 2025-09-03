@@ -140,6 +140,20 @@ Route::middleware('auth')->group(function () {
         ->name('resident.schedule.index');
 });
 
+// Gamification Routes (Simplified)
+Route::middleware(['auth', 'role:resident'])->prefix('resident')->name('resident.')->group(function () {
+    Route::get('/gamification', [\App\Http\Controllers\Resident\GamificationController::class, 'index'])
+        ->name('gamification.index');
+    Route::get('/rewards', [\App\Http\Controllers\Resident\GamificationController::class, 'rewards'])
+        ->name('gamification.rewards');
+    Route::post('/rewards/{reward}/redeem', [\App\Http\Controllers\Resident\GamificationController::class, 'redeemReward'])
+        ->name('gamification.redeem');
+    
+    // API endpoint for AJAX requests
+    Route::get('/api/gamification-stats', [\App\Http\Controllers\Resident\GamificationController::class, 'apiStats'])
+        ->name('gamification.api.stats');
+});
+
 
 
 /*

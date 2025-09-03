@@ -63,6 +63,13 @@
                     </a>
                 </div>
                 <div class="relative group">
+                    <a href="{{ route('resident.gamification.index') }}"
+                    class="text-gray-700 hover:text-green-600 font-medium flex items-center transition-colors">
+                        
+                        Eco Points
+                    </a>
+                </div>
+                <div class="relative group">
                     <a href="{{ route('resident.feedback.index') }}"
                     class="text-gray-700 hover:text-green-600 font-medium flex items-center transition-colors">
                         My Feedback
@@ -148,10 +155,49 @@
         <!-- Mobile Navigation Menu -->
         <div id="mobile-menu" class="lg:hidden hidden bg-white border-t border-gray-200 py-4 shadow-lg">
             <nav class="flex flex-col space-y-4">
-                <a href="{{ route('resident.dashboard') }}" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors">Home</a>
-                <a href="{{ route('resident.dashboard') }}#submit-report" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors">Submit Reports</a>
-                <a href="{{ route('resident.reports.index') }}" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors">Report History</a>
-                <a href="{{ route('resident.schedule.index') }}" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors">Collection Schedule</a>
+                <a href="{{ route('resident.dashboard') }}" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors flex items-center">
+                    <i class="fas fa-home mr-3 w-4"></i>Home
+                </a>
+                <a href="{{ route('resident.dashboard') }}#submit-report" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors flex items-center">
+                    <i class="fas fa-plus-circle mr-3 w-4"></i>Submit Reports
+                </a>
+                <a href="{{ route('resident.reports.index') }}" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors flex items-center">
+                    <i class="fas fa-history mr-3 w-4"></i>Report History
+                </a>
+                <a href="{{ route('resident.schedule.index') }}" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors flex items-center">
+                    <i class="fas fa-calendar mr-3 w-4"></i>Collection Schedule
+                </a>
+                <a href="{{ route('resident.gamification.index') }}" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors flex items-center">
+                    <i class="fas fa-trophy mr-3 w-4"></i>Eco Points
+                </a>
+                <a href="{{ route('resident.gamification.rewards') }}" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors flex items-center pl-8">
+                    <i class="fas fa-gift mr-3 w-4"></i>Rewards Store
+                </a>
+                <a href="{{ route('resident.feedback.index') }}" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors flex items-center">
+                    <i class="fas fa-comment mr-3 w-4"></i>My Feedback
+                    @auth
+                    @php 
+                        $newResponses = auth()->user()->notifications()
+                            ->where('data->type', 'feedback_response')
+                            ->whereNull('read_at')
+                            ->count(); 
+                    @endphp
+                    @if($newResponses)
+                        <span class="ml-2 bg-green-600 text-white text-xs rounded-full px-2 py-0.5">{{ $newResponses }}</span>
+                    @endif
+                    @endauth
+                </a>
+                
+                <!-- Notifications for mobile -->
+                @auth
+                @php $unread = auth()->user()->unreadNotifications()->count(); @endphp
+                <a href="{{ route('notifications.index') }}" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors flex items-center">
+                    <i class="fas fa-bell mr-3 w-4"></i>Notifications
+                    @if($unread)
+                        <span class="ml-2 bg-red-600 text-white text-xs rounded-full px-2 py-0.5">{{ $unread }}</span>
+                    @endif
+                </a>
+                @endauth
                 
                 <!-- User info for mobile -->
                 <div class="px-4 py-2 border-t border-gray-200 mt-2">
@@ -169,13 +215,15 @@
                             {{ auth()->user()->first_name ?? '' }}
                         </span>
                     </div>
-                    <a href="{{ route('resident.profile.edit') }}" class="text-sm text-blue-600 hover:text-blue-800 mt-1 inline-block">View Profile</a>
+                    <a href="{{ route('resident.profile.edit') }}" class="text-sm text-blue-600 hover:text-blue-800 mt-1 inline-block">
+                        <i class="fas fa-user-circle mr-2"></i>View Profile
+                    </a>
                     
                     <!-- Logout for mobile -->
                     <form method="POST" action="{{ route('logout') }}" class="mt-2">
                         @csrf
-                        <button type="submit" class="text-sm text-red-600 hover:text-red-800">
-                            Log Out
+                        <button type="submit" class="text-sm text-red-600 hover:text-red-800 flex items-center">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Log Out
                         </button>
                     </form>
                 </div>

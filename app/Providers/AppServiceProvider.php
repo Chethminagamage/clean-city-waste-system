@@ -13,7 +13,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Register GamificationService as singleton
+        $this->app->singleton(\App\Services\GamificationService::class);
     }
 
     /**

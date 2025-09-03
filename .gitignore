@@ -22,3 +22,17 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Backup and temporary files
+*.bak
+*.tmp
+*.swp
+*~
+*_old.*
+example_*
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace

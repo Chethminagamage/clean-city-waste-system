@@ -5,11 +5,18 @@ namespace App\Http\Controllers\Resident;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\WasteReport;
+use App\Services\GamificationService;
 use Illuminate\Support\Facades\Auth;
 
 
 class ResidentReportController extends Controller
 {
+    protected $gamificationService;
+
+    public function __construct(GamificationService $gamificationService)
+    {
+        $this->gamificationService = $gamificationService;
+    }
 
     public function dashboard()
     {
@@ -52,13 +59,32 @@ class ResidentReportController extends Controller
             'status'             => 'pending',
         ]);
         
+        // Award points for submitting report
+        $user = Auth::user();
+        $this->gamificationService->awardPoints(
+            $user, 
+            'report_submitted', 
+            null, 
+            null, 
+            [
+                'report_id' => $report->id,
+                'waste_type' => $request->waste_type,
+                'submission_time' => time() - request()->server('REQUEST_TIME_FLOAT')
+            ]
+        );
+
+        // Check if this is user's first report for extra points
+        if (WasteReport::where('resident_id', Auth::id())->count() === 1) {
+            $this->gamificationService->awardPoints($user, 'first_report');
+        }
+        
         // Notify all admins about the new report
         $admins = \App\Models\Admin::all();
         foreach ($admins as $admin) {
             $admin->notify(new \App\Notifications\NewWasteReport($report));
         }
 
-        return redirect()->route('resident.dashboard')->with('success', 'Report submitted successfully!');
+        return redirect()->route('resident.dashboard')->with('success', 'Report submitted successfully! You earned points for helping keep our city clean!');
     }
 
     /**

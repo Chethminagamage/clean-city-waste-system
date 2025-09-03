@@ -4,13 +4,22 @@ namespace App\Http\Controllers\Resident;
 
 use App\Http\Controllers\Controller;
 use App\Models\WasteReport;
+use App\Services\GamificationService;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
+    protected $gamificationService;
+
+    public function __construct(GamificationService $gamificationService)
+    {
+        $this->gamificationService = $gamificationService;
+    }
+
     public function index()
     {
         $userId = auth()->id();
+        $user = auth()->user();
 
         // recent reports for the table/list on the dashboard
         $reports = WasteReport::where('resident_id', $userId)
@@ -27,6 +36,9 @@ class DashboardController extends Controller
             // add 'closed' or other buckets if you later need them
         ];
 
-        return view('resident.dashboard', compact('stats', 'reports'));
+        // Initialize gamification for user (creates record if doesn't exist)
+        $gamificationStats = $this->gamificationService->getUserStats($user);
+
+        return view('resident.dashboard', compact('stats', 'reports', 'gamificationStats'));
     }
 }

@@ -99,4 +99,38 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(WasteReport::class, 'resident_id');
     }
+
+    /**
+     * Gamification relationships
+     */
+    public function gamification()
+    {
+        return $this->hasOne(UserGamification::class);
+    }
+
+    public function achievements()
+    {
+        return $this->hasMany(UserAchievement::class);
+    }
+
+    public function pointTransactions()
+    {
+        return $this->hasMany(PointTransaction::class);
+    }
+
+    public function rewardRedemptions()
+    {
+        return $this->hasMany(RewardRedemption::class);
+    }
+
+    /**
+     * Get or create user gamification record
+     */
+    public function getOrCreateGamification()
+    {
+        if (!$this->gamification) {
+            return $this->gamification()->create([]);
+        }
+        return $this->gamification;
+    }
 }

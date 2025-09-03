@@ -259,6 +259,13 @@
                         </a>
                     </div>
                     <div class="relative group">
+                        <a href="{{ route('resident.gamification.index') }}"
+                        class="text-gray-700 hover:text-green-600 font-medium flex items-center transition-colors">
+                            
+                            Eco Points
+                        </a>
+                    </div>
+                    <div class="relative group">
                     <a href="{{ route('resident.feedback.index') }}"
                     class="text-gray-700 hover:text-green-600 font-medium flex items-center transition-colors">
                         My Feedback
@@ -348,17 +355,78 @@
             <!-- Mobile Navigation Menu -->
             <div id="mobile-menu" class="lg:hidden hidden bg-white border-t border-gray-200 py-4 shadow-lg">
                 <nav class="flex flex-col space-y-4">
-                    <a href="#home" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors">Home</a>
-                    <a href="#submit-report" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors">Submit Reports</a>
+                    <a href="#home" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors flex items-center">
+                        <i class="fas fa-home mr-3 w-4"></i>Home
+                    </a>
+                    <a href="#submit-report" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors flex items-center">
+                        <i class="fas fa-plus-circle mr-3 w-4"></i>Submit Reports
+                    </a>
+                    <a href="{{ route('resident.reports.index') }}" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors flex items-center">
+                        <i class="fas fa-history mr-3 w-4"></i>Report History
+                    </a>
+                    <a href="{{ route('resident.schedule.index') }}" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors flex items-center">
+                        <i class="fas fa-calendar mr-3 w-4"></i>Collection Schedule
+                    </a>
+                    <a href="{{ route('resident.gamification.index') }}" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors flex items-center">
+                        <i class="fas fa-trophy mr-3 w-4"></i>Eco Points
+                    </a>
+                    <a href="{{ route('resident.gamification.rewards') }}" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors flex items-center pl-8">
+                        <i class="fas fa-gift mr-3 w-4"></i>Rewards Store
+                    </a>
+                    <a href="{{ route('resident.feedback.index') }}" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors flex items-center">
+                        <i class="fas fa-comment mr-3 w-4"></i>My Feedback
+                        @auth
+                        @php 
+                            $newResponses = auth()->user()->notifications()
+                                ->where('data->type', 'feedback_response')
+                                ->whereNull('read_at')
+                                ->count(); 
+                        @endphp
+                        @if($newResponses)
+                            <span class="ml-2 bg-green-600 text-white text-xs rounded-full px-2 py-0.5">{{ $newResponses }}</span>
+                        @endif
+                        @endauth
+                    </a>
+                    
+                    <!-- Notifications for mobile -->
+                    @auth
+                    @php $unread = auth()->user()->unreadNotifications()->count(); @endphp
+                    <a href="{{ route('notifications.index') }}" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors flex items-center">
+                        <i class="fas fa-bell mr-3 w-4"></i>Notifications
+                        @if($unread)
+                            <span class="ml-2 bg-red-600 text-white text-xs rounded-full px-2 py-0.5">{{ $unread }}</span>
+                        @endif
+                    </a>
+                    @endauth
                     
                     <!-- User info for mobile -->
                     <div class="px-4 py-2 border-t border-gray-200 mt-2">
-                        <a href="{{ route('resident.profile.edit') }}" class="text-sm text-blue-600 hover:text-blue-800 mt-1 inline-block">View Profile</a>
+                        <div class="flex items-center space-x-3 mb-2">
+                            @if (auth()->user()->profile_image)
+                                <img src="{{ auth()->user()->profile_image_url }}"
+                                    alt="Profile"
+                                    class="w-8 h-8 rounded-full object-cover border-2 border-gray-200">
+                            @else
+                                <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user text-white text-xs"></i>
+                                </div>
+                            @endif
+                            <span class="text-sm font-medium text-gray-900">
+                                {{ auth()->user()->first_name ?? '' }}
+                            </span>
+                        </div>
+                        <a href="{{ route('resident.profile.edit') }}" class="text-sm text-blue-600 hover:text-blue-800 mt-1 inline-block">
+                            <i class="fas fa-user-circle mr-2"></i>View Profile
+                        </a>
+                        
+                        <!-- Logout for mobile -->
+                        <form method="POST" action="{{ route('logout') }}" class="mt-2">
+                            @csrf
+                            <button type="submit" class="text-sm text-red-600 hover:text-red-800 flex items-center">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Log Out
+                            </button>
+                        </form>
                     </div>
-                    
-                    <a href="#contact" class="bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg font-semibold text-center mx-4 transition-colors">
-                        Schedule Pickup
-                    </a>
                 </nav>
             </div>
         </div>
@@ -509,6 +577,104 @@
             </div>
         </div>
         
+        <!-- Gamification Section -->
+        <div class="bg-white rounded-xl card-shadow p-6 mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center shadow-md">
+                        <i class="fas fa-trophy text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-800">Your Eco Progress</h3>
+                        <p class="text-sm text-gray-600">Level up by reporting waste and helping the community!</p>
+                    </div>
+                </div>
+                <a href="{{ route('resident.gamification.index') }}" 
+                   class="text-sm text-yellow-600 hover:text-yellow-700 font-medium flex items-center gap-1">
+                    View All <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6" id="gamification-stats">
+                <!-- Points Card -->
+                <div class="stat-card bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center shadow-md">
+                                <i class="fas fa-coins text-white text-sm"></i>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700">Total Points</span>
+                        </div>
+                        <span class="text-2xl font-bold text-yellow-600" id="total-points">0</span>
+                    </div>
+                </div>
+
+                <!-- Level Card -->
+                <div class="stat-card bg-blue-50 border border-blue-200 rounded-xl p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md">
+                                <i class="fas fa-level-up-alt text-white text-sm"></i>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700">Level</span>
+                        </div>
+                        <span class="text-2xl font-bold text-blue-600" id="current-level">1</span>
+                    </div>
+                </div>
+
+                <!-- Rank Card -->
+                <div class="stat-card bg-purple-50 border border-purple-200 rounded-xl p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+                                <i class="fas fa-crown text-white text-sm"></i>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700">Rank</span>
+                        </div>
+                        <span class="text-xs font-bold text-purple-600" id="current-rank">Eco Newbie</span>
+                    </div>
+                </div>
+
+                <!-- Achievements Card -->
+                <div class="stat-card bg-green-50 border border-green-200 rounded-xl p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-md">
+                                <i class="fas fa-medal text-white text-sm"></i>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700">Badges</span>
+                        </div>
+                        <span class="text-2xl font-bold text-green-600" id="achievements-count">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="mb-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-700">Progress to Next Level</span>
+                    <span class="text-sm text-gray-600" id="points-to-next">0 points to go</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                    <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 h-3 rounded-full transition-all duration-300" 
+                         style="width: 0%" id="level-progress"></div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="grid md:grid-cols-2 gap-3">
+                <a href="{{ route('resident.gamification.index') }}" 
+                   class="flex items-center justify-center gap-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-4 py-3 rounded-lg font-medium transition-colors">
+                    <i class="fas fa-trophy"></i>
+                    <span>View Progress & Achievements</span>
+                </a>
+                <a href="{{ route('resident.gamification.rewards') }}" 
+                   class="flex items-center justify-center gap-2 bg-green-100 hover:bg-green-200 text-green-700 px-4 py-3 rounded-lg font-medium transition-colors">
+                    <i class="fas fa-gift"></i>
+                    <span>Redeem Rewards</span>
+                </a>
+            </div>
+        </div>
 
         <!-- Submit Report Section -->
         <div id="submit-report" class="bg-white rounded-xl card-shadow p-6 mb-8">
@@ -930,6 +1096,40 @@
                 }
             });
         });
+
+        // Load gamification data
+        async function loadGamificationStats() {
+            try {
+                const response = await fetch('{{ route("resident.gamification.api.stats") }}');
+                if (response.ok) {
+                    const stats = await response.json();
+                    
+                    // Update stats display
+                    document.getElementById('total-points').textContent = stats.total_points || 0;
+                    document.getElementById('current-level').textContent = stats.current_level || 1;
+                    document.getElementById('current-rank').textContent = stats.current_rank || 'Eco Newbie';
+                    document.getElementById('achievements-count').textContent = stats.achievements_count || 0;
+                    document.getElementById('points-to-next').textContent = 
+                        stats.points_to_next_level > 0 ? `${stats.points_to_next_level} points to go` : 'Max level!';
+                    
+                    // Update progress bar
+                    const progressBar = document.getElementById('level-progress');
+                    if (stats.points_to_next_level > 0) {
+                        const currentLevelPoints = stats.total_points - (stats.total_points - stats.points_to_next_level);
+                        const nextLevelPoints = stats.points_to_next_level;
+                        const progress = (currentLevelPoints / (currentLevelPoints + nextLevelPoints)) * 100;
+                        progressBar.style.width = Math.min(progress, 100) + '%';
+                    } else {
+                        progressBar.style.width = '100%';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading gamification stats:', error);
+            }
+        }
+
+        // Load gamification stats when page loads
+        document.addEventListener('DOMContentLoaded', loadGamificationStats);
     </script>
     
     @include('partials.chat-widget')
