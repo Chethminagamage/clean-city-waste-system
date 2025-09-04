@@ -133,6 +133,14 @@ Route::middleware('auth')->group(function () {
         ->whereUuid('notification'); 
     Route::get('/notifications/{notification}', [NotificationController::class, 'open'])
         ->name('notifications.open');
+    
+    // Theme Management Routes
+    Route::post('/theme/toggle', [\App\Http\Controllers\ThemeController::class, 'toggle'])
+        ->name('theme.toggle');
+    Route::post('/theme/set', [\App\Http\Controllers\ThemeController::class, 'setTheme'])
+        ->name('theme.set');
+    Route::get('/theme/current', [\App\Http\Controllers\ThemeController::class, 'getTheme'])
+        ->name('theme.current');
 });
 
 Route::middleware('auth')->group(function () {

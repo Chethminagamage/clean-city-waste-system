@@ -1,11 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth {{ auth()->check() && auth()->user()->theme_preference === 'dark' ? 'dark' : '' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Resident Dashboard | Clean City</title>
+    
+    <!-- Theme Persistence Script - MUST BE FIRST -->
+    <script>
+        // Apply theme immediately to prevent flash
+        (function() {
+            // Get server-side theme preference
+            const serverTheme = '{{ auth()->check() ? (auth()->user()->theme_preference ?? "light") : "light" }}';
+            const isAuthenticated = {{ auth()->check() ? 'true' : 'false' }};
+            
+            let shouldApplyDark = false;
+            
+            if (isAuthenticated) {
+                // Use server theme for authenticated users
+                if (serverTheme === 'dark') {
+                    shouldApplyDark = true;
+                }
+            } else {
+                // Use localStorage for guests
+                const localTheme = localStorage.getItem('theme');
+                if (localTheme === 'dark') {
+                    shouldApplyDark = true;
+                }
+            }
+            
+            // Apply theme class immediately to HTML element
+            const htmlElement = document.documentElement;
+            if (shouldApplyDark) {
+                htmlElement.classList.add('dark');
+            } else {
+                htmlElement.classList.remove('dark');
+            }
+            
+            // Store in localStorage for consistency
+            localStorage.setItem('theme', serverTheme);
+            
+            // Add a flag to indicate theme was initialized
+            window.themeInitialized = true;
+            window.currentTheme = shouldApplyDark ? 'dark' : 'light';
+        })();
+    </script>
+    
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgyETTNM7hQ-P9BETdNwTbMr6ggGr73oY&callback=initMap" async defer></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0fdf4',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
     <style>
@@ -14,12 +75,13 @@
         }
         
         .stat-card {
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(0);
         }
         
         .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.15), 0 8px 16px -4px rgba(0, 0, 0, 0.1);
         }
         
         html {
@@ -37,18 +99,50 @@
         }
         
         .profile-icon {
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
+            transform: scale(1);
         }
         
         .profile-icon:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+            transform: scale(1.08);
+            box-shadow: 0 8px 24px rgba(34, 197, 94, 0.4);
         }
         
-        /* Smooth transitions */
-        * {
-            transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+        /* Smooth transitions for theme changes only */
+        .theme-transition {
+            transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        /* Button hover effects */
+        .btn-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .btn-hover:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Navigation link hover effects */
+        .nav-link {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        
+        .nav-link:hover {
+            transform: translateY(-1px);
+        }
+        
+        /* Card hover effects */
+        .card-hover {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(0);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         }
         
         .welcome-card {
@@ -176,10 +270,41 @@
                 padding: 0.5rem 0;
             }
         }
+
+        /* Google Maps styling - prevent dark theme interference */
+        #map, 
+        #map * {
+            filter: none !important;
+            background-color: transparent !important;
+        }
+        
+        /* Ensure Google Maps controls remain visible in both themes */
+        .gm-style .gmnoprint,
+        .gm-style .gm-bundled-control,
+        .gm-style .gm-bundled-control-on-bottom {
+            filter: none !important;
+            background-color: white !important;
+            color: black !important;
+        }
+        
+        /* Map container specific styling */
+        .map-container {
+            background: transparent !important;
+            filter: none !important;
+        }
+        
+        /* Override any dark mode effects on map */
+        .dark #map,
+        .dark #map *,
+        .dark .map-container {
+            filter: none !important;
+            background-color: transparent !important;
+        }
     </style>
     
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -191,11 +316,12 @@
             }
         }
     </script>
+    <link rel="stylesheet" href="{{ asset('css/dark-mode.css') }}">
 </head>
 
-<body class="bg-gradient-to-br from-gray-50 to-green-50 min-h-screen">
+<body class="bg-gradient-to-br from-gray-50 to-green-50 dark:from-gray-900 dark:to-gray-800 min-h-screen transition-colors duration-300">
     <!-- Top Contact Bar -->
-    <div class="bg-green-700 text-white py-2 text-sm top-contact-bar">
+    <div class="bg-green-700 dark:bg-green-800 text-white py-2 text-sm top-contact-bar transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
             <div class="flex items-center space-x-6">
                 <div class="flex items-center">
@@ -212,62 +338,62 @@
                 </div>
             </div>
             <div class="flex items-center space-x-3">
-                <a href="#" class="hover:text-green-300 transition-colors"><i class="fab fa-facebook"></i></a>
-                <a href="#" class="hover:text-green-300 transition-colors"><i class="fab fa-twitter"></i></a>
-                <a href="#" class="hover:text-green-300 transition-colors"><i class="fab fa-youtube"></i></a>
-                <a href="#" class="hover:text-green-300 transition-colors"><i class="fab fa-pinterest"></i></a>
-                <a href="#" class="hover:text-green-300 transition-colors"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="hover:text-green-300 dark:hover:text-green-200 transition-colors"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="hover:text-green-300 dark:hover:text-green-200 transition-colors"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="hover:text-green-300 dark:hover:text-green-200 transition-colors"><i class="fab fa-youtube"></i></a>
+                <a href="#" class="hover:text-green-300 dark:hover:text-green-200 transition-colors"><i class="fab fa-pinterest"></i></a>
+                <a href="#" class="hover:text-green-300 dark:hover:text-green-200 transition-colors"><i class="fab fa-instagram"></i></a>
             </div>
         </div>
     </div>
 
     <!-- Header/Navigation -->
-    <header class="glass-effect sticky top-0 z-50 shadow-lg">
+    <header class="glass-effect sticky top-0 z-50 shadow-lg bg-white/90 dark:bg-gray-800/90 backdrop-blur-md transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6">
             <div class="flex justify-between items-center py-3 sm:py-4">
                 <!-- Logo -->
                 <div class="flex items-center">
                     <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mr-2 sm:mr-3">
                     <div>
-                        <span class="text-xl sm:text-2xl font-bold text-gray-800">Clean City</span>
-                        <p class="text-xs sm:text-sm text-green-600 hidden sm:block">Your Waste, Our Responsibility</p>
+                        <span class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">Clean City</span>
+                        <p class="text-xs sm:text-sm text-green-600 dark:text-green-400 hidden sm:block">Your Waste, Our Responsibility</p>
                     </div>
                 </div>
 
                 <!-- Navigation -->
                 <nav class="hidden lg:flex items-center space-x-8">
                     <div class="relative group">
-                        <a href="#home" class="text-gray-700 hover:text-green-600 font-medium flex items-center transition-colors">
+                        <a href="#home" class="nav-link text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium flex items-center">
                             Home 
                         </a>
                     </div>
                     <div class="relative group">
-                        <a href="#submit-report" class="text-gray-700 hover:text-green-600 font-medium flex items-center transition-colors">
+                        <a href="#submit-report" class="nav-link text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium flex items-center">
                             Submit Reports 
                         </a>
                     </div>
                     <div class="relative group">
                         <a href="{{ route('resident.reports.index') }}" 
-                        class="text-gray-700 hover:text-green-600 font-medium flex items-center transition-colors">
+                        class="nav-link text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium flex items-center">
                             Report History
                         </a>
                     </div>
                     <div class="relative group">
                         <a href="{{ route('resident.schedule.index') }}"
-                        class="text-gray-700 hover:text-green-600 font-medium flex items-center transition-colors">
+                        class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium flex items-center transition-colors">
                             Collection Schedule
                         </a>
                     </div>
                     <div class="relative group">
                         <a href="{{ route('resident.gamification.index') }}"
-                        class="text-gray-700 hover:text-green-600 font-medium flex items-center transition-colors">
+                        class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium flex items-center transition-colors">
                             
                             Eco Points
                         </a>
                     </div>
                     <div class="relative group">
                     <a href="{{ route('resident.feedback.index') }}"
-                    class="text-gray-700 hover:text-green-600 font-medium flex items-center transition-colors">
+                    class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium flex items-center transition-colors">
                         My Feedback
                         @auth
                         @php 
@@ -286,17 +412,11 @@
 
                 <!-- User Info & Profile -->
                 <div class="hidden sm:flex items-center space-x-4">
-                     <!-- Theme Toggle Button -->
-                <button class="theme-toggle-btn text-gray-700 hover:text-green-600" aria-label="Toggle dark mode" title="Switch theme">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-                    </svg>
-                </button>
                     <!-- Notification Bell -->
                     @auth
                     @php $unread = auth()->user()->unreadNotifications()->count(); @endphp
                     <a href="{{ route('notifications.index') }}" class="relative inline-flex items-center ml-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700 hover:text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                         </svg>
                         @if($unread)
@@ -307,7 +427,7 @@
                     </a>
                     @endauth
 
-                    <span class="text-sm font-medium text-gray-900">
+                    <span class="text-sm font-medium text-gray-900 dark:text-white">
                         {{ auth()->user()->first_name ?? '' }}
                     </span>
 
@@ -317,7 +437,7 @@
                             @if (auth()->user()->profile_image)
                                 <img src="{{ auth()->user()->profile_image_url }}"
                                     alt="Profile"
-                                    class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-md hover:scale-105 transition-transform duration-200">
+                                    class="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-600 shadow-md hover:scale-105 transition-transform duration-200">
                             @else
                                 <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-md hover:scale-105 transition-transform duration-200">
                                     <i class="fas fa-user text-white"></i>
@@ -326,17 +446,17 @@
                         </a>
                         
                         <!-- Dropdown Menu -->
-                        <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                        <div class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-100 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                             <div class="py-2">
-                                <a href="{{ route('resident.profile.edit') }}" class="block px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors duration-200">
+                                <a href="{{ route('resident.profile.edit') }}" class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-gray-700 hover:text-green-600 dark:hover:text-green-400 transition-colors duration-200">
                                     <i class="fas fa-user-circle mr-2"></i>
                                     My Profile
                                 </a>
                                 
-                                <div class="border-t border-gray-100 my-1"></div>
+                                <div class="border-t border-gray-100 dark:border-gray-600 my-1"></div>
                                 <form method="POST" action="{{ route('logout') }}" id="logout-form" class="logout-form">
                                     @csrf
-                                    <button type="submit" class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition-colors duration-200">
+                                    <button type="submit" class="w-full text-left px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200">
                                         <i class="fas fa-sign-out-alt mr-2"></i>
                                         Logout
                                     </button>
@@ -347,33 +467,33 @@
                 </div>
 
                 <!-- Mobile Menu Button -->
-                <button id="mobile-menu-btn" class="lg:hidden text-gray-700 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <button id="mobile-menu-btn" class="lg:hidden text-gray-700 dark:text-gray-300 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                     <i class="fas fa-bars text-xl"></i>
                 </button>
             </div>
 
             <!-- Mobile Navigation Menu -->
-            <div id="mobile-menu" class="lg:hidden hidden bg-white border-t border-gray-200 py-4 shadow-lg">
+            <div id="mobile-menu" class="lg:hidden hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-4 shadow-lg transition-colors duration-300">
                 <nav class="flex flex-col space-y-4">
-                    <a href="#home" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors flex items-center">
+                    <a href="#home" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium px-4 py-2 transition-colors flex items-center">
                         <i class="fas fa-home mr-3 w-4"></i>Home
                     </a>
-                    <a href="#submit-report" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors flex items-center">
+                    <a href="#submit-report" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium px-4 py-2 transition-colors flex items-center">
                         <i class="fas fa-plus-circle mr-3 w-4"></i>Submit Reports
                     </a>
-                    <a href="{{ route('resident.reports.index') }}" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors flex items-center">
+                    <a href="{{ route('resident.reports.index') }}" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium px-4 py-2 transition-colors flex items-center">
                         <i class="fas fa-history mr-3 w-4"></i>Report History
                     </a>
-                    <a href="{{ route('resident.schedule.index') }}" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors flex items-center">
+                    <a href="{{ route('resident.schedule.index') }}" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium px-4 py-2 transition-colors flex items-center">
                         <i class="fas fa-calendar mr-3 w-4"></i>Collection Schedule
                     </a>
-                    <a href="{{ route('resident.gamification.index') }}" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors flex items-center">
+                    <a href="{{ route('resident.gamification.index') }}" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium px-4 py-2 transition-colors flex items-center">
                         <i class="fas fa-trophy mr-3 w-4"></i>Eco Points
                     </a>
-                    <a href="{{ route('resident.gamification.rewards') }}" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors flex items-center pl-8">
+                    <a href="{{ route('resident.gamification.rewards') }}" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium px-4 py-2 transition-colors flex items-center pl-8">
                         <i class="fas fa-gift mr-3 w-4"></i>Rewards Store
                     </a>
-                    <a href="{{ route('resident.feedback.index') }}" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors flex items-center">
+                    <a href="{{ route('resident.feedback.index') }}" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium px-4 py-2 transition-colors flex items-center">
                         <i class="fas fa-comment mr-3 w-4"></i>My Feedback
                         @auth
                         @php 
@@ -391,7 +511,7 @@
                     <!-- Notifications for mobile -->
                     @auth
                     @php $unread = auth()->user()->unreadNotifications()->count(); @endphp
-                    <a href="{{ route('notifications.index') }}" class="text-gray-700 hover:text-green-600 font-medium px-4 py-2 transition-colors flex items-center">
+                    <a href="{{ route('notifications.index') }}" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium px-4 py-2 transition-colors flex items-center">
                         <i class="fas fa-bell mr-3 w-4"></i>Notifications
                         @if($unread)
                             <span class="ml-2 bg-red-600 text-white text-xs rounded-full px-2 py-0.5">{{ $unread }}</span>
@@ -399,30 +519,35 @@
                     </a>
                     @endauth
                     
+                    <!-- Theme Toggle for mobile -->
+                    <button id="mobile-theme-toggle" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium px-4 py-2 transition-colors flex items-center w-full text-left">
+                        <i id="mobile-theme-icon" class="fas fa-moon mr-3 w-4"></i><span id="mobile-theme-text">Dark Mode</span>
+                    </button>
+                    
                     <!-- User info for mobile -->
-                    <div class="px-4 py-2 border-t border-gray-200 mt-2">
+                    <div class="px-4 py-2 border-t border-gray-200 dark:border-gray-600 mt-2">
                         <div class="flex items-center space-x-3 mb-2">
                             @if (auth()->user()->profile_image)
                                 <img src="{{ auth()->user()->profile_image_url }}"
                                     alt="Profile"
-                                    class="w-8 h-8 rounded-full object-cover border-2 border-gray-200">
+                                    class="w-8 h-8 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600">
                             @else
                                 <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
                                     <i class="fas fa-user text-white text-xs"></i>
                                 </div>
                             @endif
-                            <span class="text-sm font-medium text-gray-900">
+                            <span class="text-sm font-medium text-gray-900 dark:text-white">
                                 {{ auth()->user()->first_name ?? '' }}
                             </span>
                         </div>
-                        <a href="{{ route('resident.profile.edit') }}" class="text-sm text-blue-600 hover:text-blue-800 mt-1 inline-block">
+                        <a href="{{ route('resident.profile.edit') }}" class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 mt-1 inline-block transition-colors">
                             <i class="fas fa-user-circle mr-2"></i>View Profile
                         </a>
                         
                         <!-- Logout for mobile -->
                         <form method="POST" action="{{ route('logout') }}" class="mt-2">
                             @csrf
-                            <button type="submit" class="text-sm text-red-600 hover:text-red-800 flex items-center">
+                            <button type="submit" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 flex items-center transition-colors">
                                 <i class="fas fa-sign-out-alt mr-2"></i>Log Out
                             </button>
                         </form>
@@ -433,16 +558,16 @@
     </header>
 
     <!-- Welcome Banner -->
-    <div class="bg-gradient-to-r from-green-500 to-green-600 text-white shadow-xl">
+    <div class="bg-gradient-to-r from-green-500 to-green-600 dark:from-green-600 dark:to-green-700 text-white shadow-xl transition-colors duration-300">
         <div class="container mx-auto px-4 sm:px-6 py-4 sm:py-5">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-full flex items-center justify-center">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 dark:bg-white/30 rounded-full flex items-center justify-center">
                         <i class="fas fa-home text-lg sm:text-xl"></i>
                     </div>
                     <div>
                         <h1 class="text-lg sm:text-2xl font-bold">Hello, {{ Auth::user()->name ?? 'Resident' }}!</h1>
-                        <p class="text-green-100 text-xs sm:text-sm">Welcome to your Clean City dashboard. Report waste and track collection status.</p>
+                        <p class="text-green-100 dark:text-green-200 text-xs sm:text-sm">Welcome to your Clean City dashboard. Report waste and track collection status.</p>
                     </div>
                 </div>
             </div>
@@ -455,23 +580,23 @@
         <!-- Top Section -->
         <div class="grid lg:grid-cols-3 gap-6 mb-8">
             <!-- Location Map -->
-            <div class="lg:col-span-2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+            <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-300">
                 <!-- Header -->
-                <div class="px-6 py-4 bg-gradient-to-r from-green-50 to-blue-50 border-b border-gray-100">
+                <div class="px-6 py-4 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border-b border-gray-100 dark:border-gray-700 transition-colors duration-300">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <div class="w-8 h-8 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
                                 <i class="fas fa-map-marker-alt text-white text-sm"></i>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-gray-800">Your Location</h3>
-                                <p class="text-xs text-gray-600">Real-time location detection</p>
+                                <h3 class="font-semibold text-gray-800 dark:text-white">Your Location</h3>
+                                <p class="text-xs text-gray-600 dark:text-gray-400">Real-time location detection</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
                             <div id="location-status" class="flex items-center gap-1">
                                 <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                <span class="text-xs text-green-600">Active</span>
+                                <span class="text-xs text-green-600 dark:text-green-400">Active</span>
                             </div>
                         </div>
                     </div>
@@ -479,15 +604,15 @@
 
                 <!-- Map Container with Modern UI -->
                 <div class="relative w-full">
-                    <div id="map" class="w-full" style="aspect-ratio: 3 / 2; min-height: 300px;"></div>
+                    <div id="map" class="w-full map-container" style="aspect-ratio: 3 / 2; min-height: 300px;"></div>
                     
                     <!-- Map Overlay Controls -->
-                    <div class="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-3 border border-white/20">
+                    <div class="absolute top-4 left-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-lg p-3 border border-white/20 dark:border-gray-600/20">
                         <div class="flex items-center gap-2 text-sm">
                             <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                            <span class="text-gray-700 font-medium">Current Location</span>
+                            <span class="text-gray-700 dark:text-gray-200 font-medium">Current Location</span>
                         </div>
-                        <div class="text-xs text-gray-500 mt-1" id="accuracy-info">
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1" id="accuracy-info">
                             Accuracy: High
                         </div>
                     </div>
@@ -497,69 +622,69 @@
             </div>
 
             <!-- Report Statistics -->
-            <div class="bg-white rounded-xl card-shadow p-6">
+            <div class="card-hover bg-white dark:bg-gray-800 rounded-xl card-shadow p-6 theme-transition">
                 <div class="flex items-center gap-2 mb-6">
-                    <i class="fas fa-chart-bar text-green-600"></i>
-                    <h3 class="text-lg font-semibold text-gray-800">Report Statistics</h3>
+                    <i class="fas fa-chart-bar text-green-600 dark:text-green-400"></i>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Report Statistics</h3>
                 </div>
                 
                 <div class="space-y-4">
-                    <div class="stat-card bg-blue-50 border border-blue-200 rounded-xl p-4">
+                    <div class="stat-card bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md">
                                     <i class="fas fa-file-alt text-white text-sm"></i>
                                 </div>
-                                <span class="text-sm font-medium text-gray-700">Total Reports</span>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Total Reports</span>
                             </div>
-                            <span class="text-2xl font-bold text-blue-600">{{ $stats['total'] ?? 0 }}</span>
+                            <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ $stats['total'] ?? 0 }}</span>
                         </div>
                     </div>
 
-                    <div class="stat-card bg-orange-50 border border-orange-200 rounded-xl p-4">
+                    <div class="stat-card bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-xl p-4">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-md">
                                     <i class="fas fa-clock text-white text-sm"></i>
                                 </div>
-                                <span class="text-sm font-medium text-gray-700">Pending</span>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Pending</span>
                             </div>
-                            <span class="text-2xl font-bold text-orange-600">{{ $stats['pending'] ?? 0 }}</span>
+                            <span class="text-2xl font-bold text-orange-600 dark:text-orange-400">{{ $stats['pending'] ?? 0 }}</span>
                         </div>
                     </div>
 
-                    <div class="stat-card bg-purple-50 border border-purple-200 rounded-xl p-4">
+                    <div class="stat-card bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-xl p-4">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
                                     <i class="fas fa-calendar-alt text-white text-sm"></i>
                                 </div>
-                                <span class="text-sm font-medium text-gray-700">Scheduled</span>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Scheduled</span>
                             </div>
-                            <span class="text-2xl font-bold text-purple-600">{{ $stats['scheduled'] ?? 0 }}</span>
+                            <span class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ $stats['scheduled'] ?? 0 }}</span>
                         </div>
                     </div>
 
-                    <div class="stat-card bg-green-50 border border-green-200 rounded-xl p-4">
+                    <div class="stat-card bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl p-4">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-md">
                                     <i class="fas fa-check text-white text-sm"></i>
                                 </div>
-                                <span class="text-sm font-medium text-gray-700">Collected</span>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Collected</span>
                             </div>
-                            <span class="text-2xl font-bold text-green-600">{{ $stats['collected'] ?? 0 }}</span>
+                            <span class="text-2xl font-bold text-green-600 dark:text-green-400">{{ $stats['collected'] ?? 0 }}</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Quick Tips (inside same card) -->
-                <div class="mt-6 pt-6 border-t border-gray-100">
+                <div class="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700 transition-colors duration-300">
                     <div class="flex items-center gap-2 mb-3">
                         <i class="fas fa-lightbulb text-yellow-500"></i>
-                        <span class="text-sm font-medium text-gray-700">Quick Tips</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Quick Tips</span>
                     </div>
-                    <div class="space-y-2 text-xs text-gray-600">
+                    <div class="space-y-2 text-xs text-gray-600 dark:text-gray-400">
                         <div class="flex items-center gap-2">
                             <i class="fas fa-camera text-green-500"></i>
                             <span>Upload clear photos for faster processing</span>
@@ -578,73 +703,73 @@
         </div>
         
         <!-- Gamification Section -->
-        <div class="bg-white rounded-xl card-shadow p-6 mb-8">
+        <div class="card-hover bg-white dark:bg-gray-800 rounded-xl card-shadow p-6 mb-8 theme-transition">
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center shadow-md">
                         <i class="fas fa-trophy text-white text-sm"></i>
                     </div>
                     <div>
-                        <h3 class="text-xl font-semibold text-gray-800">Your Eco Progress</h3>
-                        <p class="text-sm text-gray-600">Level up by reporting waste and helping the community!</p>
+                        <h3 class="text-xl font-semibold text-gray-800 dark:text-white">Your Eco Progress</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Level up by reporting waste and helping the community!</p>
                     </div>
                 </div>
                 <a href="{{ route('resident.gamification.index') }}" 
-                   class="text-sm text-yellow-600 hover:text-yellow-700 font-medium flex items-center gap-1">
+                   class="text-sm text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 font-medium flex items-center gap-1">
                     View All <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
 
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6" id="gamification-stats">
                 <!-- Points Card -->
-                <div class="stat-card bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                <div class="stat-card bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-xl p-4">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center shadow-md">
                                 <i class="fas fa-coins text-white text-sm"></i>
                             </div>
-                            <span class="text-sm font-medium text-gray-700">Total Points</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Total Points</span>
                         </div>
-                        <span class="text-2xl font-bold text-yellow-600" id="total-points">0</span>
+                        <span class="text-2xl font-bold text-yellow-600 dark:text-yellow-400" id="total-points">0</span>
                     </div>
                 </div>
 
                 <!-- Level Card -->
-                <div class="stat-card bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <div class="stat-card bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md">
                                 <i class="fas fa-level-up-alt text-white text-sm"></i>
                             </div>
-                            <span class="text-sm font-medium text-gray-700">Level</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Level</span>
                         </div>
-                        <span class="text-2xl font-bold text-blue-600" id="current-level">1</span>
+                        <span class="text-2xl font-bold text-blue-600 dark:text-blue-400" id="current-level">1</span>
                     </div>
                 </div>
 
                 <!-- Rank Card -->
-                <div class="stat-card bg-purple-50 border border-purple-200 rounded-xl p-4">
+                <div class="stat-card bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-xl p-4">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
                                 <i class="fas fa-crown text-white text-sm"></i>
                             </div>
-                            <span class="text-sm font-medium text-gray-700">Rank</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Rank</span>
                         </div>
-                        <span class="text-xs font-bold text-purple-600" id="current-rank">Eco Newbie</span>
+                        <span class="text-xs font-bold text-purple-600 dark:text-purple-400" id="current-rank">Eco Newbie</span>
                     </div>
                 </div>
 
                 <!-- Achievements Card -->
-                <div class="stat-card bg-green-50 border border-green-200 rounded-xl p-4">
+                <div class="stat-card bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl p-4">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-md">
                                 <i class="fas fa-medal text-white text-sm"></i>
                             </div>
-                            <span class="text-sm font-medium text-gray-700">Badges</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Badges</span>
                         </div>
-                        <span class="text-2xl font-bold text-green-600" id="achievements-count">0</span>
+                        <span class="text-2xl font-bold text-green-600 dark:text-green-400" id="achievements-count">0</span>
                     </div>
                 </div>
             </div>
@@ -652,10 +777,10 @@
             <!-- Progress Bar -->
             <div class="mb-4">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-medium text-gray-700">Progress to Next Level</span>
-                    <span class="text-sm text-gray-600" id="points-to-next">0 points to go</span>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Progress to Next Level</span>
+                    <span class="text-sm text-gray-600 dark:text-gray-400" id="points-to-next">0 points to go</span>
                 </div>
-                <div class="w-full bg-gray-200 rounded-full h-3">
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                     <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 h-3 rounded-full transition-all duration-300" 
                          style="width: 0%" id="level-progress"></div>
                 </div>
@@ -664,12 +789,12 @@
             <!-- Quick Actions -->
             <div class="grid md:grid-cols-2 gap-3">
                 <a href="{{ route('resident.gamification.index') }}" 
-                   class="flex items-center justify-center gap-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-4 py-3 rounded-lg font-medium transition-colors">
+                   class="flex items-center justify-center gap-2 bg-yellow-100 dark:bg-yellow-900/30 hover:bg-yellow-200 dark:hover:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 px-4 py-3 rounded-lg font-medium transition-colors">
                     <i class="fas fa-trophy"></i>
                     <span>View Progress & Achievements</span>
                 </a>
                 <a href="{{ route('resident.gamification.rewards') }}" 
-                   class="flex items-center justify-center gap-2 bg-green-100 hover:bg-green-200 text-green-700 px-4 py-3 rounded-lg font-medium transition-colors">
+                   class="flex items-center justify-center gap-2 bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 px-4 py-3 rounded-lg font-medium transition-colors">
                     <i class="fas fa-gift"></i>
                     <span>Redeem Rewards</span>
                 </a>
@@ -677,24 +802,24 @@
         </div>
 
         <!-- Submit Report Section -->
-        <div id="submit-report" class="bg-white rounded-xl card-shadow p-6 mb-8">
+        <div id="submit-report" class="card-hover bg-white dark:bg-gray-800 rounded-xl card-shadow p-6 mb-8 theme-transition">
             <div class="flex items-center gap-3 mb-6">
                 <div class="w-10 h-10 bg-gradient-to-br from-green-600 to-green-700 rounded-xl flex items-center justify-center shadow-md">
                     <i class="fas fa-plus text-white text-sm"></i>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-800">Submit New Waste Report</h3>
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-white">Submit New Waste Report</h3>
             </div>
-            <p class="text-gray-600 mb-6">Help keep our community clean by reporting waste issues</p>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">Help keep our community clean by reporting waste issues</p>
             
             @if(session('success'))
-                <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl mb-6 flex items-center gap-2">
+                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 text-green-700 dark:text-green-200 px-4 py-3 rounded-xl mb-6 flex items-center gap-2 transition-colors duration-300">
                     <i class="fas fa-check-circle"></i>
                     <span>{{ session('success') }}</span>
                 </div>
             @endif
             
             @if ($errors->any())
-                <div class="bg-red-50 border border-red-200 text-red-700 p-4 mb-6 rounded-xl">
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-200 p-4 mb-6 rounded-xl transition-colors duration-300">
                     <div class="flex items-center gap-2 mb-2">
                         <i class="fas fa-exclamation-circle"></i>
                         <span class="font-medium">Please fix the following errors:</span>
@@ -711,24 +836,24 @@
                 @csrf
                 <div class="grid md:grid-cols-3 gap-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Location</label>
                         <input type="text" name="location" id="location" placeholder="Detecting location..." readonly
-                            class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 text-gray-600 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all" 
+                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all" 
                             value="{{ old('location') }}">
-                        <p class="text-xs text-gray-500 mt-1">Location will be detected automatically</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Location will be detected automatically</p>
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Report Date</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Report Date</label>
                         <input type="date" name="report_date" id="report_date" readonly
-                            class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 text-gray-600 transition-all">
-                        <p class="text-xs text-gray-500 mt-1">Today's date is automatically set</p>
+                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 transition-all">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Today's date is automatically set</p>
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Waste Type *</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Waste Type *</label>
                         <select name="waste_type" id="waste_type" required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white text-gray-700 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all">
+                            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all">
                             <option value="">Select waste type...</option>
                             <option value="Organic">🌱 Organic</option>
                             <option value="Plastic">♻️ Plastic</option>
@@ -740,38 +865,38 @@
                 </div>
 
                 <div>
-                    <label for="image" class="block text-sm font-medium text-gray-700 mb-2">Upload Photo</label>
-                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-green-400 hover:bg-green-50/50 transition-all">
-                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
+                    <label for="image" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Upload Photo</label>
+                    <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 text-center hover:border-green-400 dark:hover:border-green-500 hover:bg-green-50/50 dark:hover:bg-green-900/20 transition-all">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 dark:text-gray-500 mb-3"></i>
                         <input type="file" name="image" class="hidden" id="imageInput" accept="image/*">
                         <label for="imageInput" class="cursor-pointer">
-                            <span class="text-blue-600 hover:text-blue-700 font-medium">Click to upload</span>
-                            <span class="text-gray-500"> or drag and drop</span>
+                            <span class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">Click to upload</span>
+                            <span class="text-gray-500 dark:text-gray-400"> or drag and drop</span>
                         </label>
-                        <p class="text-xs text-gray-500 mt-2">PNG, JPG, GIF up to 10MB</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">PNG, JPG, GIF up to 10MB</p>
                     </div>
                     @if ($errors->has('image'))
-                        <p class="text-red-500 text-sm mt-2">{{ $errors->first('image') }}</p>
+                        <p class="text-red-500 dark:text-red-400 text-sm mt-2">{{ $errors->first('image') }}</p>
                     @endif
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Additional Details</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Additional Details</label>
                     <textarea name="additional_details" rows="4"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-700 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all" 
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all" 
                         placeholder="Describe the waste issue in detail...">{{ old('additional_details') }}</textarea>
-                    <p class="text-xs text-gray-500 mt-1">Provide additional context to help us understand the situation</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Provide additional context to help us understand the situation</p>
                 </div>
 
                 <input type="hidden" name="latitude" id="latitude">
                 <input type="hidden" name="longitude" id="longitude">
                 
                 <div class="flex items-center gap-4">
-                    <button type="submit" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-3 rounded-xl shadow-lg transition-all flex items-center gap-2 transform hover:scale-105">
+                    <button type="submit" class="btn-hover bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-3 rounded-xl shadow-lg flex items-center gap-2">
                         <i class="fas fa-paper-plane"></i>
                         Submit Waste Report
                     </button>
-                    <button type="reset" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl transition-all">
+                    <button type="reset" class="btn-hover bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-6 py-3 rounded-xl">
                         Clear Form
                     </button>
                 </div>
@@ -779,72 +904,72 @@
         </div>
 
         <!-- Report History -->
-        <div class="bg-white rounded-xl card-shadow p-6">
+        <div class="card-hover bg-white dark:bg-gray-800 rounded-xl card-shadow p-6 theme-transition">
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-md">
                         <i class="fas fa-history text-white text-sm"></i>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-800">Report History</h3>
+                    <h3 class="text-xl font-semibold text-gray-800 dark:text-white">Report History</h3>
                 </div>
-                <span class="text-sm text-gray-500">Track the status of all your submitted reports</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">Track the status of all your submitted reports</span>
             </div>
 
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead>
-                        <tr class="bg-gradient-to-r from-gray-50 to-green-50 border-b border-gray-200">
-                            <th class="text-left px-4 py-4 text-sm font-medium text-gray-700">Date & Time</th>
-                            <th class="text-left px-4 py-4 text-sm font-medium text-gray-700">Location</th>
-                            <th class="text-left px-4 py-4 text-sm font-medium text-gray-700">Waste Type</th>
-                            <th class="text-left px-4 py-4 text-sm font-medium text-gray-700">Status</th>
-                            <th class="text-left px-4 py-4 text-sm font-medium text-gray-700">Image</th>
-                            <th class="text-left px-4 py-4 text-sm font-medium text-gray-700">Actions</th>
+                        <tr class="bg-gradient-to-r from-gray-50 to-green-50 dark:from-gray-700 dark:to-green-900/30 border-b border-gray-200 dark:border-gray-600">
+                            <th class="text-left px-4 py-4 text-sm font-medium text-gray-700 dark:text-gray-300">Date & Time</th>
+                            <th class="text-left px-4 py-4 text-sm font-medium text-gray-700 dark:text-gray-300">Location</th>
+                            <th class="text-left px-4 py-4 text-sm font-medium text-gray-700 dark:text-gray-300">Waste Type</th>
+                            <th class="text-left px-4 py-4 text-sm font-medium text-gray-700 dark:text-gray-300">Status</th>
+                            <th class="text-left px-4 py-4 text-sm font-medium text-gray-700 dark:text-gray-300">Image</th>
+                            <th class="text-left px-4 py-4 text-sm font-medium text-gray-700 dark:text-gray-300">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200">
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
                         @forelse ($reports as $report)
-                            <tr class="hover:bg-gray-50 transition-colors">
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                 <td class="px-4 py-4">
-                                    <div class="text-sm font-medium text-gray-900">{{ \Carbon\Carbon::parse($report->report_date)->format('M d, Y') }}</div>
-                                    <div class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($report->created_at)->format('h:i A') }}</div>
+                                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ \Carbon\Carbon::parse($report->report_date)->format('M d, Y') }}</div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ \Carbon\Carbon::parse($report->created_at)->format('h:i A') }}</div>
                                 </td>
-                                <td class="px-4 py-4 text-sm text-gray-600 max-w-xs truncate">{{ $report->location }}</td>
+                                <td class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300 max-w-xs truncate">{{ $report->location }}</td>
                                 <td class="px-4 py-4">
                                     <span class="@class([
                                         'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium',
-                                        'bg-green-100 text-green-800' => $report->waste_type === 'Organic',
-                                        'bg-blue-100 text-blue-800' => $report->waste_type === 'Plastic',
-                                        'bg-purple-100 text-purple-800' => $report->waste_type === 'E-Waste',
-                                        'bg-red-100 text-red-800' => $report->waste_type === 'Hazardous',
-                                        'bg-gray-100 text-gray-800' => !in_array($report->waste_type, ['Organic', 'Plastic', 'E-Waste', 'Hazardous']),
+                                        'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200' => $report->waste_type === 'Organic',
+                                        'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200' => $report->waste_type === 'Plastic',
+                                        'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200' => $report->waste_type === 'E-Waste',
+                                        'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200' => $report->waste_type === 'Hazardous',
+                                        'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200' => !in_array($report->waste_type, ['Organic', 'Plastic', 'E-Waste', 'Hazardous']),
                                     ])">
                                         {{ $report->waste_type }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-4">
                                     @if ($report->status === 'pending')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200">
                                             <i class="fas fa-clock mr-1"></i>Pending
                                         </span>
                                     @elseif ($report->status === 'assigned')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200">
                                             <i class="fas fa-user-check mr-1"></i>Assigned
                                         </span>
                                     @elseif ($report->status === 'enroute')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200">
                                             <i class="fas fa-truck mr-1"></i>Enroute
                                         </span>
                                     @elseif ($report->status === 'collected')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200">
                                             <i class="fas fa-check mr-1"></i>Collected
                                         </span>
                                     @elseif ($report->status === 'closed')
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                                             <i class="fas fa-check-double mr-1"></i>Closed
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                                             {{ ucfirst($report->status) }}
                                         </span>
                                     @endif
@@ -852,17 +977,17 @@
                                 <td class="px-4 py-4">
                                     @if ($report->image_path)
                                         <img src="{{ asset('storage/' . $report->image_path) }}" 
-                                             class="w-14 h-14 rounded-xl object-cover border-2 border-gray-200 shadow-sm" 
+                                             class="w-14 h-14 rounded-xl object-cover border-2 border-gray-200 dark:border-gray-600 shadow-sm" 
                                              alt="Report image">
                                     @else
-                                        <div class="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center">
-                                            <i class="fas fa-image text-gray-400"></i>
+                                        <div class="w-14 h-14 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center">
+                                            <i class="fas fa-image text-gray-400 dark:text-gray-500"></i>
                                         </div>
                                     @endif
                                 </td>
                                 <td class="px-4 py-4">
   <a href="{{ route('resident.reports.show', $report->id) }}"
-     class="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors">
+     class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-medium transition-colors">
      View Details
   </a>
 </td>
@@ -871,12 +996,12 @@
                             <tr>
                                 <td colspan="6" class="px-4 py-16 text-center">
                                     <div class="flex flex-col items-center gap-4">
-                                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
-                                            <i class="fas fa-inbox text-2xl text-gray-300"></i>
+                                        <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-inbox text-2xl text-gray-300 dark:text-gray-500"></i>
                                         </div>
                                         <div>
-                                            <p class="text-gray-500 font-medium">No reports submitted yet</p>
-                                            <p class="text-sm text-gray-400 mt-1">Submit your first waste report above to get started</p>
+                                            <p class="text-gray-500 dark:text-gray-400 font-medium">No reports submitted yet</p>
+                                            <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">Submit your first waste report above to get started</p>
                                         </div>
                                     </div>
                                 </td>
@@ -902,7 +1027,7 @@
                     document.getElementById('latitude').value = userLocation.lat;
                     document.getElementById('longitude').value = userLocation.lng;
                     
-                    // Create map
+                    // Create map with consistent satellite view regardless of theme
                     const map = new google.maps.Map(document.getElementById('map'), {
                         zoom: 15,
                         center: userLocation,
@@ -923,7 +1048,17 @@
                         zoomControl: true,
                         scaleControl: true,
                         rotateControl: true,
-                        tilt: 0 // Start with flat view, user can tilt if supported
+                        tilt: 0, // Start with flat view, user can tilt if supported
+                        styles: [] // Empty styles array to prevent theme-based styling
+                    });
+                    
+                    // Force satellite view to remain consistent regardless of theme
+                    window.addEventListener('themeChanged', function(event) {
+                        // Ensure map stays in satellite/hybrid mode when theme changes
+                        if (map.getMapTypeId() !== google.maps.MapTypeId.HYBRID && 
+                            map.getMapTypeId() !== google.maps.MapTypeId.SATELLITE) {
+                            map.setMapTypeId(google.maps.MapTypeId.HYBRID);
+                        }
                     });
                     
                     // Create custom marker
@@ -1132,6 +1267,204 @@
         document.addEventListener('DOMContentLoaded', loadGamificationStats);
     </script>
     
+    <!-- Theme Management Script -->
+    <script>
+        // Theme Management System
+        class ThemeManager {
+            constructor() {
+                this.currentTheme = 'light';
+                this.init();
+            }
+
+            init() {
+                // Load theme from user preference or localStorage
+                this.loadTheme();
+                
+                // Initialize theme toggle buttons
+                this.initToggleButtons();
+                
+                // Apply theme immediately
+                this.applyTheme(this.currentTheme);
+                
+                // Listen for system theme changes
+                this.listenForSystemThemeChanges();
+            }
+
+            async loadTheme() {
+                try {
+                    // First try to get from server (authenticated users)
+                    const response = await fetch('/theme/current');
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.currentTheme = data.theme;
+                    }
+                } catch (error) {
+                    // Fallback to localStorage for guests
+                    this.currentTheme = localStorage.getItem('theme') || 'light';
+                }
+            }
+
+            initToggleButtons() {
+                // Theme toggle button
+                const themeToggle = document.getElementById('theme-toggle');
+                if (themeToggle) {
+                    themeToggle.addEventListener('click', () => {
+                        this.toggleTheme();
+                    });
+                }
+
+                // Mobile theme toggle
+                const mobileThemeToggle = document.getElementById('mobile-theme-toggle');
+                if (mobileThemeToggle) {
+                    mobileThemeToggle.addEventListener('click', () => {
+                        this.toggleTheme();
+                    });
+                }
+
+                // Theme selector dropdown
+                const themeSelectors = document.querySelectorAll('[data-theme]');
+                themeSelectors.forEach(selector => {
+                    selector.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const theme = selector.getAttribute('data-theme');
+                        this.setTheme(theme);
+                    });
+                });
+            }
+
+            toggleTheme() {
+                const newTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+                this.setTheme(newTheme);
+            }
+
+            async setTheme(theme) {
+                this.currentTheme = theme;
+                this.applyTheme(theme);
+                await this.saveTheme(theme);
+                this.updateToggleButton();
+            }
+
+            applyTheme(theme) {
+                const html = document.documentElement;
+                
+                if (theme === 'dark') {
+                    html.classList.add('dark');
+                } else {
+                    html.classList.remove('dark');
+                }
+
+                // Update meta theme-color for mobile browsers
+                this.updateMetaThemeColor(theme);
+                
+                // Ensure map maintains satellite view regardless of theme
+                this.maintainMapSatelliteView();
+                
+                // Trigger custom event for other components
+                window.dispatchEvent(new CustomEvent('themeChanged', { 
+                    detail: { theme } 
+                }));
+            }
+
+            maintainMapSatelliteView() {
+                // Find the map element and ensure it stays in satellite view
+                const mapElement = document.getElementById('map');
+                if (mapElement && window.google && window.google.maps) {
+                    // Add CSS to override any dark theme styling on map
+                    const mapContainer = mapElement.parentElement;
+                    if (mapContainer) {
+                        mapContainer.style.filter = 'none';
+                        mapContainer.style.backgroundColor = 'transparent';
+                    }
+                }
+            }
+
+            updateMetaThemeColor(theme) {
+                let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+                if (!metaThemeColor) {
+                    metaThemeColor = document.createElement('meta');
+                    metaThemeColor.name = 'theme-color';
+                    document.head.appendChild(metaThemeColor);
+                }
+                
+                metaThemeColor.content = theme === 'dark' ? '#1f2937' : '#10b981';
+            }
+
+            async saveTheme(theme) {
+                try {
+                    // Save to server for authenticated users
+                    const response = await fetch('/theme/toggle', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                        },
+                        body: JSON.stringify({ theme })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to save theme preference');
+                    }
+                } catch (error) {
+                    console.warn('Could not save theme to server, using localStorage:', error);
+                    // Fallback to localStorage
+                    localStorage.setItem('theme', theme);
+                }
+            }
+
+            updateToggleButton() {
+                const themeToggle = document.getElementById('theme-toggle');
+                const themeIcon = document.getElementById('theme-icon');
+                const mobileThemeIcon = document.getElementById('mobile-theme-icon');
+                const mobileThemeText = document.getElementById('mobile-theme-text');
+                
+                if (this.currentTheme === 'dark') {
+                    if (themeIcon) {
+                        themeIcon.className = 'fas fa-sun text-lg';
+                    }
+                    if (mobileThemeIcon) {
+                        mobileThemeIcon.className = 'fas fa-sun mr-3 w-4';
+                    }
+                    if (mobileThemeText) {
+                        mobileThemeText.textContent = 'Light Mode';
+                    }
+                    if (themeToggle) {
+                        themeToggle.title = 'Switch to Light Mode';
+                    }
+                } else {
+                    if (themeIcon) {
+                        themeIcon.className = 'fas fa-moon text-lg';
+                    }
+                    if (mobileThemeIcon) {
+                        mobileThemeIcon.className = 'fas fa-moon mr-3 w-4';
+                    }
+                    if (mobileThemeText) {
+                        mobileThemeText.textContent = 'Dark Mode';
+                    }
+                    if (themeToggle) {
+                        themeToggle.title = 'Switch to Dark Mode';
+                    }
+                }
+            }
+
+            getSystemTheme() {
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+
+            listenForSystemThemeChanges() {
+                // Auto theme functionality removed
+            }
+        }
+
+        // Initialize theme manager when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.themeManager = new ThemeManager();
+        });
+
+        // Export for use in other scripts
+        window.ThemeManager = ThemeManager;
+    </script>
+    
     @include('partials.chat-widget')
+    @include('partials.floating-theme-picker')
 </body>
 </html>

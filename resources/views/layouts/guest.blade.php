@@ -15,6 +15,37 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans text-gray-900 antialiased">
+        
+        <!-- Theme Persistence Script -->
+        <script>
+            // Immediate theme application to prevent flash
+            (function() {
+                const html = document.documentElement;
+                let theme = 'light';
+                
+                // Try to get theme from localStorage first
+                const storedTheme = localStorage.getItem('theme');
+                if (storedTheme && ['light', 'dark', 'auto'].includes(storedTheme)) {
+                    theme = storedTheme;
+                }
+                
+                // Apply theme
+                if (theme === 'auto') {
+                    // Check system preference
+                    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    if (systemDark) {
+                        html.classList.add('dark');
+                    } else {
+                        html.classList.remove('dark');
+                    }
+                } else if (theme === 'dark') {
+                    html.classList.add('dark');
+                } else {
+                    html.classList.remove('dark');
+                }
+            })();
+        </script>
+        
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
             <div>
                 <a href="/">
@@ -28,5 +59,6 @@
         </div>
         
     @include('partials.chat-widget')
+    @include('partials.floating-theme-picker')
     </body>
 </html>

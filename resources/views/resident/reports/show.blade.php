@@ -2,7 +2,7 @@
 
 @section('content')
 <style>
-    /* Status-based styling */
+    /* Status-based styling - Updated for dark mode */
     .status-pending { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); }
     .status-assigned { background: linear-gradient(135deg, #dbeafe 0%, #93c5fd 100%); }
     .status-enroute { background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); }
@@ -10,23 +10,32 @@
     .status-closed { background: linear-gradient(135deg, #f3f4f6 0%, #d1d5db 100%); }
     .status-cancelled { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); }
     
+    /* Dark mode status styling */
+    .dark .status-pending { background: linear-gradient(135deg, #451a03 0%, #78350f 100%); }
+    .dark .status-assigned { background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%); }
+    .dark .status-enroute { background: linear-gradient(135deg, #312e81 0%, #4338ca 100%); }
+    .dark .status-collected { background: linear-gradient(135deg, #064e3b 0%, #047857 100%); }
+    .dark .status-closed { background: linear-gradient(135deg, #374151 0%, #4b5563 100%); }
+    .dark .status-cancelled { background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%); }
+    
     /* Button hover animations only */
     .btn-hover {
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    .catch(error => {
-    clearTimeout(timeoutId); // Clear the timeout
-    console.error('Error:', error);
-    // Show the actual error message instead of generic network error
-    alert(error.message || 'An error occurred while processing your request. The request may have been processed - please refresh the page to check.');   .btn-hover:hover {
+    .btn-hover:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     }
+    
+    /* Dark mode button hover */
+    .dark .btn-hover:hover {
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
 </style>
 
-<div class="min-h-screen bg-gradient-to-br from-gray-50 via-green-50 to-blue-50">
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-green-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
   <!-- Enhanced Header Section -->
-  <div class="bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-xl">
+  <div class="bg-gradient-to-r from-green-500 to-emerald-600 dark:from-green-600 dark:to-emerald-700 text-white shadow-xl">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div class="flex items-center space-x-4">
@@ -57,12 +66,12 @@
   <!-- Display Flash Messages -->
   @if(session('error'))
     <div class="max-w-6xl mx-auto px-4 sm:px-6 mb-6">
-      <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm">
+      <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 dark:border-red-400 p-4 rounded-lg shadow-sm">
         <div class="flex items-center">
-          <svg class="w-5 h-5 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 text-red-500 dark:text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
-          <p class="text-red-700 font-medium">{{ session('error') }}</p>
+          <p class="text-red-700 dark:text-red-300 font-medium">{{ session('error') }}</p>
         </div>
       </div>
     </div>
@@ -70,12 +79,12 @@
 
   @if(session('success'))
     <div class="max-w-6xl mx-auto px-4 sm:px-6 mb-6">
-      <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg shadow-sm">
+      <div class="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 dark:border-green-400 p-4 rounded-lg shadow-sm">
         <div class="flex items-center">
-          <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 text-green-500 dark:text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
           </svg>
-          <p class="text-green-700 font-medium">{{ session('success') }}</p>
+          <p class="text-green-700 dark:text-green-300 font-medium">{{ session('success') }}</p>
         </div>
       </div>
     </div>
@@ -84,22 +93,22 @@
   <!-- Main Content -->
   <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
     <!-- Status Card -->
-    <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
       <!-- Status Header -->
       <div class="status-{{ strtolower($report->status) }} px-4 sm:px-6 py-4">
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div class="flex items-center space-x-3">
             <div class="w-3 h-3 rounded-full bg-current opacity-70"></div>
             <div>
-              <h2 class="text-lg sm:text-xl font-bold text-gray-800 capitalize">{{ $report->status }}</h2>
-              <p class="text-sm text-gray-600 mt-1">Current status of your waste collection request</p>
+              <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-white capitalize">{{ $report->status }}</h2>
+              <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">Current status of your waste collection request</p>
             </div>
           </div>
-          <div class="flex items-center space-x-2 bg-white/80 px-3 py-1 rounded-full shadow-sm">
-            <svg class="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="flex items-center space-x-2 bg-white/80 dark:bg-gray-800/80 px-3 py-1 rounded-full shadow-sm">
+            <svg class="w-3 h-3 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <span class="text-sm font-medium text-gray-700">
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
               {{ optional($report->created_at)->format('M d, Y') }}
             </span>
           </div>
@@ -107,7 +116,7 @@
       </div>
 
       <!-- Progress Timeline -->
-      <div class="px-6 sm:px-8 py-8 bg-gradient-to-r from-gray-50 to-white">
+      <div class="px-6 sm:px-8 py-8 bg-gradient-to-r from-gray-50 to-white dark:from-gray-700 dark:to-gray-800">
         @php
           $statuses = ['pending', 'assigned', 'enroute', 'collected', 'closed'];
           $current = array_search(strtolower($report->status), $statuses);
@@ -189,15 +198,15 @@
     </div>
 
     <!-- Report Information Card -->
-    <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-      <div class="bg-gradient-to-r from-blue-50 to-green-50 px-4 sm:px-6 py-4 border-b border-gray-100">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <div class="bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/30 dark:to-green-900/30 px-4 sm:px-6 py-4 border-b border-gray-100 dark:border-gray-700">
         <div class="flex items-center space-x-3">
-          <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-green-500 rounded-xl flex items-center justify-center shadow-lg">
+          <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-green-500 dark:from-blue-600 dark:to-green-600 rounded-xl flex items-center justify-center shadow-lg">
             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
           </div>
-          <h3 class="text-lg sm:text-xl font-bold text-gray-800">Report Information</h3>
+          <h3 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-white">Report Information</h3>
         </div>
       </div>
       
@@ -205,42 +214,42 @@
         <div class="grid lg:grid-cols-2 gap-6">
           <div class="space-y-4">
             <!-- Waste Type -->
-            <div class="flex items-start space-x-3 p-3 bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl border border-gray-100">
-              <div class="w-10 h-10 bg-gradient-to-r from-green-400 to-green-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+            <div class="flex items-start space-x-3 p-3 bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-700 dark:to-blue-900/30 rounded-xl border border-gray-100 dark:border-gray-600">
+              <div class="w-10 h-10 bg-gradient-to-r from-green-400 to-green-600 dark:from-green-500 dark:to-green-700 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                 </svg>
               </div>
               <div class="flex-1">
-                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Waste Type</p>
-                <p class="text-base font-bold text-gray-800 mt-1">{{ $report->waste_type ?? 'Not specified' }}</p>
+                <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Waste Type</p>
+                <p class="text-base font-bold text-gray-800 dark:text-white mt-1">{{ $report->waste_type ?? 'Not specified' }}</p>
               </div>
             </div>
 
             <!-- Location -->
-            <div class="flex items-start space-x-3 p-3 bg-gradient-to-r from-gray-50 to-green-50 rounded-xl border border-gray-100">
-              <div class="w-10 h-10 bg-gradient-to-r from-blue-400 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+            <div class="flex items-start space-x-3 p-3 bg-gradient-to-r from-gray-50 to-green-50 dark:from-gray-700 dark:to-green-900/30 rounded-xl border border-gray-100 dark:border-gray-600">
+              <div class="w-10 h-10 bg-gradient-to-r from-blue-400 to-blue-600 dark:from-blue-500 dark:to-blue-700 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
               </div>
               <div class="flex-1">
-                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Location</p>
-                <p class="text-base font-bold text-gray-800 mt-1 break-words">{{ $report->location ?? 'Location not specified' }}</p>
+                <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Location</p>
+                <p class="text-base font-bold text-gray-800 dark:text-white mt-1 break-words">{{ $report->location ?? 'Location not specified' }}</p>
               </div>
             </div>
 
             <!-- Submitted Time -->
-            <div class="flex items-start space-x-3 p-3 bg-gradient-to-r from-gray-50 to-purple-50 rounded-xl border border-gray-100">
-              <div class="w-10 h-10 bg-gradient-to-r from-purple-400 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+            <div class="flex items-start space-x-3 p-3 bg-gradient-to-r from-gray-50 to-purple-50 dark:from-gray-700 dark:to-purple-900/30 rounded-xl border border-gray-100 dark:border-gray-600">
+              <div class="w-10 h-10 bg-gradient-to-r from-purple-400 to-purple-600 dark:from-purple-500 dark:to-purple-700 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
               </div>
               <div class="flex-1">
-                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Submitted</p>
-                <p class="text-base font-bold text-gray-800 mt-1">{{ optional($report->created_at)->format('M d, Y \a\t h:i A') }}</p>
+                <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Submitted</p>
+                <p class="text-base font-bold text-gray-800 dark:text-white mt-1">{{ optional($report->created_at)->format('M d, Y \a\t h:i A') }}</p>
               </div>
             </div>
           </div>
@@ -248,36 +257,36 @@
           <div class="space-y-4">
             @if($report->additional_details)
             <!-- Additional Details -->
-            <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-4 border border-yellow-100 shadow-sm">
+            <div class="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-xl p-4 border border-yellow-100 dark:border-yellow-700/30 shadow-sm">
               <div class="flex items-center space-x-3 mb-3">
-                <div class="w-6 h-6 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center">
+                <div class="w-6 h-6 bg-gradient-to-r from-yellow-400 to-orange-500 dark:from-yellow-500 dark:to-orange-600 rounded-lg flex items-center justify-center">
                   <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                   </svg>
                 </div>
-                <p class="text-xs font-bold text-gray-700 uppercase tracking-wide">Additional Details</p>
+                <p class="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Additional Details</p>
               </div>
-              <div class="bg-white/70 rounded-lg p-3 border border-yellow-200">
-                <p class="text-gray-800 text-sm leading-relaxed">{{ $report->additional_details }}</p>
+              <div class="bg-white/70 dark:bg-gray-800/70 rounded-lg p-3 border border-yellow-200 dark:border-yellow-700/30">
+                <p class="text-gray-800 dark:text-gray-200 text-sm leading-relaxed">{{ $report->additional_details }}</p>
               </div>
             </div>
             @endif
 
             @if($report->image_path)
             <!-- Uploaded Image -->
-            <div class="bg-gradient-to-br from-green-50 to-teal-50 rounded-xl p-4 border border-green-100 shadow-sm">
+            <div class="bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 rounded-xl p-4 border border-green-100 dark:border-green-700/30 shadow-sm">
               <div class="flex items-center space-x-3 mb-3">
-                <div class="w-6 h-6 bg-gradient-to-r from-green-400 to-teal-500 rounded-lg flex items-center justify-center">
+                <div class="w-6 h-6 bg-gradient-to-r from-green-400 to-teal-500 dark:from-green-500 dark:to-teal-600 rounded-lg flex items-center justify-center">
                   <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                   </svg>
                 </div>
-                <p class="text-xs font-bold text-gray-700 uppercase tracking-wide">Uploaded Image</p>
+                <p class="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Uploaded Image</p>
               </div>
-              <div class="relative overflow-hidden rounded-xl border-2 border-white shadow-lg">
+              <div class="relative overflow-hidden rounded-xl border-2 border-white dark:border-gray-600 shadow-lg">
                 <img src="{{ asset('storage/' . $report->image_path) }}" 
                      alt="Report image" 
-                     class="w-full h-auto max-h-64 object-contain bg-gray-50">
+                     class="w-full h-auto max-h-64 object-contain bg-gray-50 dark:bg-gray-700">
               </div>
             </div>
             @endif
@@ -287,23 +296,23 @@
     </div>
 
     <!-- Collector Information -->
-    <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-      <div class="bg-gradient-to-r from-indigo-50 to-blue-50 px-4 sm:px-6 py-4 border-b border-gray-100">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <div class="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30 px-4 sm:px-6 py-4 border-b border-gray-100 dark:border-gray-700">
         <div class="flex items-center space-x-3">
-          <div class="w-8 h-8 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
+          <div class="w-8 h-8 bg-gradient-to-r from-indigo-500 to-blue-500 dark:from-indigo-600 dark:to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
             </svg>
           </div>
-          <h3 class="text-lg sm:text-xl font-bold text-gray-800">Assigned Collector</h3>
+          <h3 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-white">Assigned Collector</h3>
         </div>
       </div>
       
       <div class="p-4 sm:p-6">
         @if($report->collector)
-          <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
+          <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-100 dark:border-blue-700/30">
             <div class="relative">
-              <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl overflow-hidden shadow-xl border-3 border-white">
+              <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl overflow-hidden shadow-xl border-3 border-white dark:border-gray-600">
                 @if($report->collector->profile_image)
                   <img src="{{ asset('storage/' . $report->collector->profile_image) }}" 
                        alt="{{ $report->collector->name }}" 
@@ -322,23 +331,23 @@
             </div>
             
             <div class="flex-1 text-center sm:text-left">
-              <h4 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">{{ $report->collector->name }}</h4>
+              <h4 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-white mb-2">{{ $report->collector->name }}</h4>
               <div class="space-y-2">
                 <div class="flex items-center justify-center sm:justify-start space-x-2">
-                  <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                   </svg>
-                  <p class="text-sm font-medium text-gray-700">
+                  <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
                     {{ $report->collector->contact ?? 'Contact not available' }}
                   </p>
                 </div>
                 
                 @if($report->assigned_at)
                 <div class="flex items-center justify-center sm:justify-start space-x-2">
-                  <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 text-green-500 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4m0 0V7a1 1 0 011 1v8a1 1 0 01-1 1H9a1 1 0 01-1-1V8a1 1 0 011-1h4v0z"/>
                   </svg>
-                  <p class="text-xs text-gray-600">
+                  <p class="text-xs text-gray-600 dark:text-gray-400">
                     Assigned on {{ $report->assigned_at->format('M d, Y \a\t H:i') }}
                   </p>
                 </div>
@@ -346,24 +355,24 @@
               </div>
               
               <!-- Collector Status Badge -->
-              <div class="mt-3 inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold shadow-sm">
-                <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+              <div class="mt-3 inline-flex items-center px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-xs font-semibold shadow-sm">
+                <div class="w-2 h-2 bg-green-500 dark:bg-green-400 rounded-full mr-2"></div>
                 Active Collector
               </div>
             </div>
           </div>
         @else
           <div class="text-center py-8">
-            <div class="w-16 h-16 sm:w-18 sm:h-18 bg-gradient-to-r from-gray-200 to-gray-300 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-lg">
-              <svg class="w-8 h-8 sm:w-9 sm:h-9 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-16 h-16 sm:w-18 sm:h-18 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-600 dark:to-gray-700 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-lg">
+              <svg class="w-8 h-8 sm:w-9 sm:h-9 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
               </svg>
             </div>
-            <h4 class="text-lg sm:text-xl font-bold text-gray-800 mb-2">No collector assigned yet</h4>
-            <p class="text-gray-600 mb-3 text-sm">Your report is being processed and will be assigned to a collector soon.</p>
+            <h4 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-white mb-2">No collector assigned yet</h4>
+            <p class="text-gray-600 dark:text-gray-400 mb-3 text-sm">Your report is being processed and will be assigned to a collector soon.</p>
             
-            <div class="inline-flex items-center px-4 py-2 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold shadow-sm">
-              <div class="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
+            <div class="inline-flex items-center px-4 py-2 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 rounded-full text-xs font-semibold shadow-sm">
+              <div class="w-2 h-2 bg-yellow-500 dark:bg-yellow-400 rounded-full mr-2"></div>
               Awaiting Assignment
             </div>
           </div>
@@ -379,16 +388,16 @@
     @endphp
 
     @if($lat && $lng)
-    <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-      <div class="bg-gradient-to-r from-teal-50 to-green-50 px-4 sm:px-6 py-4 border-b border-gray-100">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <div class="bg-gradient-to-r from-teal-50 to-green-50 dark:from-teal-900/30 dark:to-green-900/30 px-4 sm:px-6 py-4 border-b border-gray-100 dark:border-gray-700">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-3">
-            <div class="w-8 h-8 bg-gradient-to-r from-teal-500 to-green-500 rounded-xl flex items-center justify-center shadow-lg">
+            <div class="w-8 h-8 bg-gradient-to-r from-teal-500 to-green-500 dark:from-teal-600 dark:to-green-600 rounded-xl flex items-center justify-center shadow-lg">
               <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
               </svg>
             </div>
-            <h3 class="text-lg sm:text-xl font-bold text-gray-800">Location Map</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-white">Location Map</h3>
           </div>
           <div class="hidden sm:flex items-center space-x-2 text-xs text-gray-600">
             <div class="w-3 h-3 bg-green-500 rounded-full"></div>
@@ -458,7 +467,7 @@
     <div class="{{ $gridClasses }}">
       <!-- Download PDF Button -->
       <a href="{{ route('resident.reports.pdf', $report->id) }}" 
-         class="btn-hover bg-gradient-to-r from-green-500 to-green-600 text-white py-4 px-6 rounded-2xl font-bold text-center shadow-xl flex items-center justify-center space-x-3">
+         class="btn-hover bg-gradient-to-r from-green-500 to-green-600 dark:from-green-600 dark:to-green-700 text-white py-4 px-6 rounded-2xl font-bold text-center shadow-xl flex items-center justify-center space-x-3">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
         </svg>
@@ -468,23 +477,23 @@
       <!-- Report Full Bin Button -->
       @if ($report->canBeMarkedUrgent())
         <button onclick="markUrgent({{ $report->id }})"
-                class="btn-hover bg-gradient-to-r from-red-500 to-red-600 text-white py-4 px-6 rounded-2xl font-bold text-center shadow-xl flex items-center justify-center space-x-3">
+                class="btn-hover bg-gradient-to-r from-red-500 to-red-600 dark:from-red-600 dark:to-red-700 text-white py-4 px-6 rounded-2xl font-bold text-center shadow-xl flex items-center justify-center space-x-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
           </svg>
           <span>Report Full Bin</span>
         </button>
       @elseif ($report->is_urgent)
-        <div class="bg-gradient-to-r from-red-100 to-red-200 rounded-2xl p-6 text-center shadow-lg border border-red-300">
-          <div class="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-red-400 to-red-500 rounded-2xl mb-4 shadow-lg">
+        <div class="bg-gradient-to-r from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30 rounded-2xl p-6 text-center shadow-lg border border-red-300 dark:border-red-700/30">
+          <div class="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-red-400 to-red-500 dark:from-red-500 dark:to-red-600 rounded-2xl mb-4 shadow-lg">
             <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
             </svg>
           </div>
-          <h3 class="text-lg sm:text-xl font-bold text-red-800 mb-2">Marked as Urgent</h3>
-          <p class="text-sm text-red-700">Admin has been notified</p>
+          <h3 class="text-lg sm:text-xl font-bold text-red-800 dark:text-red-300 mb-2">Marked as Urgent</h3>
+          <p class="text-sm text-red-700 dark:text-red-400">Admin has been notified</p>
           @if($report->urgent_message)
-            <p class="text-xs text-red-600 mt-2 italic">"{{ $report->urgent_message }}"</p>
+            <p class="text-xs text-red-600 dark:text-red-400 mt-2 italic">"{{ $report->urgent_message }}"</p>
           @endif
         </div>
       @endif
@@ -492,7 +501,7 @@
       <!-- Feedback Button - Show for completed/closed reports -->
       @if(in_array(strtolower($report->status), ['collected', 'closed']))
         <a href="{{ route('feedback.report.create', $report->id) }}" 
-           class="btn-hover bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 px-6 rounded-2xl font-bold text-center shadow-xl flex items-center justify-center space-x-3">
+           class="btn-hover bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white py-4 px-6 rounded-2xl font-bold text-center shadow-xl flex items-center justify-center space-x-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
           </svg>
@@ -508,7 +517,7 @@
               class="w-full">
           @csrf
           <button type="submit" 
-                  class="btn-hover w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-4 px-6 rounded-2xl font-bold shadow-xl flex items-center justify-center space-x-3">
+                  class="btn-hover w-full bg-gradient-to-r from-red-500 to-red-600 dark:from-red-600 dark:to-red-700 text-white py-4 px-6 rounded-2xl font-bold shadow-xl flex items-center justify-center space-x-3">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
@@ -518,23 +527,23 @@
       @else
         @php
           $infoCardClasses = in_array(strtolower($report->status), ['collected', 'closed'])
-            ? 'bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl p-6 text-center shadow-lg border border-gray-200 lg:col-span-1'
-            : 'bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl p-6 text-center shadow-lg border border-gray-200';
+            ? 'bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-2xl p-6 text-center shadow-lg border border-gray-200 dark:border-gray-600 lg:col-span-1'
+            : 'bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-2xl p-6 text-center shadow-lg border border-gray-200 dark:border-gray-600';
         @endphp
         <div class="{{ $infoCardClasses }}">
-          <div class="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-gray-300 to-gray-400 rounded-2xl mb-4 shadow-lg">
-            <svg class="w-6 h-6 sm:w-8 sm:h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-gray-300 to-gray-400 dark:from-gray-600 dark:to-gray-700 rounded-2xl mb-4 shadow-lg">
+            <svg class="w-6 h-6 sm:w-8 sm:h-8 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
           </div>
-          <h4 class="font-bold text-gray-700 mb-2 text-sm sm:text-base">
+          <h4 class="font-bold text-gray-700 dark:text-gray-300 mb-2 text-sm sm:text-base">
             @if(in_array(strtolower($report->status), ['collected', 'closed']))
               Report Completed
             @else
               Report Processing
             @endif
           </h4>
-          <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
+          <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
             @if(in_array(strtolower($report->status), ['collected', 'closed']))
               Your waste has been successfully collected. You can provide feedback about the service.
             @else
@@ -546,66 +555,66 @@
     </div>
 
     <!-- Activity Timeline -->
-    <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-      <div class="bg-gradient-to-r from-purple-50 to-pink-50 px-4 sm:px-6 py-4 border-b border-gray-100">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <div class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 px-4 sm:px-6 py-4 border-b border-gray-100 dark:border-gray-700">
         <div class="flex items-center space-x-3">
-          <div class="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
+          <div class="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 dark:from-purple-600 dark:to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
           </div>
-          <h3 class="text-lg sm:text-xl font-bold text-gray-800">Activity Timeline</h3>
+          <h3 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-white">Activity Timeline</h3>
         </div>
       </div>
       
       <div class="p-4 sm:p-6">
         <div class="relative">
           <!-- Timeline line -->
-          <div class="absolute left-5 top-6 bottom-6 w-0.5 bg-gradient-to-b from-green-400 via-blue-400 to-purple-400"></div>
+          <div class="absolute left-5 top-6 bottom-6 w-0.5 bg-gradient-to-b from-green-400 via-blue-400 to-purple-400 dark:from-green-500 dark:via-blue-500 dark:to-purple-500"></div>
           
           <div class="space-y-6">
             <!-- Report Created -->
             <div class="relative flex items-start space-x-4">
-              <div class="w-10 h-10 bg-gradient-to-r from-green-400 to-green-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+              <div class="w-10 h-10 bg-gradient-to-r from-green-400 to-green-600 dark:from-green-500 dark:to-green-700 rounded-xl flex items-center justify-center text-white shadow-lg">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
               </div>
-              <div class="flex-1 bg-gradient-to-r from-green-50 to-emerald-50 p-3 sm:p-4 rounded-xl border border-green-100">
+              <div class="flex-1 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-3 sm:p-4 rounded-xl border border-green-100 dark:border-green-700/30">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <h4 class="text-base font-bold text-gray-800">Report Created</h4>
-                  <span class="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+                  <h4 class="text-base font-bold text-gray-800 dark:text-white">Report Created</h4>
+                  <span class="inline-flex items-center px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs font-semibold rounded-full">
                     <svg class="w-2 h-2 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
                     Completed
                   </span>
                 </div>
-                <p class="text-gray-600 text-sm mt-2">{{ $report->created_at->format('l, M d, Y \a\t h:i A') }}</p>
-                <p class="text-gray-500 text-xs mt-1">Your waste collection request was successfully submitted</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mt-2">{{ $report->created_at->format('l, M d, Y \a\t h:i A') }}</p>
+                <p class="text-gray-500 dark:text-gray-500 text-xs mt-1">Your waste collection request was successfully submitted</p>
               </div>
             </div>
 
             @if($report->assigned_at)
             <!-- Collector Assigned -->
             <div class="relative flex items-start space-x-4">
-              <div class="w-10 h-10 bg-gradient-to-r from-blue-400 to-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+              <div class="w-10 h-10 bg-gradient-to-r from-blue-400 to-blue-600 dark:from-blue-500 dark:to-blue-700 rounded-xl flex items-center justify-center text-white shadow-lg">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                 </svg>
               </div>
-              <div class="flex-1 bg-gradient-to-r from-blue-50 to-indigo-50 p-3 sm:p-4 rounded-xl border border-blue-100">
+              <div class="flex-1 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-3 sm:p-4 rounded-xl border border-blue-100 dark:border-blue-700/30">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <h4 class="text-base font-bold text-gray-800">Collector Assigned</h4>
-                  <span class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
+                  <h4 class="text-base font-bold text-gray-800 dark:text-white">Collector Assigned</h4>
+                  <span class="inline-flex items-center px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs font-semibold rounded-full">
                     <svg class="w-2 h-2 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
                     Completed
                   </span>
                 </div>
-                <p class="text-gray-600 text-sm mt-2">{{ $report->assigned_at->format('l, M d, Y \a\t H:i') }}</p>
-                <p class="text-gray-500 text-xs mt-1">A collector has been assigned to handle your request</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mt-2">{{ $report->assigned_at->format('l, M d, Y \a\t H:i') }}</p>
+                <p class="text-gray-500 dark:text-gray-500 text-xs mt-1">A collector has been assigned to handle your request</p>
               </div>
             </div>
             @endif
@@ -613,23 +622,23 @@
             @if($report->collected_at)
             <!-- Waste Collected -->
             <div class="relative flex items-start space-x-4">
-              <div class="w-10 h-10 bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+              <div class="w-10 h-10 bg-gradient-to-r from-emerald-400 to-emerald-600 dark:from-emerald-500 dark:to-emerald-700 rounded-xl flex items-center justify-center text-white shadow-lg">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
               </div>
-              <div class="flex-1 bg-gradient-to-r from-emerald-50 to-green-50 p-3 sm:p-4 rounded-xl border border-emerald-100">
+              <div class="flex-1 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 p-3 sm:p-4 rounded-xl border border-emerald-100 dark:border-emerald-700/30">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <h4 class="text-base font-bold text-gray-800">Waste Collected</h4>
-                  <span class="inline-flex items-center px-2 py-1 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-full">
+                  <h4 class="text-base font-bold text-gray-800 dark:text-white">Waste Collected</h4>
+                  <span class="inline-flex items-center px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 text-xs font-semibold rounded-full">
                     <svg class="w-2 h-2 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
                     Completed
                   </span>
                 </div>
-                <p class="text-gray-600 text-sm mt-2">{{ $report->collected_at->format('l, M d, Y \a\t H:i') }}</p>
-                <p class="text-gray-500 text-xs mt-1">Your waste has been successfully collected</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mt-2">{{ $report->collected_at->format('l, M d, Y \a\t H:i') }}</p>
+                <p class="text-gray-500 dark:text-gray-500 text-xs mt-1">Your waste has been successfully collected</p>
               </div>
             </div>
             @endif
@@ -637,23 +646,23 @@
             @if($report->closed_at)
             <!-- Report Closed -->
             <div class="relative flex items-start space-x-4">
-              <div class="w-10 h-10 bg-gradient-to-r from-purple-400 to-purple-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+              <div class="w-10 h-10 bg-gradient-to-r from-purple-400 to-purple-600 dark:from-purple-500 dark:to-purple-700 rounded-xl flex items-center justify-center text-white shadow-lg">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
               </div>
-              <div class="flex-1 bg-gradient-to-r from-purple-50 to-indigo-50 p-3 sm:p-4 rounded-xl border border-purple-100">
+              <div class="flex-1 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 p-3 sm:p-4 rounded-xl border border-purple-100 dark:border-purple-700/30">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <h4 class="text-base font-bold text-gray-800">Report Closed</h4>
-                  <span class="inline-flex items-center px-2 py-1 bg-purple-100 text-purple-800 text-xs font-semibold rounded-full">
+                  <h4 class="text-base font-bold text-gray-800 dark:text-white">Report Closed</h4>
+                  <span class="inline-flex items-center px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 text-xs font-semibold rounded-full">
                     <svg class="w-2 h-2 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
                     Completed
                   </span>
                 </div>
-                <p class="text-gray-600 text-sm mt-2">{{ $report->closed_at->format('l, M d, Y \a\t H:i') }}</p>
-                <p class="text-gray-500 text-xs mt-1">The waste collection process has been completed</p>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mt-2">{{ $report->closed_at->format('l, M d, Y \a\t H:i') }}</p>
+                <p class="text-gray-500 dark:text-gray-500 text-xs mt-1">The waste collection process has been completed</p>
               </div>
             </div>
             @endif

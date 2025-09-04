@@ -27,6 +27,8 @@ class ResidentProfileController extends Controller
                 return $this->updatePhoto($request, $user);
             case 'password':
                 return $this->updatePassword($request, $user);
+            case 'theme':
+                return $this->updateTheme($request, $user);
             case 'info':
             default:
                 return $this->updateInfo($request, $user);
@@ -95,6 +97,18 @@ class ResidentProfileController extends Controller
         $user->save();
 
         return back()->with('success', 'Profile information updated successfully.');
+    }
+
+    private function updateTheme(Request $request, $user)
+    {
+        $request->validate([
+            'theme_preference' => 'required|in:light,dark,auto',
+        ]);
+
+        $user->theme_preference = $request->theme_preference;
+        $user->save();
+
+        return back()->with('success', 'Theme preference updated successfully.');
     }
 
     public function removeImage()

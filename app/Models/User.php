@@ -33,6 +33,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'location',
         'latitude',
         'longitude',
+        'theme_preference', // Add theme preference
     ];
 
     /**
