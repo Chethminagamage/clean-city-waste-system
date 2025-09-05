@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\Auth\LoginController as AdminLoginController;
 use App\Http\Controllers\Admin\BinReportController;
 use App\Http\Controllers\Admin\CollectorController;
 use App\Http\Controllers\Collector\CollectorDashboardController;
+use App\Http\Controllers\Collector\CollectorNotificationController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AlertController;
 use App\Http\Controllers\Admin\AnalyticsController;
@@ -133,8 +134,15 @@ Route::middleware('auth')->group(function () {
         ->whereUuid('notification'); 
     Route::get('/notifications/{notification}', [NotificationController::class, 'open'])
         ->name('notifications.open');
-    
-    // Theme Management Routes
+});
+
+// Theme Management Routes (accessible by both auth guards)
+Route::group(['middleware' => function ($request, $next) {
+    if (Auth::guard('web')->check() || Auth::guard('collector')->check()) {
+        return $next($request);
+    }
+    return redirect('/login');
+}], function () {
     Route::post('/theme/toggle', [\App\Http\Controllers\ThemeController::class, 'toggle'])
         ->name('theme.toggle');
     Route::post('/theme/set', [\App\Http\Controllers\ThemeController::class, 'setTheme'])
@@ -247,9 +255,19 @@ Route::prefix('collector')->name('collector.')->group(function () {
         Route::get('/reports', [CollectorDashboardController::class, 'allReports'])->name('reports.all');
         Route::get('/reports/completed', [CollectorDashboardController::class, 'completedReports'])->name('reports.completed');
         Route::get('/report/{id}/details', [CollectorDashboardController::class, 'reportDetails'])->name('report.details');
+        Route::get('/report/{id}', [CollectorDashboardController::class, 'showReportDetails'])->name('report.show');
         Route::post('/update-location', [CollectorDashboardController::class, 'updateLocation'])->name('updateLocation');
         Route::post('/report/{id}/confirm', [CollectorDashboardController::class, 'confirmAssignment'])->name('report.confirm');
         Route::post('/report/{id}/start', [CollectorDashboardController::class, 'startWork'])->name('report.start');
+        
+        // Notification routes
+        Route::get('/notifications', [CollectorNotificationController::class, 'index'])->name('notifications.index');
+        Route::get('/notifications/recent', [CollectorNotificationController::class, 'getRecent'])->name('notifications.recent');
+        Route::get('/notifications/unread-count', [CollectorNotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
+        Route::post('/notifications/{id}/mark-read', [CollectorNotificationController::class, 'markAsRead'])->name('notifications.mark-read');
+        Route::post('/notifications/mark-all-read', [CollectorNotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+        Route::get('/notifications/{notification}', [CollectorNotificationController::class, 'show'])->name('notifications.show');
+        Route::delete('/notifications/{id}', [CollectorNotificationController::class, 'destroy'])->name('notifications.destroy');
     });
 });
 

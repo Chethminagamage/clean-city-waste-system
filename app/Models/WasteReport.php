@@ -54,6 +54,7 @@ class WasteReport extends Model
         'status'     => 'string',
         'is_urgent'  => 'boolean',
         'urgent_reported_at' => 'datetime',
+        'assigned_at' => 'datetime',
     ];
 
     /**

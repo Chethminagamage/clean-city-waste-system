@@ -46,12 +46,13 @@ class RegisteredUserController extends Controller
         // ✅ Dispatch verification email
         event(new Registered($user));
 
+        $message = 'We sent a verification link to your email. Please verify before logging in.';
 
         // ⛔ Do NOT log in automatically
         // Auth::login($user); // commented out to require email verification first
 
         // ✅ Redirect to verification notice
         return redirect()->route('verification.notice')
-                         ->with('status', 'We sent a verification link to your email. Please verify before logging in.');
+                         ->with('status', $message);
     }
 }

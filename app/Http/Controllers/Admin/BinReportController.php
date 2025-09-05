@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\WasteReport;
 use Illuminate\Support\Facades\DB;
 use App\Notifications\ReportStatusUpdated;
+use App\Notifications\ReportAssignedToCollector;
 
 class BinReportController extends Controller
 {
@@ -72,12 +73,17 @@ class BinReportController extends Controller
         // Assign collector with a consistent lowercase status
         $report->collector_id = $nearest['collector']->id;
         $report->status = WasteReport::ST_ASSIGNED; // 'assigned'
+        $report->assigned_at = now();
         $report->save();
 
         // Notify resident (optional)
         if ($report->resident) {
             $report->resident->notify(new ReportStatusUpdated($report, WasteReport::ST_ASSIGNED));
         }
+
+        // Notify the assigned collector
+        $assignedCollector = $nearest['collector'];
+        $assignedCollector->notify(new ReportAssignedToCollector($report));
 
         return back()->with('success', 'Nearest collector assigned successfully!');
     }
@@ -129,11 +135,18 @@ class BinReportController extends Controller
 
         $report->collector_id = $validated['collector_id'];
         $report->status = WasteReport::ST_ASSIGNED; // 'assigned'
+        $report->assigned_at = now();
         $report->save();
 
         // Notify resident (optional)
         if ($report->resident) {
             $report->resident->notify(new ReportStatusUpdated($report, WasteReport::ST_ASSIGNED));
+        }
+
+        // Notify the assigned collector
+        $assignedCollector = User::find($validated['collector_id']);
+        if ($assignedCollector) {
+            $assignedCollector->notify(new ReportAssignedToCollector($report));
         }
 
         return redirect()->back()->with('success', 'Collector assigned successfully.');

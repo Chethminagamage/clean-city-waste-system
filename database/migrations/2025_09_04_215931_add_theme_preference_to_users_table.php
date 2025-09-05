@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->enum('theme_preference', ['light', 'dark', 'auto'])->default('light')->after('email_verified_at');
+            $table->enum('theme_preference', ['light', 'dark', 'auto', 'system'])->default('light')->after('email_verified_at');
         });
     }
 

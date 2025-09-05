@@ -15,7 +15,7 @@ class CollectorDashboardController extends Controller
 {
     public function index()
     {
-        $collector = Auth::user();
+        $collector = Auth::guard('collector')->user();
 
         $activeReports = WasteReport::with('resident')
             ->activeForCollector($collector->id)
@@ -50,7 +50,7 @@ class CollectorDashboardController extends Controller
             'longitude' => ['required','numeric'],
         ]);
 
-        $user = Auth::user();
+        $user = Auth::guard('collector')->user();
         $user->latitude  = (float) $request->latitude;
         $user->longitude = (float) $request->longitude;
         $user->location  = $request->input('location'); // nullable
@@ -66,7 +66,7 @@ class CollectorDashboardController extends Controller
     {
         $report = WasteReport::findOrFail($id);
 
-        if ($report->collector_id !== Auth::id()) {
+        if ($report->collector_id !== Auth::guard('collector')->id()) {
             return back()->with('error', 'Unauthorized');
         }
 
@@ -91,7 +91,7 @@ class CollectorDashboardController extends Controller
     {
         $report = WasteReport::findOrFail($id);
 
-        if ($report->collector_id !== Auth::id()) {
+        if ($report->collector_id !== Auth::guard('collector')->id()) {
             return back()->with('error', 'Unauthorized');
         }
 
@@ -114,30 +114,79 @@ class CollectorDashboardController extends Controller
      */
     public function reportDetails($id)
     {
+        try {
+            $collectorId = Auth::guard('collector')->id();
+            
+            $report = WasteReport::with('resident')
+                ->where('collector_id', $collectorId)
+                ->where('id', $id)
+                ->first();
+
+            if (!$report) {
+                return response()->json([
+                    'error' => 'Report not found or you are not authorized to view this report'
+                ], 404);
+            }
+
+            return response()->json([
+                'id' => $report->id,
+                'reference_code' => $report->reference_code ?? '#' . $report->id,
+                'waste_type' => $report->waste_type,
+                'location' => $report->location,
+                'latitude' => $report->latitude,
+                'longitude' => $report->longitude,
+                'status' => $report->status,
+                'priority' => $report->priority ?? 'Normal',
+                'description' => $report->additional_details, // Fixed field name
+                'created_at' => $report->created_at->format('M d, Y h:i A'),
+                'updated_at' => $report->updated_at->format('M d, Y h:i A'),
+                'resident' => $report->resident ? [
+                    'name' => $report->resident->name,
+                    'email' => $report->resident->email,
+                    'contact' => $report->resident->contact ?? 'Not provided'
+                ] : null,
+                'images' => $report->images ?? [], // If you have image attachments
+                'additional_notes' => $report->additional_notes ?? null
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Report details error: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Unable to load report details. Please try again.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Show report details page (for direct access from notifications)
+     */
+    public function show($id)
+    {
+        $collector = Auth::user();
+        
+        // Find the report, ensuring it belongs to this collector
         $report = WasteReport::with('resident')
-            ->where('collector_id', Auth::id())
+            ->where('id', $id)
+            ->where('collector_id', $collector->id)
+            ->first();
+
+        if (!$report) {
+            return redirect()->route('collector.dashboard')
+                ->with('error', 'Report not found or you are not assigned to this report.');
+        }
+
+        return view('collector.report-details', compact('report'));
+    }
+
+    /**
+     * Show report details page (alternative method name)
+     */
+    public function showReportDetails($id)
+    {
+        $report = WasteReport::with('resident')
+            ->where('collector_id', Auth::guard('collector')->id())
             ->findOrFail($id);
 
-        return response()->json([
-            'id' => $report->id,
-            'reference_code' => $report->reference_code ?? '#' . $report->id,
-            'waste_type' => $report->waste_type,
-            'location' => $report->location,
-            'latitude' => $report->latitude,
-            'longitude' => $report->longitude,
-            'status' => $report->status,
-            'priority' => $report->priority ?? 'Normal',
-            'description' => $report->description,
-            'created_at' => $report->created_at->format('M d, Y h:i A'),
-            'updated_at' => $report->updated_at->format('M d, Y h:i A'),
-            'resident' => $report->resident ? [
-                'name' => $report->resident->name,
-                'email' => $report->resident->email,
-                'contact' => $report->resident->contact ?? 'Not provided'
-            ] : null,
-            'images' => $report->images ?? [], // If you have image attachments
-            'additional_notes' => $report->additional_notes ?? null
-        ]);
+        return view('collector.report-details', compact('report'));
     }
 
     /**
@@ -204,7 +253,7 @@ class CollectorDashboardController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . Auth::id()],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . Auth::guard('collector')->id()],
             'phone' => ['nullable', 'string', 'max:20'],
             'emergency_contact' => ['nullable', 'string', 'max:20'],
             'address' => ['nullable', 'string', 'max:500'],

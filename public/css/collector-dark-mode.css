@@ -1,0 +1,404 @@
+/* Collector Dark Mode Styles */
+
+/* General dark mode classes for collector theme */
+.dark {
+    color-scheme: dark;
+}
+
+/* Background colors */
+.dark .bg-white {
+    background-color: #1f2937 !important;
+}
+
+.dark .bg-gray-50 {
+    background-color: #111827 !important;
+}
+
+.dark .bg-gray-100 {
+    background-color: #374151 !important;
+}
+
+.dark .bg-gray-200 {
+    background-color: #4b5563 !important;
+}
+
+/* Text colors */
+.dark .text-gray-900 {
+    color: #f9fafb !important;
+}
+
+.dark .text-gray-800 {
+    color: #f3f4f6 !important;
+}
+
+.dark .text-gray-700 {
+    color: #d1d5db !important;
+}
+
+.dark .text-gray-600 {
+    color: #9ca3af !important;
+}
+
+.dark .text-gray-500 {
+    color: #6b7280 !important;
+}
+
+.dark .text-gray-400 {
+    color: #9ca3af !important;
+}
+
+/* Border colors */
+.dark .border-gray-100 {
+    border-color: #374151 !important;
+}
+
+.dark .border-gray-200 {
+    border-color: #4b5563 !important;
+}
+
+.dark .border-gray-300 {
+    border-color: #6b7280 !important;
+}
+
+/* Orange theme adjustments for dark mode */
+.dark .bg-orange-50 {
+    background-color: #ea580c20 !important;
+}
+
+.dark .bg-orange-100 {
+    background-color: #ea580c30 !important;
+}
+
+.dark .hover\:bg-orange-50:hover {
+    background-color: #ea580c30 !important;
+}
+
+.dark .hover\:bg-orange-100:hover {
+    background-color: #ea580c40 !important;
+}
+
+.dark .text-orange-600 {
+    color: #fb923c !important;
+}
+
+.dark .text-orange-700 {
+    color: #f97316 !important;
+}
+
+.dark .hover\:text-orange-600:hover {
+    color: #fb923c !important;
+}
+
+.dark .hover\:text-orange-700:hover {
+    color: #f97316 !important;
+}
+
+/* Navigation */
+.dark nav {
+    background-color: #1f2937 !important;
+    border-bottom-color: #ea580c !important;
+}
+
+/* Cards and containers */
+.dark .bg-white {
+    background-color: #1f2937 !important;
+}
+
+.dark .shadow-lg {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15) !important;
+}
+
+.dark .shadow-xl {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Buttons */
+.dark .bg-orange-500 {
+    background-color: #ea580c !important;
+}
+
+.dark .bg-orange-600 {
+    background-color: #dc2626 !important;
+}
+
+.dark .hover\:bg-orange-600:hover {
+    background-color: #dc2626 !important;
+}
+
+.dark .hover\:bg-orange-700:hover {
+    background-color: #b91c1c !important;
+}
+
+/* Status indicators */
+.dark .bg-green-100 {
+    background-color: #065f4630 !important;
+}
+
+.dark .text-green-800 {
+    color: #34d399 !important;
+}
+
+.dark .bg-yellow-100 {
+    background-color: #d9730930 !important;
+}
+
+.dark .text-yellow-800 {
+    color: #fbbf24 !important;
+}
+
+.dark .bg-red-100 {
+    background-color: #dc262630 !important;
+}
+
+.dark .text-red-800 {
+    color: #f87171 !important;
+}
+
+.dark .bg-blue-100 {
+    background-color: #1d4ed830 !important;
+}
+
+.dark .text-blue-800 {
+    color: #60a5fa !important;
+}
+
+/* Forms */
+.dark input,
+.dark textarea,
+.dark select {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+    color: #f9fafb !important;
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+    border-color: #ea580c !important;
+    box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1) !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+    color: #9ca3af !important;
+}
+
+/* Dropdown menus */
+.dark .bg-white.rounded-xl,
+.dark .bg-white.rounded-lg {
+    background-color: #1f2937 !important;
+}
+
+/* Tables */
+.dark table {
+    background-color: #1f2937 !important;
+}
+
+.dark thead {
+    background-color: #374151 !important;
+}
+
+.dark tbody tr {
+    border-bottom-color: #374151 !important;
+}
+
+.dark tbody tr:hover {
+    background-color: #374151 !important;
+}
+
+/* Modals */
+.dark .modal-content {
+    background-color: #1f2937 !important;
+}
+
+/* Progress bars */
+.dark .bg-gray-200 {
+    background-color: #4b5563 !important;
+}
+
+/* Gradients */
+.dark .bg-gradient-to-br {
+    background-image: linear-gradient(to bottom right, #111827, #1f2937, #111827) !important;
+}
+
+/* Custom collector orange accents in dark mode */
+.dark .border-orange-500 {
+    border-color: #ea580c !important;
+}
+
+.dark .border-orange-200 {
+    border-color: #ea580c60 !important;
+}
+
+/* Notification badge */
+.dark .bg-red-500 {
+    background-color: #dc2626 !important;
+}
+
+/* Special handling for profile images and icons */
+.dark .bg-orange-100.rounded-full {
+    background-color: #ea580c30 !important;
+}
+
+/* Scrollbar for dark mode */
+.dark ::-webkit-scrollbar-track {
+    background: #374151 !important;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: #ea580c !important;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: #dc2626 !important;
+}
+
+/* Mobile menu dark mode */
+.dark .bg-orange-50 {
+    background-color: #1f2937 !important;
+}
+
+.dark .border-orange-200 {
+    border-color: #374151 !important;
+}
+
+/* Stats cards specific styling */
+.dark .stat-card {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+}
+
+/* Map controls dark mode adjustments */
+.dark .gmnoprint {
+    filter: invert(1) hue-rotate(180deg) !important;
+}
+
+/* Theme toggle button styles */
+#collector-theme-toggle,
+#mobile-collector-theme-toggle {
+    transition: all 0.2s ease;
+}
+
+#collector-theme-toggle:hover,
+#mobile-collector-theme-toggle:hover {
+    transform: scale(1.05);
+}
+
+/* Ensure text readability in all scenarios */
+.dark .text-primary {
+    color: #ea580c !important;
+}
+
+.dark .text-secondary {
+    color: #6b7280 !important;
+}
+
+.dark .text-muted {
+    color: #9ca3af !important;
+}
+
+/* Loading spinner dark mode */
+.dark .spinner {
+    border-color: #4b5563;
+    border-top-color: #ea580c;
+}
+
+/* Breadcrumb styling */
+.dark .breadcrumb {
+    color: #9ca3af !important;
+}
+
+.dark .breadcrumb a {
+    color: #ea580c !important;
+}
+
+/* Alert styling */
+.dark .alert-success {
+    background-color: #065f4630 !important;
+    border-color: #059669 !important;
+    color: #34d399 !important;
+}
+
+.dark .alert-warning {
+    background-color: #d9730930 !important;
+    border-color: #d97309 !important;
+    color: #fbbf24 !important;
+}
+
+.dark .alert-error {
+    background-color: #dc262630 !important;
+    border-color: #dc2626 !important;
+    color: #f87171 !important;
+}
+
+/* Card hover effects */
+.dark .card:hover {
+    background-color: #374151 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Button variants for dark mode */
+.dark .btn-primary {
+    background-color: #ea580c !important;
+    border-color: #ea580c !important;
+    color: #ffffff !important;
+}
+
+.dark .btn-primary:hover {
+    background-color: #dc2626 !important;
+    border-color: #dc2626 !important;
+}
+
+.dark .btn-secondary {
+    background-color: #6b7280 !important;
+    border-color: #6b7280 !important;
+    color: #ffffff !important;
+}
+
+.dark .btn-secondary:hover {
+    background-color: #4b5563 !important;
+    border-color: #4b5563 !important;
+}
+
+/* Notification specific styles */
+.dark .notification-dropdown {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+}
+
+.dark .notification-item {
+    border-bottom-color: #374151 !important;
+}
+
+.dark .notification-item:hover {
+    background-color: #374151 !important;
+}
+
+.dark .notification-unread {
+    background-color: #ea580c20 !important;
+    border-left-color: #ea580c !important;
+}
+
+/* Timeline and progress indicators */
+.dark .timeline-item {
+    border-color: #4b5563 !important;
+}
+
+.dark .timeline-marker {
+    background-color: #ea580c !important;
+}
+
+/* Data tables dark mode */
+.dark .datatable {
+    background-color: #1f2937 !important;
+}
+
+.dark .datatable thead th {
+    background-color: #374151 !important;
+    color: #f9fafb !important;
+}
+
+.dark .datatable tbody td {
+    border-top-color: #374151 !important;
+}
