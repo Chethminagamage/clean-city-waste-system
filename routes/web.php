@@ -109,18 +109,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/resident/feedback/{id}', [ResidentFeedbackController::class, 'show'])->name('resident.feedback.show');
     Route::post('/resident/feedback/mark-responses-read', [ResidentFeedbackController::class, 'markResponsesRead'])->name('resident.feedback.mark_responses_read');
     Route::post('/resident/feedback/{id}/rate-response', [ResidentFeedbackController::class, 'rateResponse'])->name('resident.feedback.rate_response');
+    
+    // Individual report view and PDF (moved inside auth middleware)
+    Route::get('/resident/reports/{report}', [ReportHistoryController::class,'show'])
+        ->name('resident.reports.show');
+    Route::get('/resident/reports/{report}/pdf', [ReportHistoryController::class, 'pdf'])
+        ->name('resident.reports.pdf');
+    Route::post('/resident/reports/{report}/urgent', [ResidentReportController::class, 'markUrgent'])
+        ->name('resident.reports.urgent');
 });
-
-Route::get('/resident/reports/{report}', [ReportHistoryController::class,'show'])
-    ->name('resident.reports.show');
-
-Route::get('/resident/reports/{report}/pdf', [ReportHistoryController::class, 'pdf'])
-    ->middleware('auth')        
-    ->name('resident.reports.pdf');
-
-Route::post('/resident/reports/{report}/urgent', [ResidentReportController::class, 'markUrgent'])
-    ->middleware('auth')
-    ->name('resident.reports.urgent');
 
 Route::middleware('auth')->group(function () {
     Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])

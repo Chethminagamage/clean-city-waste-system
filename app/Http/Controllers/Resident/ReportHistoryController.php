@@ -11,17 +11,37 @@ use App\Notifications\ReportStatusUpdated;
 
 class ReportHistoryController extends Controller
 {
+    /**
+     * Get authenticated user or handle authentication failure
+     */
+    private function getAuthenticatedUser(Request $request, bool $isAjax = false)
+    {
+        $user = $request->user();
+        
+        if (!$user) {
+            if ($isAjax) {
+                abort(401, 'Unauthorized - Please log in again');
+            } else {
+                abort(redirect()->route('login')->with('error', 'Please log in to access this page.'));
+            }
+        }
+        
+        return $user;
+    }
+
     public function index() { return view('resident.reports.index'); }
 
     public function show(Request $req, $id)
     {
+        $user = $this->getAuthenticatedUser($req);
+
         $report = WasteReport::with([
             'collector' => function ($q) {
                 // must include 'id' when selecting subset for relations
                 $q->select('id','name','contact','latitude','longitude','profile_image');
             },
         ])
-        ->where('resident_id', $req->user()->id)
+        ->where('resident_id', $user->id)
         ->findOrFail($id);
 
         return view('resident.reports.show', compact('report'));
@@ -30,7 +50,8 @@ class ReportHistoryController extends Controller
     // SMART FILTERS + SEARCH + Overdue badge derivation
     public function data(Request $req)
     {
-        $residentId = $req->user()->id;
+        $user = $this->getAuthenticatedUser($req, true);
+        $residentId = $user->id;
 
         $q      = trim($req->string('q')->toString());
         $status = $req->string('status')->toString();
@@ -73,7 +94,8 @@ class ReportHistoryController extends Controller
     // ACTIONS
     public function duplicate(Request $req, WasteReport $report)
     {
-        abort_unless($report->resident_id === $req->user()->id, 403);
+        $user = $this->getAuthenticatedUser($req, true);
+        abort_unless($report->resident_id === $user->id, 403);
 
         $copy = $report->replicate([
             'status','assigned_at','eta_at','collected_at','closed_at','qr_token',
@@ -90,8 +112,10 @@ class ReportHistoryController extends Controller
 
     public function cancel(Request $req, WasteReport $report)
     {
+        $user = $this->getAuthenticatedUser($req);
+        
         // Must own the report
-        if ($report->resident_id !== $req->user()->id) {
+        if ($report->resident_id !== $user->id) {
             abort(403);
         }
 
@@ -113,7 +137,8 @@ class ReportHistoryController extends Controller
     // EXPORT
     public function exportCsv(Request $req): StreamedResponse
     {
-        $residentId = $req->user()->id;
+        $user = $this->getAuthenticatedUser($req);
+        $residentId = $user->id;
         $rows = WasteReport::where('resident_id', $residentId)
             ->orderByDesc('created_at')
             ->get(['reference_code','created_at','location','waste_type','status']);
@@ -141,8 +166,10 @@ class ReportHistoryController extends Controller
 
     public function pdf(Request $req, WasteReport $report)
     {
+        $user = $this->getAuthenticatedUser($req);
+        
         // Ownership check
-        abort_if($report->resident_id !== $req->user()->id, 403);
+        abort_if($report->resident_id !== $user->id, 403);
 
         // Load relationships for comprehensive PDF
         $report->load(['collector:id,name,contact', 'resident:id,name,email', 'feedback']);

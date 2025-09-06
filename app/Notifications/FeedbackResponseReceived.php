@@ -4,7 +4,6 @@ namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use App\Models\Feedback;
 
@@ -29,24 +28,7 @@ class FeedbackResponseReceived extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
-    }
-
-    /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail(object $notifiable): MailMessage
-    {
-        return (new MailMessage)
-                    ->subject('Response to Your Feedback - Clean City')
-                    ->greeting('Hello ' . $notifiable->name . '!')
-                    ->line('We have responded to your recent feedback.')
-                    ->line('**Your Feedback:** ' . ($this->feedback->message ?: 'Rating: ' . $this->feedback->rating . ' stars'))
-                    ->line('**Our Response:** ' . $this->feedback->admin_response)
-                    ->action('View Full Response', url('/resident/feedback/' . $this->feedback->id))
-                    ->line('Thank you for helping us improve our waste management services!')
-                    ->line('Best regards,')
-                    ->line('Clean City Team');
+        return ['database'];
     }
 
     /**

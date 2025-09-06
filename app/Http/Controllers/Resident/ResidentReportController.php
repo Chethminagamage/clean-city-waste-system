@@ -73,6 +73,31 @@ class ResidentReportController extends Controller
             ]
         );
 
+        // Award bonus points for urgent reports
+        if ($request->has('is_urgent') && $request->is_urgent) {
+            $this->gamificationService->awardPoints(
+                $user,
+                'urgent_report',
+                null,
+                'Bonus points for reporting urgent waste issue',
+                ['report_id' => $report->id]
+            );
+        }
+
+        // Award bonus points for proper segregation (if waste_type is properly categorized)
+        if (in_array($request->waste_type, ['organic', 'recyclable', 'hazardous'])) {
+            $this->gamificationService->awardPoints(
+                $user,
+                'proper_segregation',
+                null,
+                'Bonus points for proper waste segregation',
+                [
+                    'report_id' => $report->id,
+                    'waste_type' => $request->waste_type
+                ]
+            );
+        }
+
         // Check if this is user's first report for extra points
         if (WasteReport::where('resident_id', Auth::id())->count() === 1) {
             $this->gamificationService->awardPoints($user, 'first_report');

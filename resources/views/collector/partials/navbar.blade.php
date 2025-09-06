@@ -3,7 +3,7 @@
     <div class="container mx-auto px-4 sm:px-6">
         <div class="flex justify-between items-center py-4">
             <!-- Logo and Brand -->
-            <div class="flex items-center space-x-4">
+            <a href="{{ route('collector.dashboard') }}" class="flex items-center space-x-4 hover:opacity-80 transition-opacity duration-200">
                 <div class="w-10 h-10 bg-white dark:bg-gray-700 rounded-xl flex items-center justify-center shadow-lg p-1 transition-colors duration-300">
                     <img src="{{ asset('images/logo.png') }}" alt="Clean City Logo" class="w-8 h-8 object-contain">
                 </div>
@@ -11,7 +11,7 @@
                     <h1 class="text-xl font-bold text-orange-600 dark:text-orange-400 transition-colors duration-300">Clean City</h1>
                     <p class="text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300">Your Waste, Our Responsibility</p>
                 </div>
-            </div>
+            </a>
 
             <!-- Navigation Links (Desktop) -->
             <div class="hidden md:flex items-center space-x-6">
@@ -34,12 +34,7 @@
 
             <!-- User Menu -->
             <div class="flex items-center space-x-4">
-                <!-- Theme Toggle Button -->
-                <button id="collector-theme-toggle" 
-                        class="text-gray-600 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors duration-200 p-2 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/30"
-                        title="Toggle Theme">
-                    <i id="collector-theme-icon" class="fas fa-moon text-lg"></i>
-                </button>
+                
 
                 <!-- Notification Dropdown -->
                 <div class="relative" x-data="notificationDropdown()">
@@ -199,12 +194,7 @@
                 History
             </a>
             
-            <!-- Mobile Theme Toggle -->
-            <button id="mobile-collector-theme-toggle"
-                    class="w-full text-left py-2 px-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-900/50 hover:text-orange-600 dark:hover:text-orange-400 font-medium transition-colors duration-200">
-                <i id="mobile-collector-theme-icon" class="fas fa-moon mr-2"></i>
-                <span id="mobile-collector-theme-text">Dark Mode</span>
-            </button>
+            
             
             <a href="{{ route('collector.profile') }}" 
                class="block py-2 px-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-900/50 hover:text-orange-600 dark:hover:text-orange-400 font-medium transition-colors duration-200 {{ request()->routeIs('collector.profile') ? 'bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400' : '' }}">

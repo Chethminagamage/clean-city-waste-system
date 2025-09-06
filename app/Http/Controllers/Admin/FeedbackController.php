@@ -87,9 +87,17 @@ class FeedbackController extends Controller
             'admin_responded_at' => now()
         ]);
 
+        // Refresh the feedback model to ensure we have the latest data
+        $feedback->refresh();
+
         // Send notification to user about the response
-        if ($feedback->user) {
-            $feedback->user->notify(new \App\Notifications\FeedbackResponseReceived($feedback));
+        if ($feedback->user && $feedback->admin_response) {
+            try {
+                $feedback->user->notify(new \App\Notifications\FeedbackResponseReceived($feedback));
+            } catch (\Exception $e) {
+                // Log the error but don't fail the response
+                \Log::error('Failed to send feedback response notification: ' . $e->getMessage());
+            }
         }
 
         return redirect()->back()->with('success', 'Response sent successfully! User has been notified.');

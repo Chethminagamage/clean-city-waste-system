@@ -242,32 +242,117 @@
             }
         }
 
-        /* Top contact bar responsive */
+        /* Top contact bar responsive - HIDE ON MOBILE */
         @media (max-width: 768px) {
-            .top-contact-bar .flex.justify-between {
-                flex-direction: column;
-                gap: 0.5rem;
-                text-align: center;
-            }
-            
-            .top-contact-bar .flex.items-center.space-x-6 {
-                flex-direction: column;
-                space-x: 0;
-                gap: 0.25rem;
-            }
-            
-            .top-contact-bar .flex.items-center.space-x-3 {
-                justify-content: center;
+            .top-contact-bar {
+                display: none !important;
             }
         }
-
-        @media (max-width: 640px) {
-            .top-contact-bar .flex.items-center.space-x-6 > div {
-                font-size: 0.75rem;
+        
+        /* Mobile table optimization */
+        @media (max-width: 768px) {
+            .desktop-table {
+                display: none;
             }
             
-            .top-contact-bar {
-                padding: 0.5rem 0;
+            .mobile-reports {
+                display: block;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .desktop-table {
+                display: block;
+            }
+            
+            .mobile-reports {
+                display: none;
+            }
+        }
+        
+        /* Mobile report cards styling */
+        .mobile-report-card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid rgba(229, 231, 235, 0.8);
+        }
+        
+        .mobile-report-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+        
+        .dark .mobile-report-card {
+            background: rgb(31, 41, 55);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(75, 85, 99, 0.6);
+        }
+        
+        .dark .mobile-report-card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+        }
+        
+        /* Mobile text utilities */
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        /* Enhanced dark mode for mobile cards */
+        .dark .mobile-report-card .border-gray-100 {
+            border-color: rgba(75, 85, 99, 0.6) !important;
+        }
+        
+        .dark .mobile-report-card .border-gray-200 {
+            border-color: rgba(75, 85, 99, 0.8) !important;
+        }
+        
+        /* Mobile status badges enhanced contrast */
+        .dark .mobile-report-card .bg-yellow-100 {
+            background-color: rgba(251, 191, 36, 0.2) !important;
+        }
+        
+        .dark .mobile-report-card .bg-blue-100 {
+            background-color: rgba(59, 130, 246, 0.2) !important;
+        }
+        
+        .dark .mobile-report-card .bg-purple-100 {
+            background-color: rgba(147, 51, 234, 0.2) !important;
+        }
+        
+        .dark .mobile-report-card .bg-green-100 {
+            background-color: rgba(34, 197, 94, 0.2) !important;
+        }
+        
+        .dark .mobile-report-card .bg-red-100 {
+            background-color: rgba(239, 68, 68, 0.2) !important;
+        }
+        
+        /* Mobile padding adjustments */
+        @media (max-width: 640px) {
+            .mobile-reports .mobile-report-card {
+                margin-bottom: 0.75rem;
+            }
+            
+            .mobile-reports .mobile-report-card .p-4 {
+                padding: 0.75rem;
+            }
+            
+            /* Enhanced mobile spacing for better readability */
+            .mobile-reports {
+                padding: 0.5rem;
+                background: transparent;
+            }
+            
+            /* Mobile container background enhancement */
+            main {
+                background: transparent;
             }
         }
 
@@ -350,15 +435,16 @@
     <!-- Header/Navigation -->
     <header class="glass-effect sticky top-0 z-50 shadow-lg bg-white/90 dark:bg-gray-800/90 backdrop-blur-md transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6">
-            <div class="flex justify-between items-center py-3 sm:py-4">
+            <div class="relative">
+                <div class="flex justify-between items-center py-3 sm:py-4">
                 <!-- Logo -->
-                <div class="flex items-center">
+                <a href="{{ route('resident.dashboard') }}" class="flex items-center hover:opacity-80 transition-opacity duration-200">
                     <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mr-2 sm:mr-3">
                     <div>
                         <span class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">Clean City</span>
-                        <p class="text-xs sm:text-sm text-green-600 dark:text-green-400 hidden sm:block">Your Waste, Our Responsibility</p>
+                        <p class="text-xs sm:text-sm text-green-600 dark:text-green-400">Your Waste, Our Responsibility</p>
                     </div>
-                </div>
+                </a>
 
                 <!-- Navigation -->
                 <nav class="hidden lg:flex items-center space-x-8">
@@ -466,93 +552,143 @@
                     </div>
                 </div>
 
-                <!-- Mobile Menu Button -->
-                <button id="mobile-menu-btn" class="lg:hidden text-gray-700 dark:text-gray-300 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
+                <!-- Mobile Profile & Menu Button -->
+                <div class="lg:hidden flex items-center space-x-3">
+                    <!-- Mobile Profile Picture -->
+                    @auth
+                    <a href="{{ route('resident.profile.edit') }}" class="relative">
+                        @if (auth()->user()->profile_image)
+                            <img src="{{ auth()->user()->profile_image_url }}"
+                                alt="Profile"
+                                class="w-9 h-9 rounded-full object-cover border-2 border-green-200 dark:border-green-600 shadow-md hover:scale-105 transition-transform duration-200">
+                        @else
+                            <div class="w-9 h-9 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-md hover:scale-105 transition-transform duration-200">
+                                <i class="fas fa-user text-white text-sm"></i>
+                            </div>
+                        @endif
+                    </a>
+                    @endauth
+
+                    <!-- Mobile Menu Button -->
+                    <button id="mobile-menu-btn" class="text-gray-700 dark:text-gray-300 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
             </div>
 
             <!-- Mobile Navigation Menu -->
-            <div id="mobile-menu" class="lg:hidden hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-4 shadow-lg transition-colors duration-300">
-                <nav class="flex flex-col space-y-4">
-                    <a href="#home" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium px-4 py-2 transition-colors flex items-center">
-                        <i class="fas fa-home mr-3 w-4"></i>Home
+            <div id="mobile-menu" class="lg:hidden hidden absolute top-full left-0 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700 shadow-2xl transition-all duration-300 z-50 rounded-b-2xl overflow-hidden max-h-screen overflow-y-auto">
+                <nav class="flex flex-col py-2">
+                    <a href="#home" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 font-medium px-6 py-4 transition-all duration-200 flex items-center border-b border-gray-100 dark:border-gray-800">
+                        <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-home text-green-600 dark:text-green-400"></i>
+                        </div>
+                        <span class="font-semibold">Home</span>
                     </a>
-                    <a href="#submit-report" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium px-4 py-2 transition-colors flex items-center">
-                        <i class="fas fa-plus-circle mr-3 w-4"></i>Submit Reports
+                    <a href="#submit-report" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 font-medium px-6 py-4 transition-all duration-200 flex items-center border-b border-gray-100 dark:border-gray-800">
+                        <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-plus-circle text-blue-600 dark:text-blue-400"></i>
+                        </div>
+                        <span class="font-semibold">Submit Reports</span>
                     </a>
-                    <a href="{{ route('resident.reports.index') }}" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium px-4 py-2 transition-colors flex items-center">
-                        <i class="fas fa-history mr-3 w-4"></i>Report History
+                    <a href="{{ route('resident.reports.index') }}" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 font-medium px-6 py-4 transition-all duration-200 flex items-center border-b border-gray-100 dark:border-gray-800">
+                        <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-history text-purple-600 dark:text-purple-400"></i>
+                        </div>
+                        <span class="font-semibold">Report History</span>
                     </a>
-                    <a href="{{ route('resident.schedule.index') }}" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium px-4 py-2 transition-colors flex items-center">
-                        <i class="fas fa-calendar mr-3 w-4"></i>Collection Schedule
+                    <a href="{{ route('resident.schedule.index') }}" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 font-medium px-6 py-4 transition-all duration-200 flex items-center border-b border-gray-100 dark:border-gray-800">
+                        <div class="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-calendar text-orange-600 dark:text-orange-400"></i>
+                        </div>
+                        <span class="font-semibold">Collection Schedule</span>
                     </a>
-                    <a href="{{ route('resident.gamification.index') }}" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium px-4 py-2 transition-colors flex items-center">
-                        <i class="fas fa-trophy mr-3 w-4"></i>Eco Points
+                    <a href="{{ route('resident.gamification.index') }}" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 font-medium px-6 py-4 transition-all duration-200 flex items-center border-b border-gray-100 dark:border-gray-800">
+                        <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-trophy text-yellow-600 dark:text-yellow-400"></i>
+                        </div>
+                        <span class="font-semibold">Eco Points</span>
                     </a>
-                    <a href="{{ route('resident.gamification.rewards') }}" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium px-4 py-2 transition-colors flex items-center pl-8">
-                        <i class="fas fa-gift mr-3 w-4"></i>Rewards Store
+                    <a href="{{ route('resident.gamification.rewards') }}" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 font-medium px-6 py-4 transition-all duration-200 flex items-center border-b border-gray-100 dark:border-gray-800 ml-6">
+                        <div class="w-8 h-8 bg-pink-100 dark:bg-pink-900/30 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-gift text-pink-600 dark:text-pink-400 text-sm"></i>
+                        </div>
+                        <span class="font-medium text-sm">Rewards Store</span>
                     </a>
-                    <a href="{{ route('resident.feedback.index') }}" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium px-4 py-2 transition-colors flex items-center">
-                        <i class="fas fa-comment mr-3 w-4"></i>My Feedback
-                        @auth
-                        @php 
-                            $newResponses = auth()->user()->notifications()
-                                ->where('data->type', 'feedback_response')
-                                ->whereNull('read_at')
-                                ->count(); 
-                        @endphp
-                        @if($newResponses)
-                            <span class="ml-2 bg-green-600 text-white text-xs rounded-full px-2 py-0.5">{{ $newResponses }}</span>
-                        @endif
-                        @endauth
+                    <a href="{{ route('resident.feedback.index') }}" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 font-medium px-6 py-4 transition-all duration-200 flex items-center border-b border-gray-100 dark:border-gray-800">
+                        <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-comment text-indigo-600 dark:text-indigo-400"></i>
+                        </div>
+                        <div class="flex items-center justify-between flex-1">
+                            <span class="font-semibold">My Feedback</span>
+                            @auth
+                            @php 
+                                $newResponses = auth()->user()->notifications()
+                                    ->where('data->type', 'feedback_response')
+                                    ->whereNull('read_at')
+                                    ->count(); 
+                            @endphp
+                            @if($newResponses)
+                                <span class="bg-green-600 text-white text-xs rounded-full px-2 py-1 font-bold">{{ $newResponses }}</span>
+                            @endif
+                            @endauth
+                        </div>
                     </a>
                     
                     <!-- Notifications for mobile -->
                     @auth
                     @php $unread = auth()->user()->unreadNotifications()->count(); @endphp
-                    <a href="{{ route('notifications.index') }}" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium px-4 py-2 transition-colors flex items-center">
-                        <i class="fas fa-bell mr-3 w-4"></i>Notifications
-                        @if($unread)
-                            <span class="ml-2 bg-red-600 text-white text-xs rounded-full px-2 py-0.5">{{ $unread }}</span>
-                        @endif
+                    <a href="{{ route('notifications.index') }}" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 font-medium px-6 py-4 transition-all duration-200 flex items-center border-b border-gray-100 dark:border-gray-800">
+                        <div class="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-bell text-red-600 dark:text-red-400"></i>
+                        </div>
+                        <div class="flex items-center justify-between flex-1">
+                            <span class="font-semibold">Notifications</span>
+                            @if($unread)
+                                <span class="bg-red-600 text-white text-xs rounded-full px-2 py-1 font-bold">{{ $unread }}</span>
+                            @endif
+                        </div>
                     </a>
                     @endauth
                     
-                    <!-- Theme Toggle for mobile -->
-                    <button id="mobile-theme-toggle" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium px-4 py-2 transition-colors flex items-center w-full text-left">
-                        <i id="mobile-theme-icon" class="fas fa-moon mr-3 w-4"></i><span id="mobile-theme-text">Dark Mode</span>
-                    </button>
+                    
                     
                     <!-- User info for mobile -->
-                    <div class="px-4 py-2 border-t border-gray-200 dark:border-gray-600 mt-2">
-                        <div class="flex items-center space-x-3 mb-2">
+                    <div class="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 mt-2">
+                        <div class="flex items-center space-x-4 mb-4">
                             @if (auth()->user()->profile_image)
                                 <img src="{{ auth()->user()->profile_image_url }}"
                                     alt="Profile"
-                                    class="w-8 h-8 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600">
+                                    class="w-12 h-12 rounded-full object-cover border-3 border-green-200 dark:border-green-600 shadow-lg">
                             @else
-                                <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-user text-white text-xs"></i>
+                                <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+                                    <i class="fas fa-user text-white text-lg"></i>
                                 </div>
                             @endif
-                            <span class="text-sm font-medium text-gray-900 dark:text-white">
-                                {{ auth()->user()->first_name ?? '' }}
-                            </span>
+                            <div>
+                                <span class="text-lg font-bold text-gray-900 dark:text-white">
+                                    {{ auth()->user()->first_name ?? '' }}
+                                </span>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ auth()->user()->email }}</p>
+                            </div>
                         </div>
-                        <a href="{{ route('resident.profile.edit') }}" class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 mt-1 inline-block transition-colors">
-                            <i class="fas fa-user-circle mr-2"></i>View Profile
-                        </a>
                         
-                        <!-- Logout for mobile -->
-                        <form method="POST" action="{{ route('logout') }}" class="mt-2">
-                            @csrf
-                            <button type="submit" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 flex items-center transition-colors">
-                                <i class="fas fa-sign-out-alt mr-2"></i>Log Out
-                            </button>
-                        </form>
+                        <div class="flex flex-col space-y-2">
+                            <a href="{{ route('resident.profile.edit') }}" class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all">
+                                <i class="fas fa-user-circle mr-3 text-base"></i>View Profile
+                            </a>
+                            
+                            <!-- Logout for mobile -->
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="w-full text-left text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 flex items-center px-3 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all">
+                                    <i class="fas fa-sign-out-alt mr-3 text-base"></i>Log Out
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </nav>
+            </div>
             </div>
         </div>
     </header>
@@ -575,10 +711,10 @@
     </div>
 
     <!-- Main Content -->
-    <main id="home" class="max-w-7xl mx-auto px-6 py-8">
+    <main id="home" class="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
         
         <!-- Top Section -->
-        <div class="grid lg:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <!-- Location Map -->
             <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-300">
                 <!-- Header -->
@@ -915,7 +1051,7 @@
                 <span class="text-sm text-gray-500 dark:text-gray-400">Track the status of all your submitted reports</span>
             </div>
 
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto desktop-table">
                 <table class="w-full">
                     <thead>
                         <tr class="bg-gradient-to-r from-gray-50 to-green-50 dark:from-gray-700 dark:to-green-900/30 border-b border-gray-200 dark:border-gray-600">
@@ -1009,6 +1145,106 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Mobile Reports Layout -->
+            <div class="mobile-reports">
+                @forelse ($reports as $report)
+                    <div class="mobile-report-card">
+                        <!-- Report Header -->
+                        <div class="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-600">
+                            <div class="flex items-center space-x-3">
+                                @if ($report->image_path)
+                                    <img src="{{ asset('storage/' . $report->image_path) }}" 
+                                         class="w-12 h-12 rounded-lg object-cover border border-gray-200 dark:border-gray-600" 
+                                         alt="Report image">
+                                @else
+                                    <div class="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-image text-gray-400 dark:text-gray-500"></i>
+                                    </div>
+                                @endif
+                                <div>
+                                    <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                        {{ \Carbon\Carbon::parse($report->report_date)->format('M d, Y') }}
+                                    </div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                                        {{ \Carbon\Carbon::parse($report->created_at)->format('h:i A') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Status Badge -->
+                            @if ($report->status === 'pending')
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200">
+                                    <i class="fas fa-clock mr-1"></i>Pending
+                                </span>
+                            @elseif ($report->status === 'assigned')
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200">
+                                    <i class="fas fa-user-check mr-1"></i>Assigned
+                                </span>
+                            @elseif ($report->status === 'enroute')
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200">
+                                    <i class="fas fa-truck mr-1"></i>Enroute
+                                </span>
+                            @elseif ($report->status === 'collected')
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200">
+                                    <i class="fas fa-check mr-1"></i>Collected
+                                </span>
+                            @elseif ($report->status === 'closed')
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                    <i class="fas fa-check-double mr-1"></i>Closed
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                    {{ ucfirst($report->status) }}
+                                </span>
+                            @endif
+                        </div>
+                        
+                        <!-- Report Details -->
+                        <div class="p-4 space-y-3">
+                            <!-- Location -->
+                            <div class="flex items-start space-x-2">
+                                <i class="fas fa-map-marker-alt text-gray-400 dark:text-gray-500 mt-1 text-sm flex-shrink-0"></i>
+                                <span class="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{{ $report->location }}</span>
+                            </div>
+                            
+                            <!-- Waste Type -->
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-trash text-gray-400 dark:text-gray-500 text-sm flex-shrink-0"></i>
+                                <span class="@class([
+                                    'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium',
+                                    'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200' => $report->waste_type === 'Organic',
+                                    'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200' => $report->waste_type === 'Plastic',
+                                    'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200' => $report->waste_type === 'E-Waste',
+                                    'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200' => $report->waste_type === 'Hazardous',
+                                    'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200' => !in_array($report->waste_type, ['Organic', 'Plastic', 'E-Waste', 'Hazardous']),
+                                ])">
+                                    {{ $report->waste_type }}
+                                </span>
+                            </div>
+                            
+                            <!-- Action Button -->
+                            <div class="pt-2">
+                                <a href="{{ route('resident.reports.show', $report->id) }}"
+                                   class="w-full inline-flex items-center justify-center px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">
+                                   <i class="fas fa-eye mr-2"></i>View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="text-center py-16">
+                        <div class="flex flex-col items-center gap-4">
+                            <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                <i class="fas fa-inbox text-2xl text-gray-300 dark:text-gray-500"></i>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 dark:text-gray-400 font-medium">No reports submitted yet</p>
+                                <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">Submit your first waste report above to get started</p>
+                            </div>
+                        </div>
+                    </div>
+                @endforelse
             </div>
         </div>
     </main>

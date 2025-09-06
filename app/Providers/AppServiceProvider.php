@@ -15,6 +15,10 @@ class AppServiceProvider extends ServiceProvider
     {
         // Register GamificationService as singleton
         $this->app->singleton(\App\Services\GamificationService::class);
+        
+        // Register refactored services and repositories
+        $this->app->singleton(\App\Repositories\WasteReportRepository::class);
+        $this->app->singleton(\App\Services\CollectorService::class);
     }
 
     /**

@@ -10,28 +10,27 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules;
 use App\Models\WasteReport;
 use App\Notifications\ReportStatusUpdated;
+use App\Repositories\WasteReportRepository;
+use App\Services\GamificationService;
 
 class CollectorDashboardController extends Controller
 {
+    protected $wasteReportRepository;
+    protected $gamificationService;
+
+    public function __construct(WasteReportRepository $wasteReportRepository, GamificationService $gamificationService)
+    {
+        $this->wasteReportRepository = $wasteReportRepository;
+        $this->gamificationService = $gamificationService;
+    }
+
     public function index()
     {
         $collector = Auth::guard('collector')->user();
 
-        $activeReports = WasteReport::with('resident')
-            ->activeForCollector($collector->id)
-            ->orderByDesc('created_at')
-            ->get();
-
-        $completedReports = WasteReport::with('resident')
-            ->completedForCollector($collector->id)
-            ->orderByDesc('created_at')
-            ->get();
-
-        // Get ALL reports assigned to this collector (both active and completed)
-        $allAssignedReports = WasteReport::with('resident')
-            ->forCollector($collector->id)
-            ->orderByDesc('created_at')
-            ->get();
+        $activeReports = $this->wasteReportRepository->getActiveReportsForCollector($collector->id);
+        $completedReports = $this->wasteReportRepository->getCompletedReportsForCollector($collector->id);
+        $allAssignedReports = $this->wasteReportRepository->getAllAssignedReportsForCollector($collector->id);
 
         return view('collector.dashboard', [
             'collector'         => $collector,
@@ -99,7 +98,26 @@ class CollectorDashboardController extends Controller
             $report->status = WasteReport::ST_COLLECTED;
             $report->save();
 
+            // Award points to resident for completed collection
             if ($report->resident) {
+                try {
+                    $this->gamificationService->awardPoints(
+                        $report->resident,
+                        'report_collected',
+                        null,
+                        'Earned points for completed waste collection',
+                        [
+                            'report_id' => $report->id,
+                            'waste_type' => $report->waste_type,
+                            'collection_date' => now()->toDateString()
+                        ]
+                    );
+                } catch (\Exception $e) {
+                    // Log error but don't fail the collection
+                    \Log::error('Failed to award collection points: ' . $e->getMessage());
+                }
+
+                // Send notification about status change
                 $report->resident->notify(new ReportStatusUpdated($report, WasteReport::ST_COLLECTED));
             }
 

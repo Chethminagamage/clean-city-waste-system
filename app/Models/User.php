@@ -34,6 +34,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'latitude',
         'longitude',
         'theme_preference', // Add theme preference
+        'last_login_at',     // Add for daily login tracking
     ];
 
     /**
@@ -60,6 +61,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'two_factor_expires_at' => 'datetime',
             'two_factor_enabled' => 'boolean',
             'password' => 'hashed',
+            'last_login_at' => 'datetime',
         ];
     }
 

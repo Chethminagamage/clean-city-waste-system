@@ -34,6 +34,16 @@ class NotificationController extends Controller
         abort_unless($notification->notifiable_id === auth()->id(), 403);
         $notification->markAsRead();
 
+        // Check if this is a feedback response notification
+        if (data_get($notification->data, 'type') === 'feedback_response') {
+            $feedbackId = data_get($notification->data, 'feedback_id');
+            if ($feedbackId) {
+                return redirect()->route('resident.feedback.show', $feedbackId);
+            }
+            // Fallback to feedback index if no specific feedback ID
+            return redirect()->route('resident.feedback.index');
+        }
+
         // Prefer report_id if we have it
         if ($id = data_get($notification->data, 'report_id')) {
             // deleted? -> toast + back to list/history
@@ -42,6 +52,11 @@ class NotificationController extends Controller
                     ->with('toast.error', 'That report no longer exists (it may have been deleted).');
             }
             return redirect()->route('resident.reports.show', $id);
+        }
+
+        // Handle action_url if available (for feedback responses)
+        if ($actionUrl = data_get($notification->data, 'action_url')) {
+            return redirect()->to($actionUrl);
         }
 
         // else fall back to stored URL (which might be relative for new ones)
@@ -53,6 +68,20 @@ class NotificationController extends Controller
     {
         $n = $request->user()->notifications()->whereKey($id)->firstOrFail();
         $n->markAsRead();
+
+        // Check if this is a feedback response notification
+        if (data_get($n->data, 'type') === 'feedback_response') {
+            $feedbackId = data_get($n->data, 'feedback_id');
+            if ($feedbackId) {
+                return redirect()->route('resident.feedback.show', $feedbackId);
+            }
+            return redirect()->route('resident.feedback.index');
+        }
+
+        // Handle action_url if available (for feedback responses)
+        if ($actionUrl = data_get($n->data, 'action_url')) {
+            return redirect()->to($actionUrl);
+        }
 
         // open detail page when clicked
         $url = $n->data['url'] ?? route('resident.reports.index');

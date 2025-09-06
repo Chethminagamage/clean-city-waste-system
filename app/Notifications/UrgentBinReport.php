@@ -29,12 +29,14 @@ class UrgentBinReport extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return ['database']; // Only in-app notifications, no emails
     }
 
     /**
      * Get the mail representation of the notification.
+     * DISABLED: Only using database notifications for urgent bin reports
      */
+    /*
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
@@ -45,7 +47,7 @@ class UrgentBinReport extends Notification implements ShouldQueue
             ->line("**Location:** {$this->report->location}")
             ->line("**Waste Type:** {$this->report->waste_type}")
             ->line("**Status:** " . ucfirst($this->report->status))
-            ->line("**Reported:** {$this->report->urgent_reported_at->format('M d, Y h:i A')}")
+            ->line("**Reported:** " . ($this->report->urgent_reported_at ? $this->report->urgent_reported_at->format('M d, Y h:i A') : 'Just now'))
             ->when($this->report->urgent_message, function ($mail) {
                 return $mail->line("**Resident's Message:** \"{$this->report->urgent_message}\"");
             })
@@ -53,6 +55,7 @@ class UrgentBinReport extends Notification implements ShouldQueue
             ->line('Please prioritize this collection to maintain service quality.')
             ->salutation('Clean City Waste Management System');
     }
+    */
 
     /**
      * Get the array representation of the notification.

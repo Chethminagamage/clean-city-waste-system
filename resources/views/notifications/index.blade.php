@@ -63,42 +63,64 @@
 
             {{-- Icon based on notification type --}}
             <div class="flex-shrink-0 mt-0.5">
-              <div class="w-10 h-10 bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/50 dark:to-green-800/50 rounded-xl flex items-center justify-center">
-                @php
-                  $status = strtolower($n->data['status'] ?? '');
-                @endphp
-                @if($status === 'assigned')
-                  <i class="fas fa-user-check text-green-600 dark:text-green-400"></i>
-                @elseif($status === 'collected')
-                  <i class="fas fa-check-circle text-green-600 dark:text-green-400"></i>
-                @elseif($status === 'closed')
-                  <i class="fas fa-archive text-green-600 dark:text-green-400"></i>
-                @else
-                  <i class="fas fa-file-alt text-green-600 dark:text-green-400"></i>
-                @endif
-              </div>
+              @php
+                $notificationType = $n->data['type'] ?? '';
+                $status = strtolower($n->data['status'] ?? '');
+              @endphp
+              
+              @if($notificationType === 'feedback_response')
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/50 dark:to-blue-800/50 rounded-xl flex items-center justify-center">
+                  <i class="fas fa-reply text-blue-600 dark:text-blue-400"></i>
+                </div>
+              @else
+                <div class="w-10 h-10 bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/50 dark:to-green-800/50 rounded-xl flex items-center justify-center">
+                  @if($status === 'assigned')
+                    <i class="fas fa-user-check text-green-600 dark:text-green-400"></i>
+                  @elseif($status === 'collected')
+                    <i class="fas fa-check-circle text-green-600 dark:text-green-400"></i>
+                  @elseif($status === 'closed')
+                    <i class="fas fa-archive text-green-600 dark:text-green-400"></i>
+                  @else
+                    <i class="fas fa-file-alt text-green-600 dark:text-green-400"></i>
+                  @endif
+                </div>
+              @endif
             </div>
 
             {{-- Content --}}
             <div class="flex-1 min-w-0">
               <div class="flex items-start justify-between">
                 <div>
-                  <p class="text-sm font-semibold text-gray-900 dark:text-white">
-                    Report {{ ucfirst($n->data['reason'] ?? 'Updated') }}
-                  </p>
-                  <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                    Status changed to 
-                    <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full 
-                      @if($status === 'assigned') bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300
-                      @elseif($status === 'collected') bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300
-                      @elseif($status === 'closed') bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300
-                      @else bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 @endif">
-                      {{ ucfirst($n->data['status'] ?? '-') }}
-                    </span>
-                    @if(!empty($n->data['reference']))
-                      • <span class="font-mono text-xs">{{ $n->data['reference'] }}</span>
-                    @endif
-                  </p>
+                  @if($notificationType === 'feedback_response')
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white">
+                      Response to Your Feedback
+                    </p>
+                    <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                      {{ $n->data['message'] ?? 'We have responded to your feedback' }}
+                      @if(!empty($n->data['feedback_type']))
+                        <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 ml-1">
+                          {{ ucfirst(str_replace('_', ' ', $n->data['feedback_type'])) }}
+                        </span>
+                      @endif
+                    </p>
+                  @else
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white">
+                      Report {{ ucfirst($n->data['reason'] ?? 'Updated') }}
+                    </p>
+                    <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                      Status changed to 
+                      <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full 
+                        @if($status === 'assigned') bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300
+                        @elseif($status === 'collected') bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300
+                        @elseif($status === 'closed') bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300
+                        @else bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 @endif">
+                        {{ ucfirst($n->data['status'] ?? '-') }}
+                      </span>
+                      @if(!empty($n->data['reference']))
+                        • <span class="font-mono text-xs">{{ $n->data['reference'] }}</span>
+                      @endif
+                    </p>
+                  @endif
                 </div>
                 
                 {{-- Timestamp --}}

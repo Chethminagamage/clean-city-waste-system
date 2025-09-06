@@ -176,8 +176,8 @@ class WasteReport extends Model
             return false;
         }
         
-        // Only allow after 4 hours
-        return $this->created_at->addHours(4)->isPast();
+        // Only allow after 30 minutes (practical for real-world usage)
+        return $this->created_at->addMinutes(30)->isPast();
     }
     
     /**
