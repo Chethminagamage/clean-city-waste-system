@@ -38,22 +38,16 @@ Route::get('/', function () {
 
 /*
 |--------------------------------------------------------------------------
-| Email Verification for Residents
+| Email Verification (Manual Implementation - Residents Only)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth'])->group(function () {
-    Route::get('/email/verify', function () {
-        return view('auth.verify-email');
-    })->name('verification.notice');
-
-    Route::post('/email/verification-notification', function (Request $request) {
-        $request->user()->sendEmailVerificationNotification();
-        return back()->with('status', 'Verification link sent!');
-    })->middleware('throttle:6,1')->name('verification.send');
-});
-
 Route::get('/email/verify/{id}/{hash}', function (Request $request, $id, $hash) {
     $user = User::findOrFail($id);
+
+    // ✅ Only verify resident accounts
+    if ($user->role !== 'resident') {
+        abort(403, 'This verification link is only for resident accounts.');
+    }
 
     if (! hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
         abort(403, 'Invalid verification link.');
@@ -134,12 +128,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // Theme Management Routes (accessible by both auth guards)
-Route::group(['middleware' => function ($request, $next) {
-    if (Auth::guard('web')->check() || Auth::guard('collector')->check()) {
-        return $next($request);
-    }
-    return redirect('/login');
-}], function () {
+Route::middleware('auth')->group(function () {
     Route::post('/theme/toggle', [\App\Http\Controllers\ThemeController::class, 'toggle'])
         ->name('theme.toggle');
     Route::post('/theme/set', [\App\Http\Controllers\ThemeController::class, 'setTheme'])
@@ -241,6 +230,20 @@ Route::prefix('collector')->name('collector.')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'showCollectorLogin'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'loginCollector'])->name('login.submit');
     Route::post('/logout', [AuthenticatedSessionController::class, 'logoutCollector'])->name('logout');
+    
+    // Collector Password Reset Routes
+    Route::get('/forgot-password', [\App\Http\Controllers\Collector\Auth\CollectorPasswordResetLinkController::class, 'create'])
+                ->middleware('guest')
+                ->name('password.request');
+    Route::post('/forgot-password', [\App\Http\Controllers\Collector\Auth\CollectorPasswordResetLinkController::class, 'store'])
+                ->middleware('guest')
+                ->name('password.email');
+    Route::get('/reset-password/{token}', [\App\Http\Controllers\Collector\Auth\CollectorNewPasswordController::class, 'create'])
+                ->middleware('guest')
+                ->name('password.reset');
+    Route::post('/reset-password', [\App\Http\Controllers\Collector\Auth\CollectorNewPasswordController::class, 'store'])
+                ->middleware('guest')
+                ->name('password.store');
 
     Route::middleware(['auth:collector'])->group(function () {
         Route::get('/dashboard', [CollectorDashboardController::class, 'index'])->name('dashboard');
@@ -256,6 +259,7 @@ Route::prefix('collector')->name('collector.')->group(function () {
         Route::post('/update-location', [CollectorDashboardController::class, 'updateLocation'])->name('updateLocation');
         Route::post('/report/{id}/confirm', [CollectorDashboardController::class, 'confirmAssignment'])->name('report.confirm');
         Route::post('/report/{id}/start', [CollectorDashboardController::class, 'startWork'])->name('report.start');
+        Route::post('/report/{id}/complete-with-image', [CollectorDashboardController::class, 'completeWithImage'])->name('report.complete-with-image');
         
         // Notification routes
         Route::get('/notifications', [CollectorNotificationController::class, 'index'])->name('notifications.index');
@@ -267,15 +271,6 @@ Route::prefix('collector')->name('collector.')->group(function () {
         Route::delete('/notifications/{id}', [CollectorNotificationController::class, 'destroy'])->name('notifications.destroy');
     });
 });
-
-/*
-|--------------------------------------------------------------------------
-| Custom Email Verification (Optional)
-|--------------------------------------------------------------------------
-*/
-Route::get('/verify-email/{id}/{hash}', [VerifyEmailController::class, '__invoke'])
-    ->middleware(['signed'])
-    ->name('verification.verify');
 
 /*
 |--------------------------------------------------------------------------

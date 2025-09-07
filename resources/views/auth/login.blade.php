@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Clean City Waste Management</title>
+    <!-- Favicon -->
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/logo.png') }}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/logo.png') }}">
+        <link rel="shortcut icon" href="{{ asset('images/logo.png') }}">
+        <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="//unpkg.com/alpinejs" defer></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -134,7 +139,8 @@
 <body class="font-sans text-gray-800 bg-[#f3fef5]">
 
     <!-- Top Contact Bar -->
-    <div class="bg-green-700 text-white py-2 text-sm">
+    <!-- Desktop/Tablet -->
+    <div class="bg-green-700 text-white py-2 text-sm hidden sm:block">
         <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
             <div class="flex items-center space-x-6">
                 <div class="flex items-center">
@@ -159,6 +165,23 @@
             </div>
         </div>
     </div>
+    <!-- Mobile-only compact bar -->
+    <div class="sm:hidden bg-green-700 text-white py-1.5 text-[11px]">
+        <div class="max-w-7xl mx-auto px-3 space-y-1">
+            <div class="flex items-center justify-between">
+                <span class="flex items-center mr-3"><i class="fas fa-clock mr-1.5"></i>Mon-Fri 08:00-18:00</span>
+                <span class="flex items-center"><i class="fas fa-phone mr-1.5"></i>+94 81 456 7890</span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="flex items-center truncate"><i class="fas fa-envelope mr-1.5"></i><span class="truncate">contact@cleancity@gmail.com</span></span>
+                <span class="flex items-center space-x-2 ml-3">
+                    <a href="#" class="hover:text-green-300"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="hover:text-green-300"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="hover:text-green-300"><i class="fab fa-instagram"></i></a>
+                </span>
+            </div>
+        </div>
+    </div>
 
     <!-- Header/Navigation -->
     <header class="bg-white/95 backdrop-blur-md sticky top-0 z-50 shadow-sm">
@@ -169,7 +192,7 @@
                     <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mr-2 sm:mr-3">
                     <div>
                         <span class="text-xl sm:text-2xl font-bold text-gray-800">Clean City</span>
-                        <p class="text-xs sm:text-sm text-green-600 hidden sm:block">Your Waste, Our Responsibility</p>
+                        <p class="text-[11px] leading-tight sm:text-sm text-green-600 block sm:block">Your Waste, Our Responsibility</p>
                     </div>
                 </a>
 
@@ -239,7 +262,7 @@
                 <div class="grid lg:grid-cols-2 gap-12 items-center min-h-[calc(100vh-200px)]">
                     
                     <!-- Left Side - Illustration & Branding -->
-                    <div class="text-center lg:text-left animate-on-scroll">
+                    <div class="text-center lg:text-left animate-on-scroll hidden sm:hidden lg:block">
                         <!-- Illustration Area -->
                         <div class="bg-green-100/20 backdrop-blur-sm rounded-3xl p-8 mb-8">
                             <div class="w-full h-80 bg-green-50/30 rounded-2xl flex items-center justify-center">
@@ -265,7 +288,7 @@
                     </div>
 
                     <!-- Right Side - Login Form -->
-                    <div class="flex items-center justify-center">
+                    <div class="flex items-center justify-center w-full">
                         <div class="w-full max-w-md">
                             <div class="bg-white rounded-2xl shadow-2xl p-8 animate-on-scroll stagger-1">
                             
@@ -274,9 +297,15 @@
                                     <p class="text-gray-600">Login to manage waste smartly in your community</p>
                                 </div>
 
-                                @if(session('message'))
+                                @if(session('success'))
     <div class="mb-4 text-green-700 bg-green-100 border border-green-300 px-4 py-3 rounded">
-        {{ session('message') }}
+        {{ session('success') }}
+    </div>
+@endif
+
+@if(session('error'))
+    <div class="mb-4 text-red-700 bg-red-100 border border-red-300 px-4 py-3 rounded">
+        {{ session('error') }}
     </div>
 @endif
 
@@ -374,6 +403,25 @@
                                         Login
                                     </button>
                                 </form>
+
+                                <!-- Or Divider -->
+                                <div class="my-6 flex items-center">
+                                    <div class="flex-grow border-t border-gray-300"></div>
+                                    <span class="px-4 text-gray-500 text-sm">or</span>
+                                    <div class="flex-grow border-t border-gray-300"></div>
+                                </div>
+
+                                <!-- Google Sign In Button -->
+                                <a href="{{ route('google.redirect', ['intent' => 'signin']) }}" 
+                                   class="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-700 hover:bg-gray-50 font-medium transition-all duration-300 transform hover:scale-105">
+                                    <svg class="w-5 h-5 mr-3" viewBox="0 0 24 24">
+                                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                                    </svg>
+                                    Sign in with Google
+                                </a>
 
                                 <div class="mt-8 text-center space-y-4">
                                     <p class="text-gray-600">

@@ -147,6 +147,56 @@
                     </div>
                 </div>
 
+                <!-- Completion Image (if available) -->
+                @if($report->completion_image_path && in_array(strtolower($report->status), ['collected', 'closed']))
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-camera text-green-600 mr-2"></i>Completion Photo
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="relative">
+                            <img src="{{ asset('storage/' . $report->completion_image_path) }}" 
+                                 alt="Completion Photo" 
+                                 class="w-full max-h-80 object-cover rounded-lg border border-gray-200 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                                 onclick="window.open('{{ asset('storage/' . $report->completion_image_path) }}', '_blank')">
+                            <div class="absolute top-3 right-3 bg-white bg-opacity-90 hover:bg-opacity-100 p-2 rounded-full shadow-md transition-all cursor-pointer"
+                                 onclick="window.open('{{ asset('storage/' . $report->completion_image_path) }}', '_blank')">
+                                <i class="fas fa-expand text-gray-600"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="font-medium text-gray-700">Uploaded:</span>
+                                    <span class="text-gray-900">{{ $report->completion_image_uploaded_at ? $report->completion_image_uploaded_at->format('M d, Y h:i A') : 'N/A' }}</span>
+                                </div>
+                                <div>
+                                    <span class="font-medium text-gray-700">Collector:</span>
+                                    <span class="text-gray-900">{{ $report->collector->name ?? 'Unknown' }}</span>
+                                </div>
+                            </div>
+                            
+                            @if($report->completion_notes)
+                            <div class="mt-4 pt-4 border-t border-gray-200">
+                                <span class="font-medium text-gray-700 block mb-2">Collector Notes:</span>
+                                <div class="bg-white p-3 rounded border border-gray-200">
+                                    <p class="text-gray-900 text-sm">{{ $report->completion_notes }}</p>
+                                </div>
+                            </div>
+                            @endif
+                            
+                            <div class="mt-4 pt-4 border-t border-gray-200">
+                                <p class="text-xs text-gray-500">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    This photo was taken by the collector as proof of waste collection completion.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
             </div>
 
             <!-- Sidebar -->

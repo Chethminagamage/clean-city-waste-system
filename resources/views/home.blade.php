@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clean City - Waste Management Solutions</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/logo.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/logo.png') }}">
+    <link rel="shortcut icon" href="{{ asset('images/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -143,7 +150,8 @@
 <body class="font-sans text-gray-800">
 
     <!-- Top Contact Bar -->
-    <div class="bg-green-700 text-white py-2 text-sm">
+    <!-- Desktop/Tablet -->
+    <div class="bg-green-700 text-white py-2 text-sm hidden sm:block">
         <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
             <div class="flex items-center space-x-6">
                 <div class="flex items-center">
@@ -168,6 +176,23 @@
             </div>
         </div>
     </div>
+    <!-- Mobile-only compact bar -->
+    <div class="sm:hidden bg-green-700 text-white py-1.5 text-[11px]">
+        <div class="max-w-7xl mx-auto px-3 space-y-1">
+            <div class="flex items-center justify-between">
+                <span class="flex items-center mr-3"><i class="fas fa-clock mr-1.5"></i>Mon-Fri 08:00-18:00</span>
+                <span class="flex items-center"><i class="fas fa-phone mr-1.5"></i>+94 81 456 7890</span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="flex items-center truncate"><i class="fas fa-envelope mr-1.5"></i><span class="truncate">contact@cleancity@gmail.com</span></span>
+                <span class="flex items-center space-x-2 ml-3">
+                    <a href="#" class="hover:text-green-300"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="hover:text-green-300"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="hover:text-green-300"><i class="fab fa-instagram"></i></a>
+                </span>
+            </div>
+        </div>
+    </div>
 
     <!-- Header/Navigation -->
     <header class="bg-white/95 backdrop-blur-md sticky top-0 z-50 shadow-sm">
@@ -178,7 +203,7 @@
                     <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain mr-2 sm:mr-3">
                     <div>
                         <span class="text-xl sm:text-2xl font-bold text-gray-800">Clean City</span>
-                        <p class="text-xs sm:text-sm text-green-600 hidden sm:block">Your Waste, Our Responsibility</p>
+                        <p class="text-[11px] leading-tight sm:text-sm text-green-600 block sm:block">Your Waste, Our Responsibility</p>
                     </div>
                 </a>
 

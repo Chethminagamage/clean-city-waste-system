@@ -139,8 +139,11 @@
                                         <p class="text-sm text-gray-600 dark:text-gray-400">#{{ $report->reference_code ?? $report->id }}</p>
                                     </div>
                                     <div class="text-right">
-                                        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                                        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 inline-flex items-center">
                                             Completed
+                                            @if($report->completion_image_path)
+                                                <i class="fas fa-camera ml-1" title="Completion photo available"></i>
+                                            @endif
                                         </span>
                                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $report->updated_at->diffForHumans() }}</p>
                                     </div>
@@ -175,6 +178,15 @@
                                             <span>Status: {{ ucfirst($report->status) }}</span>
                                         </div>
                                     </div>
+                                    @if($report->completion_image_path)
+                                        <div class="flex items-center text-green-700 dark:text-green-300 mt-2 pt-2 border-t border-green-200 dark:border-green-700">
+                                            <i class="fas fa-camera mr-2"></i>
+                                            <span class="text-xs">Completion photo available</span>
+                                            @if($report->completion_notes)
+                                                <span class="ml-2 text-xs">• Notes included</span>
+                                            @endif
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
 
@@ -392,6 +404,29 @@
                                 <span class="text-gray-600 dark:text-gray-400">Contact:</span>
                                 <span class="font-medium text-gray-900 dark:text-gray-100">${reportData.resident.contact || 'Not provided'}</span>
                             </div>
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    ${reportData.completion_image_url ? `
+                    <div class="bg-green-50 dark:bg-green-900 p-4 rounded-xl border border-green-100 dark:border-green-800 transition-colors duration-300">
+                        <h4 class="font-semibold text-green-800 dark:text-green-200 mb-3">
+                            <i class="fas fa-camera mr-2"></i>Completion Photo
+                        </h4>
+                        <div class="space-y-3">
+                            <img src="${reportData.completion_image_url}" 
+                                 alt="Completion Photo" 
+                                 class="w-full max-h-64 object-cover rounded-lg border border-green-200 dark:border-green-700 cursor-pointer"
+                                 onclick="window.open('${reportData.completion_image_url}', '_blank')">
+                            <p class="text-xs text-green-600 dark:text-green-400">
+                                <i class="fas fa-clock mr-1"></i>
+                                Uploaded: ${reportData.completion_image_uploaded_at || 'N/A'}
+                            </p>
+                            ${reportData.completion_notes ? `
+                            <div class="bg-white dark:bg-gray-800 p-3 rounded-lg border border-green-200 dark:border-green-700">
+                                <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Notes:</strong> ${reportData.completion_notes}</p>
+                            </div>
+                            ` : ''}
                         </div>
                     </div>
                     ` : ''}

@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Resident Dashboard | Clean City</title>
+
+    <!-- Favicon -->
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/logo.png') }}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/logo.png') }}">
+        <link rel="shortcut icon" href="{{ asset('images/logo.png') }}">
+        <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
     
     <!-- Theme Persistence Script - MUST BE FIRST -->
     <script>
@@ -1099,10 +1105,16 @@
                                     @elseif ($report->status === 'collected')
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200">
                                             <i class="fas fa-check mr-1"></i>Collected
+                                            @if($report->completion_image_path)
+                                                <i class="fas fa-camera ml-1 text-green-600 dark:text-green-400" title="Completion photo available"></i>
+                                            @endif
                                         </span>
                                     @elseif ($report->status === 'closed')
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                                             <i class="fas fa-check-double mr-1"></i>Closed
+                                            @if($report->completion_image_path)
+                                                <i class="fas fa-camera ml-1 text-gray-600 dark:text-gray-400" title="Completion photo available"></i>
+                                            @endif
                                         </span>
                                     @else
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
@@ -1188,10 +1200,16 @@
                             @elseif ($report->status === 'collected')
                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200">
                                     <i class="fas fa-check mr-1"></i>Collected
+                                    @if($report->completion_image_path)
+                                        <i class="fas fa-camera ml-1 text-green-600 dark:text-green-400" title="Completion photo available"></i>
+                                    @endif
                                 </span>
                             @elseif ($report->status === 'closed')
                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                                     <i class="fas fa-check-double mr-1"></i>Closed
+                                    @if($report->completion_image_path)
+                                        <i class="fas fa-camera ml-1 text-gray-600 dark:text-gray-400" title="Completion photo available"></i>
+                                    @endif
                                 </span>
                             @else
                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
@@ -1568,9 +1586,36 @@
                 });
             }
 
-            toggleTheme() {
-                const newTheme = this.currentTheme === 'light' ? 'dark' : 'light';
-                this.setTheme(newTheme);
+            async toggleTheme() {
+                try {
+                    // Use the proper toggle endpoint
+                    const response = await fetch('/theme/toggle', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to toggle theme');
+                    }
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        this.currentTheme = result.theme;
+                        this.applyTheme(result.theme);
+                        this.updateToggleButton();
+                        console.log('Theme toggled successfully:', result);
+                    } else {
+                        throw new Error(result.message || 'Failed to toggle theme');
+                    }
+                } catch (error) {
+                    console.warn('Could not toggle theme on server, falling back to local toggle:', error);
+                    // Fallback to local toggle
+                    const newTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+                    this.setTheme(newTheme);
+                }
             }
 
             async setTheme(theme) {
@@ -1628,7 +1673,7 @@
             async saveTheme(theme) {
                 try {
                     // Save to server for authenticated users
-                    const response = await fetch('/theme/toggle', {
+                    const response = await fetch('/theme/set', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1640,6 +1685,9 @@
                     if (!response.ok) {
                         throw new Error('Failed to save theme preference');
                     }
+                    
+                    const result = await response.json();
+                    console.log('Theme saved successfully:', result);
                 } catch (error) {
                     console.warn('Could not save theme to server, using localStorage:', error);
                     // Fallback to localStorage

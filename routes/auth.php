@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\Auth\GoogleController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
@@ -25,20 +26,27 @@ Route::middleware('guest')->group(function () {
 
     Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
     Route::post('reset-password', [NewPasswordController::class, 'store'])->name('password.store');
+
+    // Google OAuth routes (sign up only)
+    Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.redirect');
+    Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
 });
 
 Route::middleware('auth')->group(function () {
 
     Route::get('/email/verify', function () {
+        // ✅ Only residents need email verification
+        if (auth()->user()->role !== 'resident') {
+            return redirect('/login')->with('error', 'Email verification is only required for resident accounts.');
+        }
         return view('auth.verify-email');
     })->name('verification.notice');
 
-    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-        $request->fulfill();
-        return redirect('/resident/dashboard');
-    })->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
-
     Route::post('/email/verification-notification', function (Request $request) {
+        // ✅ Only residents can request verification emails
+        if ($request->user()->role !== 'resident') {
+            return back()->with('error', 'Email verification is only for resident accounts.');
+        }
         $request->user()->sendEmailVerificationNotification();
         return back()->with('status', 'Verification link sent!');
     })->middleware(['throttle:6,1'])->name('verification.send');

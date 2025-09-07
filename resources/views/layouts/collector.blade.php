@@ -7,6 +7,12 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Collector Dashboard - Clean City Waste Management</title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/logo.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/logo.png') }}">
+    <link rel="shortcut icon" href="{{ asset('images/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
+    
     <!-- Theme Persistence Script - MUST BE FIRST -->
     <script>
         // Apply theme immediately to prevent flash
@@ -187,6 +193,69 @@
         window.axios.defaults.headers = window.axios.defaults.headers || {};
         window.axios.defaults.headers.common = window.axios.defaults.headers.common || {};
         window.axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        
+        // Collector Theme Manager
+        window.collectorThemeManager = {
+            currentTheme: window.currentCollectorTheme || 'light',
+            
+            async toggleTheme() {
+                try {
+                    const response = await fetch('/theme/toggle', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to toggle theme');
+                    }
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        this.currentTheme = result.theme;
+                        this.applyTheme(result.theme);
+                        console.log('Collector theme toggled successfully:', result);
+                        
+                        // Dispatch theme change event
+                        window.dispatchEvent(new CustomEvent('collectorThemeChanged', {
+                            detail: { theme: result.theme }
+                        }));
+                        
+                        return result;
+                    } else {
+                        throw new Error(result.message || 'Failed to toggle theme');
+                    }
+                } catch (error) {
+                    console.warn('Could not toggle theme on server, falling back to local toggle:', error);
+                    // Fallback to local toggle
+                    const newTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+                    this.currentTheme = newTheme;
+                    this.applyTheme(newTheme);
+                    localStorage.setItem('collector-theme', newTheme);
+                    return { success: true, theme: newTheme };
+                }
+            },
+            
+            applyTheme(theme) {
+                const htmlElement = document.documentElement;
+                if (theme === 'dark') {
+                    htmlElement.classList.add('dark');
+                } else {
+                    htmlElement.classList.remove('dark');
+                }
+                
+                // Update meta theme color for mobile browsers
+                let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+                if (!metaThemeColor) {
+                    metaThemeColor = document.createElement('meta');
+                    metaThemeColor.name = 'theme-color';
+                    document.head.appendChild(metaThemeColor);
+                }
+                metaThemeColor.content = theme === 'dark' ? '#1f2937' : '#f97316';
+            }
+        };
     </script>
     
     <!-- Google Maps API -->

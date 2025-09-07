@@ -308,13 +308,23 @@
                                             </button>
                                         </form>
                                     @elseif ($report->status === 'enroute')
-                                        <form method="POST" action="{{ route('collector.report.start', $report->id) }}" class="flex-1">
-                                            @csrf
-                                            <button type="submit" class="w-full bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center">
-                                                <i class="fas fa-check mr-2"></i>
-                                                Mark Collected
+                                        <div class="flex-1 space-y-2">
+                                            <!-- Quick Complete (Original) -->
+                                            <form method="POST" action="{{ route('collector.report.start', $report->id) }}" class="w-full">
+                                                @csrf
+                                                <button type="submit" class="w-full bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center">
+                                                    <i class="fas fa-check mr-2"></i>
+                                                    Quick Complete
+                                                </button>
+                                            </form>
+                                            
+                                            <!-- Complete with Image -->
+                                            <button onclick="openCompletionModal({{ $report->id }})" 
+                                                    class="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center">
+                                                <i class="fas fa-camera mr-2"></i>
+                                                Complete with Image
                                             </button>
-                                        </form>
+                                        </div>
                                     @elseif ($report->status === 'collected')
                                         <div class="flex-1 bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300 px-4 py-2 rounded-lg font-medium flex items-center justify-center transition-colors duration-300">
                                             <i class="fas fa-check-double mr-2"></i>
@@ -429,6 +439,78 @@
             
             <div id="modalContent" class="p-6 overflow-y-auto max-h-[calc(90vh-120px)] text-gray-900 dark:text-gray-100 transition-colors duration-300">
                 <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Completion Modal with Camera -->
+<div id="completionModal" class="fixed inset-0 bg-black bg-opacity-50 dark:bg-black dark:bg-opacity-70 z-50 flex p-4 transition-colors duration-300" style="display: none;">
+    <div class="flex items-center justify-center min-h-full w-full">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl transition-colors duration-300">
+            <div class="bg-gradient-to-r from-green-500 to-emerald-600 dark:from-green-600 dark:to-emerald-700 px-6 py-4 flex items-center justify-between border-b border-green-200 dark:border-green-600 transition-colors duration-300">
+                <h3 class="text-xl font-bold text-white">Complete Collection with Photo</h3>
+                <button onclick="closeCompletionModal()" class="text-white hover:text-gray-200 transition-colors duration-200">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+                <form id="completionForm">
+                    <input type="hidden" id="completionReportId" name="report_id">
+                    
+                    <!-- Camera Container -->
+                    <div id="cameraContainer" class="mb-6">
+                        <div class="relative bg-black rounded-lg overflow-hidden">
+                            <video id="cameraVideo" class="w-full h-64 object-cover" autoplay playsinline muted></video>
+                            <canvas id="photoCanvas" style="display: none;"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Camera Controls -->
+                    <div id="captureControls" class="flex justify-center mb-6">
+                        <button type="button" onclick="capturePhoto()" 
+                                class="bg-red-500 hover:bg-red-600 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg transition-colors duration-200">
+                            <i class="fas fa-camera text-2xl"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Retake Controls -->
+                    <div id="retakeControls" class="justify-center gap-4 mb-6 hidden">
+                        <button type="button" onclick="retakePhoto()" 
+                                class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors duration-200">
+                            <i class="fas fa-redo mr-2"></i>Retake Photo
+                        </button>
+                    </div>
+                    
+                    <!-- Image Preview -->
+                    <div id="imagePreview" class="mb-6 hidden">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Captured Photo:</label>
+                        <img id="previewImg" src="" alt="Preview" class="w-full h-64 object-cover rounded-lg border border-gray-300 dark:border-gray-600">
+                    </div>
+                    
+                    <!-- Completion Notes -->
+                    <div class="mb-6">
+                        <label for="completion_notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Completion Notes (Optional)
+                        </label>
+                        <textarea id="completion_notes" name="completion_notes" rows="3" 
+                                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-200"
+                                  placeholder="Add any notes about the collection..."></textarea>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="closeCompletionModal()" 
+                                class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors duration-200">
+                            Cancel
+                        </button>
+                        <button type="submit" id="submitCompletion" 
+                                class="px-6 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors duration-200">
+                            <span id="submitText">Complete Collection</span>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -614,6 +696,30 @@
                     </div>
                     ` : ''}
 
+                    <!-- Completion Image (for completed reports) -->
+                    ${reportData.status === 'collected' && reportData.completion_image_url ? `
+                    <div class="bg-green-50 dark:bg-green-900 p-4 rounded-xl border border-green-100 dark:border-green-800">
+                        <h4 class="font-semibold text-green-800 dark:text-green-200 mb-3">
+                            <i class="fas fa-camera mr-2"></i>Completion Photo
+                        </h4>
+                        <div class="space-y-3">
+                            <img src="${reportData.completion_image_url}" 
+                                 alt="Completion Photo" 
+                                 class="w-full max-h-64 object-cover rounded-lg border border-green-200 dark:border-green-700 cursor-pointer"
+                                 onclick="window.open('${reportData.completion_image_url}', '_blank')">
+                            <p class="text-xs text-green-600 dark:text-green-400">
+                                <i class="fas fa-clock mr-1"></i>
+                                Uploaded: ${reportData.completion_image_uploaded_at || 'N/A'}
+                            </p>
+                            ${reportData.completion_notes ? `
+                            <div class="bg-white dark:bg-gray-800 p-3 rounded-lg border border-green-200 dark:border-green-700">
+                                <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Notes:</strong> ${reportData.completion_notes}</p>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    ` : ''}
+
                     <!-- Actions -->
                     <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200 dark:border-gray-600">
                         ${reportData.latitude && reportData.longitude ? `
@@ -737,6 +843,169 @@
     document.getElementById('reportModal').addEventListener('click', function(e) {
         if (e.target === this) {
             closeReportModal();
+        }
+    });
+
+    // Completion Modal Functions
+    let mediaStream = null;
+    let capturedImageBlob = null;
+
+    function openCompletionModal(reportId) {
+        document.getElementById('completionReportId').value = reportId;
+        document.getElementById('completionModal').style.display = 'flex';
+        
+        // Reset form and camera
+        document.getElementById('completionForm').reset();
+        document.getElementById('completionReportId').value = reportId;
+        document.getElementById('imagePreview').classList.add('hidden');
+        document.getElementById('cameraContainer').classList.remove('hidden');
+        document.getElementById('captureControls').classList.remove('hidden');
+        document.getElementById('retakeControls').classList.add('hidden');
+        capturedImageBlob = null;
+        
+        // Start camera
+        startCamera();
+    }
+
+    async function startCamera() {
+        try {
+            const video = document.getElementById('cameraVideo');
+            mediaStream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: 'environment', // Use back camera on mobile
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                } 
+            });
+            video.srcObject = mediaStream;
+            video.play();
+        } catch (error) {
+            console.error('Camera access error:', error);
+            alert('Unable to access camera. Please ensure camera permissions are granted.');
+        }
+    }
+
+    function capturePhoto() {
+        const video = document.getElementById('cameraVideo');
+        const canvas = document.getElementById('photoCanvas');
+        const context = canvas.getContext('2d');
+        
+        // Set canvas size to video size
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        // Draw video frame to canvas
+        context.drawImage(video, 0, 0);
+        
+        // Convert canvas to blob
+        canvas.toBlob(function(blob) {
+            capturedImageBlob = blob;
+            
+            // Show preview
+            const imageUrl = URL.createObjectURL(blob);
+            document.getElementById('previewImg').src = imageUrl;
+            document.getElementById('imagePreview').classList.remove('hidden');
+            
+            // Hide camera, show retake controls
+            document.getElementById('cameraContainer').classList.add('hidden');
+            document.getElementById('captureControls').classList.add('hidden');
+            document.getElementById('retakeControls').classList.remove('hidden');
+            document.getElementById('retakeControls').classList.add('flex');
+            
+            // Stop camera
+            stopCamera();
+        }, 'image/jpeg', 0.8);
+    }
+
+    function retakePhoto() {
+        // Reset states
+        document.getElementById('imagePreview').classList.add('hidden');
+        document.getElementById('cameraContainer').classList.remove('hidden');
+        document.getElementById('captureControls').classList.remove('hidden');
+        document.getElementById('retakeControls').classList.add('hidden');
+        document.getElementById('retakeControls').classList.remove('flex');
+        capturedImageBlob = null;
+        
+        // Restart camera
+        startCamera();
+    }
+
+    function stopCamera() {
+        if (mediaStream) {
+            mediaStream.getTracks().forEach(track => track.stop());
+            mediaStream = null;
+        }
+    }
+
+    function closeCompletionModal() {
+        stopCamera();
+        document.getElementById('completionModal').style.display = 'none';
+        document.getElementById('completionForm').reset();
+        document.getElementById('imagePreview').classList.add('hidden');
+        document.getElementById('cameraContainer').classList.remove('hidden');
+        document.getElementById('captureControls').classList.remove('hidden');
+        document.getElementById('retakeControls').classList.add('hidden');
+        document.getElementById('retakeControls').classList.remove('flex');
+        capturedImageBlob = null;
+    }
+
+    // Form submission
+    document.getElementById('completionForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        if (!capturedImageBlob) {
+            alert('Please capture a photo before submitting.');
+            return;
+        }
+        
+        const submitButton = document.getElementById('submitCompletion');
+        const submitText = document.getElementById('submitText');
+        const reportId = document.getElementById('completionReportId').value;
+        
+        // Disable submit button
+        submitButton.disabled = true;
+        submitText.textContent = 'Uploading...';
+        submitButton.classList.add('opacity-50');
+        
+        try {
+            const formData = new FormData();
+            formData.append('completion_image', capturedImageBlob, 'completion.jpg');
+            formData.append('completion_notes', document.getElementById('completion_notes').value);
+            
+            const response = await fetch(`/collector/report/${reportId}/complete-with-image`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Show success message
+                alert('Collection completed successfully with photo!');
+                closeCompletionModal();
+                // Refresh the page to show updated status
+                window.location.reload();
+            } else {
+                alert('Error: ' + (data.message || 'Failed to complete collection'));
+            }
+        } catch (error) {
+            console.error('Completion error:', error);
+            alert('Failed to complete collection. Please try again.');
+        } finally {
+            // Re-enable submit button
+            submitButton.disabled = false;
+            submitText.textContent = 'Complete Collection';
+            submitButton.classList.remove('opacity-50');
+        }
+    });
+
+    // Close completion modal when clicking outside
+    document.getElementById('completionModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeCompletionModal();
         }
     });
 </script>

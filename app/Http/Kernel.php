@@ -68,5 +68,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'locale' => \App\Http\Middleware\SetLocale::class, // Register as a named middleware as well
         'role' => \App\Http\Middleware\CheckUserRole::class,
+        'multi_auth' => \App\Http\Middleware\MultiGuardAuth::class,
     ];
 }

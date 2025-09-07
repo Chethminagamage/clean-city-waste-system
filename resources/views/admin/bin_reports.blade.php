@@ -67,8 +67,11 @@
                                         ];
                                         $statusColor = $statusColors[strtolower($report->status ?? '')] ?? 'bg-gray-100 text-gray-800';
                                     @endphp
-                                    <span class="px-2 py-1 text-xs font-medium rounded-full {{ $statusColor }}">
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full {{ $statusColor }} inline-flex items-center">
                                         {{ ucfirst($report->status) }}
+                                        @if($report->completion_image_path && in_array(strtolower($report->status), ['collected', 'closed']))
+                                            <i class="fas fa-camera ml-1" title="Completion photo available"></i>
+                                        @endif
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 w-28">

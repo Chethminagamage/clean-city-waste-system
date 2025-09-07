@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\Collector\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
@@ -8,14 +8,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Illuminate\View\View;
 
-class PasswordResetLinkController extends Controller
+class CollectorPasswordResetLinkController extends Controller
 {
     /**
      * Display the password reset link request view.
      */
     public function create(): View
     {
-        return view('auth.forgot-password');
+        return view('collector.auth.forgot-password');
     }
 
     /**
@@ -29,7 +29,7 @@ class PasswordResetLinkController extends Controller
             'email' => ['required', 'email'],
         ]);
 
-        // Check if the email belongs to a resident account
+        // Check if the email belongs to a collector account
         $user = \App\Models\User::where('email', $request->email)->first();
         
         if (!$user) {
@@ -37,21 +37,21 @@ class PasswordResetLinkController extends Controller
                         ->withErrors(['email' => 'No account found with this email address.']);
         }
         
-        if ($user->role === 'collector') {
+        if ($user->role !== 'collector') {
             return back()->withInput($request->only('email'))
-                        ->withErrors(['email' => 'This email is associated with a collector account. Please use the collector login page to reset your password.']);
+                        ->withErrors(['email' => 'This email is not associated with a collector account. Please use the resident login page to reset your password.']);
         }
 
         // We will send the password reset link to this user. Once we have attempted
         // to send the link, we will examine the response then see the message we
         // need to show to the user. Finally, we'll send out a proper response.
-        $status = Password::sendResetLink(
+        $status = Password::broker('users')->sendResetLink(
             $request->only('email')
         );
 
         return $status == Password::RESET_LINK_SENT
                     ? back()->with('status', __($status))
                     : back()->withInput($request->only('email'))
-                        ->withErrors(['email' => __($status)]);
+                            ->withErrors(['email' => __($status)]);
     }
 }

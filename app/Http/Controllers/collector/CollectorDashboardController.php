@@ -128,6 +128,78 @@ class CollectorDashboardController extends Controller
     }
 
     /**
+     * Mark report as collected with completion image (enhanced version)
+     */
+    public function completeWithImage(Request $request, $id)
+    {
+        $request->validate([
+            'completion_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
+            'completion_notes' => 'nullable|string|max:500'
+        ]);
+
+        $report = WasteReport::findOrFail($id);
+
+        if ($report->collector_id !== Auth::guard('collector')->id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        if ($report->status !== WasteReport::ST_ENROUTE) {
+            return response()->json(['error' => 'This report cannot be completed at this time.'], 400);
+        }
+
+        try {
+            // Handle image upload
+            $imagePath = null;
+            if ($request->hasFile('completion_image')) {
+                $image = $request->file('completion_image');
+                $imageName = 'completion_' . time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                $imagePath = $image->storeAs('completion_images', $imageName, 'public');
+            }
+
+            // Update report status and completion details
+            $report->update([
+                'status' => WasteReport::ST_COLLECTED,
+                'completion_image_path' => $imagePath,
+                'completion_notes' => $request->completion_notes,
+                'completion_image_uploaded_at' => now(),
+                'collected_at' => now()
+            ]);
+
+            // Award points to resident for completed collection
+            if ($report->resident) {
+                try {
+                    $this->gamificationService->awardPoints(
+                        $report->resident,
+                        'report_collected',
+                        null,
+                        'Earned points for completed waste collection',
+                        [
+                            'report_id' => $report->id,
+                            'waste_type' => $report->waste_type,
+                            'collection_date' => now()->toDateString()
+                        ]
+                    );
+                } catch (\Exception $e) {
+                    \Log::error('Failed to award collection points: ' . $e->getMessage());
+                }
+
+                // Send notification about status change
+                $report->resident->notify(new ReportStatusUpdated($report, WasteReport::ST_COLLECTED));
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Report completed successfully with completion image!',
+                'completion_image_url' => $imagePath ? Storage::url($imagePath) : null
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Completion with image failed: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to complete report. Please try again.'], 500);
+        }
+    }
+
+    /**
      * Get report details for the modal view
      */
     public function reportDetails($id)
@@ -158,6 +230,10 @@ class CollectorDashboardController extends Controller
                 'description' => $report->additional_details, // Fixed field name
                 'created_at' => $report->created_at->format('M d, Y h:i A'),
                 'updated_at' => $report->updated_at->format('M d, Y h:i A'),
+                'completion_image_path' => $report->completion_image_path,
+                'completion_image_url' => $report->completion_image_path ? Storage::url($report->completion_image_path) : null,
+                'completion_notes' => $report->completion_notes,
+                'completion_image_uploaded_at' => $report->completion_image_uploaded_at ? $report->completion_image_uploaded_at->format('M d, Y h:i A') : null,
                 'resident' => $report->resident ? [
                     'name' => $report->resident->name,
                     'email' => $report->resident->email,

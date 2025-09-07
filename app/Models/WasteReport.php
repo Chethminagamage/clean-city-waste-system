@@ -35,6 +35,8 @@ class WasteReport extends Model
         'longitude',
         'report_date',
         'image_path',
+        'completion_image_path',
+        'completion_notes',
         'status',
         'waste_type',
         'additional_details',
@@ -55,6 +57,7 @@ class WasteReport extends Model
         'is_urgent'  => 'boolean',
         'urgent_reported_at' => 'datetime',
         'assigned_at' => 'datetime',
+        'completion_image_uploaded_at' => 'datetime',
     ];
 
     /**

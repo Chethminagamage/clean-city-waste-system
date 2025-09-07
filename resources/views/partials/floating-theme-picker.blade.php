@@ -27,7 +27,7 @@
                     bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-lg opacity-0 
                     group-hover:opacity-100 transition-opacity duration-200 pointer-events-none
                     whitespace-nowrap shadow-lg">
-            <span id="theme-tooltip">Change Theme</span>
+            <span id="theme-tooltip">Click: Toggle • Double-click: Options</span>
             <div class="absolute top-full right-4 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></div>
         </div>
     </button>
@@ -100,17 +100,75 @@ document.addEventListener('DOMContentLoaded', function() {
     // Get CSRF token
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
     
+    if (!csrfToken) {
+        console.error('CSRF token not found! Theme saving may fail.');
+    }
+    
     let isOpen = false;
     let currentTheme = 'light';
     
     // Initialize current theme
     initializeTheme();
     
-    // Toggle panel visibility
+    // Handle theme toggle vs panel opening
+    let clickTimer = null;
+    let longPressTimer = null;
+    
+    // Single click = quick toggle, Double click = open panel
     toggleBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        togglePanel();
+        
+        if (clickTimer === null) {
+            clickTimer = setTimeout(() => {
+                // Single click - quick toggle theme
+                quickToggleTheme();
+                clickTimer = null;
+            }, 200); // Wait 200ms to see if it's a double click
+        } else {
+            // Double click - open panel
+            clearTimeout(clickTimer);
+            clickTimer = null;
+            togglePanel();
+        }
     });
+    
+    // Long press (500ms) to open panel
+    toggleBtn.addEventListener('mousedown', (e) => {
+        longPressTimer = setTimeout(() => {
+            if (clickTimer) {
+                clearTimeout(clickTimer);
+                clickTimer = null;
+            }
+            togglePanel();
+        }, 500);
+    });
+    
+    toggleBtn.addEventListener('mouseup', () => {
+        if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+        }
+    });
+    
+    toggleBtn.addEventListener('mouseleave', () => {
+        if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+        }
+    });
+    
+    // Quick toggle function
+    async function quickToggleTheme() {
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        await setTheme(newTheme);
+        
+        // Show quick feedback
+        const originalText = tooltip.textContent;
+        tooltip.textContent = `Switched to ${newTheme} mode`;
+        setTimeout(() => {
+            tooltip.textContent = originalText;
+        }, 1500);
+    }
     
     // Close panel when clicking outside
     document.addEventListener('click', (e) => {
@@ -159,17 +217,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({ theme: theme })
             });
             
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Theme API error:', response.status, errorText);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
             const data = await response.json();
+            
             if (data.success) {
                 applyTheme(theme);
                 currentTheme = theme;
                 updateUI();
                 localStorage.setItem('theme', theme);
+                console.log('Theme successfully saved to database:', theme);
+            } else {
+                throw new Error(data.message || 'Failed to save theme preference');
             }
         } catch (error) {
             console.error('Theme update error:', error);
@@ -178,6 +247,7 @@ document.addEventListener('DOMContentLoaded', function() {
             currentTheme = theme;
             updateUI();
             localStorage.setItem('theme', theme);
+            console.log('Theme saved locally only due to error:', theme);
         }
     }
     
@@ -202,11 +272,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show appropriate icon and check mark
         if (currentTheme === 'light') {
             sunIcon.classList.remove('hidden');
-            tooltip.textContent = 'Light Mode';
+            tooltip.textContent = 'Click: Dark Mode • Double-click: Options';
             document.getElementById('theme-light').querySelector('.theme-check').classList.remove('opacity-0');
         } else if (currentTheme === 'dark') {
             moonIcon.classList.remove('hidden');
-            tooltip.textContent = 'Dark Mode';
+            tooltip.textContent = 'Click: Light Mode • Double-click: Options';
             document.getElementById('theme-dark').querySelector('.theme-check').classList.remove('opacity-0');
         }
     }
