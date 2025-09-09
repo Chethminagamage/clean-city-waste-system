@@ -30,11 +30,19 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ResidentFeedbackController;
 use Illuminate\Notifications\DatabaseNotification;
 use App\Http\Controllers\Resident\CollectionScheduleController;
+use App\Http\Controllers\PublicPagesController;
 
 //Public Landing Page
 Route::get('/', function () {
     return view('home');
 })->name('landing.home');
+
+// Public Pages
+Route::get('/services', [PublicPagesController::class, 'services'])->name('public.services');
+Route::get('/projects', [PublicPagesController::class, 'projects'])->name('public.projects');
+Route::get('/company', [PublicPagesController::class, 'company'])->name('public.company');
+Route::get('/blog', [PublicPagesController::class, 'blog'])->name('public.blog');
+Route::get('/contact', [PublicPagesController::class, 'contact'])->name('public.contact');
 
 /*
 |--------------------------------------------------------------------------

@@ -215,24 +215,24 @@
                         </a>
                     </div>
                     <div class="relative group">
-                        <a href="#" class="text-gray-700 hover:text-green-500 font-medium flex items-center">
-                            Service <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        <a href="{{ route('public.services') }}" class="text-gray-700 hover:text-green-500 font-medium flex items-center">
+                            Service 
                         </a>
                     </div>
-                    <a href="#" class="text-gray-700 hover:text-green-500 font-medium">Projects</a>
+                    <a href="{{ route('public.projects') }}" class="text-gray-700 hover:text-green-500 font-medium">Projects</a>
                     <div class="relative group">
-                        <a href="#" class="text-gray-700 hover:text-green-500 font-medium flex items-center">
-                            Company <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        <a href="{{ route('public.company') }}" class="text-gray-700 hover:text-green-500 font-medium flex items-center">
+                            Company 
                         </a>
                     </div>
-                    <a href="#" class="text-gray-700 hover:text-green-500 font-medium">Blog</a>
-                    <a href="#" class="text-gray-700 hover:text-green-500 font-medium">Contact</a>
+                    <a href="{{ route('public.blog') }}" class="text-gray-700 hover:text-green-500 font-medium">Blog</a>
+                    <a href="{{ route('public.contact') }}" class="text-gray-700 hover:text-green-500 font-medium">Contact</a>
                 </nav>
 
                 <!-- CTA Buttons -->
                 <div class="hidden sm:flex items-center space-x-3">
-                    <a href="#contact" class="bg-green-500 hover:bg-green-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold text-sm sm:text-base transition-all duration-300 transform hover:scale-105">
-                        Schedule Pickup
+                    <a href="https://wa.me/94814567890?text=Hi! I'd like to schedule a waste pickup for my location. Please provide me with available time slots and pricing information." target="_blank" class="bg-green-500 hover:bg-green-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold text-sm sm:text-base transition-all duration-300 transform hover:scale-105">
+                        <i class="fab fa-whatsapp mr-2"></i>Schedule Pickup
                     </a>
                     <a href="{{ route('login') }}" class="border-2 border-green-500 text-green-500 hover:bg-green-500 hover:text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold text-sm sm:text-base transition-all duration-300">
                         <i class="fas fa-user mr-2"></i>Login
@@ -248,14 +248,14 @@
             <!-- Mobile Navigation Menu -->
             <div id="mobile-menu" class="lg:hidden hidden bg-white border-t border-gray-200 py-4">
                 <nav class="flex flex-col space-y-4">
-                    <a href="#" class="text-gray-700 hover:text-green-500 font-medium px-4 py-2">Home</a>
-                    <a href="#" class="text-gray-700 hover:text-green-500 font-medium px-4 py-2">Service</a>
-                    <a href="#" class="text-gray-700 hover:text-green-500 font-medium px-4 py-2">Projects</a>
-                    <a href="#" class="text-gray-700 hover:text-green-500 font-medium px-4 py-2">Company</a>
-                    <a href="#" class="text-gray-700 hover:text-green-500 font-medium px-4 py-2">Blog</a>
-                    <a href="#" class="text-gray-700 hover:text-green-500 font-medium px-4 py-2">Contact</a>
-                    <a href="#contact" class="bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg font-semibold text-center mx-4 transition-colors">
-                        Schedule Pickup
+                    <a href="{{ route('landing.home') }}" class="text-gray-700 hover:text-green-500 font-medium px-4 py-2">Home</a>
+                    <a href="{{ route('public.services') }}" class="text-gray-700 hover:text-green-500 font-medium px-4 py-2">Service</a>
+                    <a href="{{ route('public.projects') }}" class="text-gray-700 hover:text-green-500 font-medium px-4 py-2">Projects</a>
+                    <a href="{{ route('public.company') }}" class="text-gray-700 hover:text-green-500 font-medium px-4 py-2">Company</a>
+                    <a href="{{ route('public.blog') }}" class="text-gray-700 hover:text-green-500 font-medium px-4 py-2">Blog</a>
+                    <a href="{{ route('public.contact') }}" class="text-gray-700 hover:text-green-500 font-medium px-4 py-2">Contact</a>
+                    <a href="https://wa.me/94814567890?text=Hi! I'd like to schedule a waste pickup for my location. Please provide me with available time slots and pricing information." target="_blank" class="bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg font-semibold text-center mx-4 transition-colors">
+                        <i class="fab fa-whatsapp mr-2"></i>Schedule Pickup
                     </a>
                     <a href="{{ route('login') }}" class="border-2 border-green-500 text-green-500 hover:bg-green-500 hover:text-white px-4 py-3 rounded-lg font-semibold text-center mx-4 transition-colors">
                         <i class="fas fa-user mr-2"></i>Login
@@ -284,8 +284,8 @@
                         <a href="#services" class="bg-green-500 hover:bg-green-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all duration-300 transform hover:scale-105 text-center">
                             View Project
                         </a>
-                        <a href="#contact" class="border-2 border-white text-white hover:bg-white hover:text-green-500 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all duration-300 text-center">
-                            Schedule Pickup
+                        <a href="https://wa.me/94814567890?text=Hi! I'd like to schedule a waste pickup for my location. Please provide me with available time slots and pricing information." target="_blank" class="border-2 border-white text-white hover:bg-white hover:text-green-500 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all duration-300 text-center">
+                            </i>Schedule Pickup
                         </a>
                     </div>
                 </div>
@@ -296,6 +296,16 @@
     <!-- Services Section -->
     <section id="services" class="py-12 sm:py-16 lg:py-20 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <!-- Section Heading -->
+            <div class="text-center mb-8 sm:mb-12 lg:mb-16 animate-on-scroll">
+                <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-4">
+                    Our <span class="text-green-500">Services</span>
+                </h2>
+                <p class="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+                    Comprehensive waste management solutions designed to keep your community clean and sustainable
+                </p>
+            </div>
+
             <!-- Services Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
                 <!-- Service Card 1 -->
@@ -473,7 +483,7 @@
                 <!-- Testimonial 2 -->
                 <div class="bg-white rounded-lg p-6 shadow-lg hover-lift animate-on-scroll stagger-2">
                     <div class="flex items-center mb-4">
-                        <img src="https://images.unsplash.com/photo-1494790108755-2616b6617cbc?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" 
+                        <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" 
                              alt="Customer" class="w-12 h-12 rounded-full mr-4">
                         <div>
                             <h5 class="font-semibold">Sarah Johnson</h5>
