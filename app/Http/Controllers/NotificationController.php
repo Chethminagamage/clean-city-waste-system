@@ -20,18 +20,19 @@ class NotificationController extends Controller
     public function show(Request $request, DatabaseNotification $notification)
     {
         // Security: ensure the notification belongs to this user
-        abort_unless($notification->notifiable_id === $request->user()->id, 403);
+        abort_unless($notification->notifiable_id === $request->user()->id, 404);
 
-        // Mark as read and redirect to the stored URL (fallback to history page)
+        // Mark as read
         $notification->markAsRead();
-        $url = $notification->data['url'] ?? route('resident.reports.index');
 
-        return redirect()->to($url);
+        // Return the notification.show view
+    // Return the notification.show view, ensure it's a fresh model instance
+    return view('notifications.show')->with('notification', $notification);
     }
 
     public function open(DatabaseNotification $notification)
     {
-        abort_unless($notification->notifiable_id === auth()->id(), 403);
+        abort_unless($notification->notifiable_id === auth()->id(), 404);
         $notification->markAsRead();
 
         // Check if this is a feedback response notification

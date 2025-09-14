@@ -202,10 +202,10 @@
                         <div class="text-sm text-gray-600">📍 {{ $report->location }}</div>
                         <div class="text-sm text-gray-500">
                             Reported by: <span class="font-medium">{{ $report->resident->name ?? 'Unknown' }}</span>
-                            • {{ $report->urgent_reported_at->diffForHumans() }}
+                            • {{ $report->created_at->diffForHumans() }}
                         </div>
-                        @if($report->urgent_message)
-                        <div class="text-sm text-red-700 italic mt-1">"{{ $report->urgent_message }}"</div>
+                        @if($report->is_urgent)
+                        <div class="text-sm text-red-700 italic mt-1">🚨 Urgent Report</div>
                         @endif
                     </div>
                 </div>

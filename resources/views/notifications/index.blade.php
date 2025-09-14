@@ -50,7 +50,7 @@
     {{-- Notifications Container --}}
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700">
       @forelse ($notifications as $n)
-        <a href="{{ route('notifications.open', $n->id) }}" class="block hover:bg-gradient-to-r hover:from-green-50 hover:to-white dark:hover:from-green-900/20 dark:hover:to-gray-800 transition-all duration-200 border-b border-gray-100 dark:border-gray-700 last:border-b-0">
+  <a href="{{ route('notifications.open', $n->id) }}" class="block hover:bg-gradient-to-r hover:from-green-50 hover:to-white dark:hover:from-green-900/20 dark:hover:to-gray-800 transition-all duration-200 border-b border-gray-100 dark:border-gray-700 last:border-b-0">
           <div class="px-6 py-5 flex items-start gap-4">
             {{-- Status Indicator --}}
             <div class="flex-shrink-0 mt-1">
@@ -95,32 +95,37 @@
                     <p class="text-sm font-semibold text-gray-900 dark:text-white">
                       Response to Your Feedback
                     </p>
-                    <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                      {{ $n->data['message'] ?? 'We have responded to your feedback' }}
-                      @if(!empty($n->data['feedback_type']))
-                        <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 ml-1">
-                          {{ ucfirst(str_replace('_', ' ', $n->data['feedback_type'])) }}
+                  @elseif(isset($n->data['reason']))
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white">
+                      Report {{ ucfirst($n->data['reason']) }}
+                    </p>
+                  @endif
+                  <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                    {{-- Always show message if present --}}
+                    @if(!empty($n->data['message']))
+                      {{ $n->data['message'] }}
+                    @endif
+                    @if($notificationType === 'feedback_response' && !empty($n->data['feedback_type']))
+                      <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 ml-1">
+                        {{ ucfirst(str_replace('_', ' ', $n->data['feedback_type'])) }}
+                      </span>
+                    @endif
+                    @if($notificationType !== 'feedback_response')
+                      @if(isset($n->data['status']))
+                        Status changed to 
+                        <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full 
+                          @if($status === 'assigned') bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300
+                          @elseif($status === 'collected') bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300
+                          @elseif($status === 'closed') bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300
+                          @else bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 @endif">
+                          {{ ucfirst($n->data['status']) }}
                         </span>
                       @endif
-                    </p>
-                  @else
-                    <p class="text-sm font-semibold text-gray-900 dark:text-white">
-                      Report {{ ucfirst($n->data['reason'] ?? 'Updated') }}
-                    </p>
-                    <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                      Status changed to 
-                      <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full 
-                        @if($status === 'assigned') bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300
-                        @elseif($status === 'collected') bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300
-                        @elseif($status === 'closed') bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300
-                        @else bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 @endif">
-                        {{ ucfirst($n->data['status'] ?? '-') }}
-                      </span>
                       @if(!empty($n->data['reference']))
                         • <span class="font-mono text-xs">{{ $n->data['reference'] }}</span>
                       @endif
-                    </p>
-                  @endif
+                    @endif
+                  </p>
                 </div>
                 
                 {{-- Timestamp --}}

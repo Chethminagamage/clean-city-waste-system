@@ -28,6 +28,9 @@ class Feedback extends Model
         'resolved_at',
         'response_rating',
         'response_rated_at',
+        'response_read_at',
+        'subject',
+        'type',
     ];
 
     // Enable timestamps if your table has created_at and updated_at columns
@@ -38,6 +41,7 @@ class Feedback extends Model
         'admin_responded_at' => 'datetime',
         'resolved_at' => 'datetime',
         'response_rated_at' => 'datetime',
+        'response_read_at' => 'datetime',
     ];
 
     // Define relationship to user

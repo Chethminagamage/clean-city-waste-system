@@ -17,11 +17,13 @@ class BinReportController extends Controller
      */
     public function index()
     {
-        $reports = WasteReport::with('resident')
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $query = WasteReport::with('resident')->orderBy('created_at', 'desc');
+        if (request('filter') === 'urgent') {
+            $query->where('is_urgent', true);
+        }
+        $reports = $query->paginate(10);
 
-        return view('admin.bin_reports', compact('reports'));
+        return view('admin.binreports', compact('reports'));
     }
 
     /**
@@ -133,6 +135,8 @@ class BinReportController extends Controller
             'collector_id' => ['required', 'exists:users,id'],
         ]);
 
+        $assignedCollector = User::find($validated['collector_id']);
+
         $report->collector_id = $validated['collector_id'];
         $report->status = WasteReport::ST_ASSIGNED; // 'assigned'
         $report->assigned_at = now();
@@ -144,7 +148,6 @@ class BinReportController extends Controller
         }
 
         // Notify the assigned collector
-        $assignedCollector = User::find($validated['collector_id']);
         if ($assignedCollector) {
             $assignedCollector->notify(new ReportAssignedToCollector($report));
         }
@@ -160,7 +163,7 @@ class BinReportController extends Controller
         $report = WasteReport::with(['resident', 'collector'])
             ->findOrFail($id);
             
-        return view('admin.report_details', compact('report'));
+    return view('admin.report_details', compact('report'));
     }
     
     /**

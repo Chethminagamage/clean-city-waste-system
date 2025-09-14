@@ -396,7 +396,7 @@
                                     </div>
 
                                     <button 
-                                        type="submit" 
+                                        type="submit" dusk="login-button"
                                         class="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 focus:ring-4 focus:ring-green-200"
                                     >
                                         <i class="fas fa-sign-in-alt mr-2"></i>

@@ -1,3 +1,4 @@
+
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -44,6 +45,24 @@ Route::get('/company', [PublicPagesController::class, 'company'])->name('public.
 Route::get('/blog', [PublicPagesController::class, 'blog'])->name('public.blog');
 Route::get('/contact', [PublicPagesController::class, 'contact'])->name('public.contact');
 
+
+/*
+|--------------------------------------------------------------------------
+| Universal Profile Route (redirects based on user role)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->get('/profile', function () {
+    $user = auth()->user();
+    
+    switch ($user->role) {
+        case 'admin':
+            return redirect('/admin/profile');
+        case 'resident':
+        default:
+            return redirect('/resident/profile/edit');
+    }
+})->name('profile');
+
 /*
 |--------------------------------------------------------------------------
 | Email Verification (Manual Implementation - Residents Only)
@@ -75,7 +94,7 @@ Route::get('/email/verify/{id}/{hash}', function (Request $request, $id, $hash) 
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:resident'])->prefix('resident')->name('resident.')->group(function () {
-    Route::get('/dashboard', [ResidentReportController::class, 'dashboard'])->name('dashboard');
+    Route::get('/dashboard', [ResidentReportController::class, 'dashboard'])->name('dashboard.main');
     Route::post('/report/store', [ResidentReportController::class, 'store'])->name('report.store');
     Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.submit');
 
@@ -131,7 +150,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications/{notification}', [NotificationController::class, 'show'])
         ->name('notifications.show')
         ->whereUuid('notification'); 
-    Route::get('/notifications/{notification}', [NotificationController::class, 'open'])
+    Route::get('/notifications/{notification}/open', [NotificationController::class, 'open'])
         ->name('notifications.open');
 });
 
@@ -184,7 +203,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/login', [AdminLoginController::class, 'login'])->name('login.submit');
 
     Route::middleware(['auth:admin'])->group(function () {
-        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard.main');
         Route::get('/profile', [AdminProfileController::class, 'edit'])->name('profile.edit');
         Route::post('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
         Route::delete('/profile/photo', [AdminProfileController::class, 'removePhoto'])->name('profile.remove-photo');
@@ -253,8 +272,17 @@ Route::prefix('collector')->name('collector.')->group(function () {
                 ->middleware('guest')
                 ->name('password.store');
 
+    // Register dashboard route as collector.dashboard
+    Route::get('/dashboard', [CollectorDashboardController::class, 'index'])
+        ->middleware('auth:collector')
+        ->name('dashboard');
+
+    // Alias route for collector.dashboard.main (redirect to dashboard)
+    Route::get('/dashboard-main-alias', function() {
+        return redirect()->route('collector.dashboard');
+    })->middleware('auth:collector')->name('dashboard.main');
+    // Continue with other routes as before
     Route::middleware(['auth:collector'])->group(function () {
-        Route::get('/dashboard', [CollectorDashboardController::class, 'index'])->name('dashboard');
         Route::get('/profile', [CollectorDashboardController::class, 'profile'])->name('profile');
         Route::put('/profile', [CollectorDashboardController::class, 'updateProfile'])->name('profile.update');
         Route::put('/password', [CollectorDashboardController::class, 'updatePassword'])->name('password.update');

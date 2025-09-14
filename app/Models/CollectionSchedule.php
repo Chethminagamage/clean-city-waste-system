@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class CollectionSchedule extends Model {
+    use HasFactory;
+    
     protected $fillable = ['area_id','date','waste_type','window_from','window_to','notes', 'frequency'];
     
     /**

@@ -7,7 +7,7 @@
         <div class="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div class="flex items-center space-x-4">
-                    <a href="{{ route('collector.dashboard') }}" 
+                    <a href="{{ route('collector.dashboard.main') }}" 
                        class="w-10 h-10 bg-white/20 dark:bg-white/30 rounded-full flex items-center justify-center hover:bg-white/30 dark:hover:bg-white/40 transition-colors duration-200">
                         <i class="fas fa-arrow-left"></i>
                     </a>

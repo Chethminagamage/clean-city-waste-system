@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="/Applications/XAMPP/xamppfiles/htdocs/CleanCity/phpunit.dusk.xml" tests="4" assertions="3" errors="1" failures="0" skipped="0" time="8.137279">
+    <testsuite name="Browser Test Suite" tests="4" assertions="3" errors="1" failures="0" skipped="0" time="8.137279">
+      <testsuite name="Tests\Browser\AuthTest" file="/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/AuthTest.php" tests="4" assertions="3" errors="1" failures="0" skipped="0" time="8.137279">
+        <testcase name="resident_can_login" file="/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/AuthTest.php" line="13" class="Tests\Browser\AuthTest" classname="Tests.Browser.AuthTest" assertions="1" time="3.790490">
+          <system-out>
+</system-out>
+        </testcase>
+        <testcase name="collector_can_login" file="/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/AuthTest.php" line="26" class="Tests\Browser\AuthTest" classname="Tests.Browser.AuthTest" assertions="1" time="1.140501">
+          <system-out>
+</system-out>
+        </testcase>
+        <testcase name="admin_can_login" file="/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/AuthTest.php" line="39" class="Tests\Browser\AuthTest" classname="Tests.Browser.AuthTest" assertions="1" time="0.930726">
+          <system-out>
+</system-out>
+        </testcase>
+        <testcase name="user_can_reset_password" file="/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/AuthTest.php" line="52" class="Tests\Browser\AuthTest" classname="Tests.Browser.AuthTest" assertions="0" time="2.275561">
+          <error type="Facebook\WebDriver\Exception\NoSuchElementException">Tests\Browser\AuthTest::user_can_reset_password
+Facebook\WebDriver\Exception\NoSuchElementException: no such element: Unable to locate element: {"method":"css selector","selector":"body input[name=email]"}
+  (Session info: chrome=140.0.7339.133)
+
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/php-webdriver/webdriver/lib/Exception/WebDriverException.php:120
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/php-webdriver/webdriver/lib/Remote/HttpCommandExecutor.php:359
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/php-webdriver/webdriver/lib/Remote/RemoteWebDriver.php:601
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/php-webdriver/webdriver/lib/Remote/RemoteWebDriver.php:217
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/laravel/dusk/src/ElementResolver.php:372
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/laravel/dusk/src/ElementResolver.php:351
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/laravel/dusk/src/ElementResolver.php:89
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/laravel/dusk/src/Concerns/InteractsWithElements.php:125
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/AuthTest.php:56
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/laravel/dusk/src/Concerns/ProvidesBrowser.php:70
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/AuthTest.php:54</error>
+          <system-out>
+</system-out>
+        </testcase>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+</testsuites>

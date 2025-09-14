@@ -50,6 +50,16 @@
                     </div>
                 </div>
 
+                <!-- Feedback Subject -->
+                @if($feedback->subject)
+                <div class="mb-6">
+                    <h3 class="text-sm font-medium text-gray-700 mb-2">Subject</h3>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <p class="text-gray-900 font-medium">{{ $feedback->subject }}</p>
+                    </div>
+                </div>
+                @endif
+
                 <!-- Feedback Message -->
                 @if($feedback->message)
                 <div class="mb-6">

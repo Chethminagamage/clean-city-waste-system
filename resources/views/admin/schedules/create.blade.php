@@ -4,7 +4,7 @@
     <h1 class="text-2xl font-bold mb-4">Create Collection Schedule</h1>
     
     <div class="mb-4">
-        <a href="{{ route('admin.dashboard') }}" class="text-blue-500 hover:underline">Dashboard</a> / 
+        <a href="{{ route('admin.dashboard.main') }}" class="text-blue-500 hover:underline">Dashboard</a> / 
         <a href="{{ route('admin.schedules.index') }}" class="text-blue-500 hover:underline">Collection Schedules</a> / 
         <span class="text-gray-700">Create New</span>
     </div>

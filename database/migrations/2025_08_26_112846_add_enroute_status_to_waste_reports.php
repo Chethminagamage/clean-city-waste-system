@@ -12,7 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement("ALTER TABLE waste_reports MODIFY COLUMN status ENUM('pending','assigned','enroute','collected','closed','cancelled')");
+        // For SQLite compatibility, skip enum modifications
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE waste_reports MODIFY COLUMN status ENUM('pending','assigned','enroute','collected','closed','cancelled')");
+        }
     }
 
     /**
@@ -20,6 +23,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE waste_reports MODIFY COLUMN status ENUM('pending','assigned','collected','closed','cancelled')");
+        // For SQLite compatibility, skip enum modifications
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE waste_reports MODIFY COLUMN status ENUM('pending','assigned','collected','closed','cancelled')");
+        }
     }
 };

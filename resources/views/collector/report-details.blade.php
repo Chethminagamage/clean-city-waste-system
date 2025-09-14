@@ -229,7 +229,7 @@
                         @endif
 
                         {{-- Back to Dashboard --}}
-                        <a href="{{ route('collector.dashboard') }}" 
+                        <a href="{{ route('collector.dashboard.main') }}" 
                            class="w-full flex items-center justify-center px-4 py-3 bg-gray-600 hover:bg-gray-700 dark:bg-gray-600 dark:hover:bg-gray-700 text-white rounded-lg transition-all duration-200 font-semibold shadow-md hover:shadow-lg">
                             <i class="fas fa-arrow-left mr-2"></i>
                             Back to Dashboard

@@ -3,7 +3,7 @@
     <div class="container mx-auto px-4 sm:px-6">
         <div class="flex justify-between items-center py-4">
             <!-- Logo and Brand -->
-            <a href="{{ route('collector.dashboard') }}" class="flex items-center space-x-4 hover:opacity-80 transition-opacity duration-200">
+            <a href="{{ route('collector.dashboard.main') }}" class="flex items-center space-x-4 hover:opacity-80 transition-opacity duration-200">
                 <div class="w-10 h-10 bg-white dark:bg-gray-700 rounded-xl flex items-center justify-center shadow-lg p-1 transition-colors duration-300">
                     <img src="{{ asset('images/logo.png') }}" alt="Clean City Logo" class="w-8 h-8 object-contain">
                 </div>
@@ -15,8 +15,8 @@
 
             <!-- Navigation Links (Desktop) -->
             <div class="hidden md:flex items-center space-x-6">
-                <a href="{{ route('collector.dashboard') }}" 
-                   class="flex items-center text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 font-medium transition-colors duration-200 {{ request()->routeIs('collector.dashboard') ? 'text-orange-600 dark:text-orange-400' : '' }}">
+                <a href="{{ route('collector.dashboard.main') }}" 
+                   class="flex items-center text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 font-medium transition-colors duration-200 {{ request()->routeIs('collector.dashboard.main') ? 'text-orange-600 dark:text-orange-400' : '' }}">
                     
                     Dashboard
                 </a>
@@ -178,8 +178,8 @@
     <!-- Mobile Menu -->
     <div id="mobileMenu" class="md:hidden bg-orange-50 dark:bg-gray-700 border-t border-orange-200 dark:border-gray-600 hidden transition-colors duration-300">
         <div class="px-4 py-3 space-y-2">
-            <a href="{{ route('collector.dashboard') }}" 
-               class="block py-2 px-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-900/50 hover:text-orange-600 dark:hover:text-orange-400 font-medium transition-colors duration-200 {{ request()->routeIs('collector.dashboard') ? 'bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400' : '' }}">
+            <a href="{{ route('collector.dashboard.main') }}" 
+               class="block py-2 px-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-900/50 hover:text-orange-600 dark:hover:text-orange-400 font-medium transition-colors duration-200 {{ request()->routeIs('collector.dashboard.main') ? 'bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400' : '' }}">
                 <i class="fas fa-tachometer-alt mr-2"></i>
                 Dashboard
             </a>

@@ -25,7 +25,16 @@ class RegistrationTest extends TestCase
             'password_confirmation' => 'password',
         ]);
 
-        $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        // User is not automatically authenticated - email verification required
+        $this->assertGuest();
+        $response->assertRedirect(route('verification.notice'));
+        
+        // Verify user was created in database
+        $this->assertDatabaseHas('users', [
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'role' => 'resident',
+            'email_verified_at' => null, // Should be null initially
+        ]);
     }
 }

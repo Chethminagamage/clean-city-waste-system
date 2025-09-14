@@ -15,10 +15,13 @@ return new class extends Migration
         // First, update any existing 'auto' values to 'light'
         DB::table('users')->where('theme_preference', 'auto')->update(['theme_preference' => 'light']);
         
-        // Then modify the enum to remove 'auto'
-        Schema::table('users', function (Blueprint $table) {
-            $table->enum('theme_preference', ['light', 'dark', 'system'])->default('light')->change();
-        });
+        // SQLite doesn't support changing enum constraints, so we skip this for SQLite
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            // Then modify the enum to remove 'auto'
+            Schema::table('users', function (Blueprint $table) {
+                $table->enum('theme_preference', ['light', 'dark', 'system'])->default('light')->change();
+            });
+        }
     }
 
     /**
@@ -26,9 +29,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Add 'auto' back to the enum
-        Schema::table('users', function (Blueprint $table) {
-            $table->enum('theme_preference', ['light', 'dark', 'auto', 'system'])->default('light')->change();
-        });
+        // SQLite doesn't support changing enum constraints, so we skip this for SQLite
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            // Add 'auto' back to the enum
+            Schema::table('users', function (Blueprint $table) {
+                $table->enum('theme_preference', ['light', 'dark', 'auto', 'system'])->default('light')->change();
+            });
+        }
     }
 };

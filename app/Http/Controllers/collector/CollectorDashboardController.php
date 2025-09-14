@@ -44,10 +44,17 @@ class CollectorDashboardController extends Controller
 
     public function updateLocation(Request $request)
     {
-        $request->validate([
-            'latitude'  => ['required','numeric'],
-            'longitude' => ['required','numeric'],
-        ]);
+        try {
+            $validated = $request->validate([
+                'latitude'  => ['required','numeric'],
+                'longitude' => ['required','numeric'],
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->expectsJson() || $request->isJson() || $request->wantsJson()) {
+                return response()->json(['errors' => $e->errors()], 422);
+            }
+            throw $e;
+        }
 
         $user = Auth::guard('collector')->user();
         $user->latitude  = (float) $request->latitude;
@@ -94,37 +101,30 @@ class CollectorDashboardController extends Controller
             return back()->with('error', 'Unauthorized');
         }
 
-        if ($report->status === WasteReport::ST_ENROUTE) {
-            $report->status = WasteReport::ST_COLLECTED;
+        if ($report->status === WasteReport::ST_ASSIGNED) {
+            $report->status = WasteReport::ST_ENROUTE;
             $report->save();
 
-            // Award points to resident for completed collection
+            // Send notification about status change
             if ($report->resident) {
-                try {
-                    $this->gamificationService->awardPoints(
-                        $report->resident,
-                        'report_collected',
-                        null,
-                        'Earned points for completed waste collection',
-                        [
-                            'report_id' => $report->id,
-                            'waste_type' => $report->waste_type,
-                            'collection_date' => now()->toDateString()
-                        ]
-                    );
-                } catch (\Exception $e) {
-                    // Log error but don't fail the collection
-                    \Log::error('Failed to award collection points: ' . $e->getMessage());
-                }
+                $report->resident->notify(new ReportStatusUpdated($report, WasteReport::ST_ENROUTE));
+            }
 
-                // Send notification about status change
+            return back()->with('success', 'Collection started successfully.');
+        } elseif ($report->status === WasteReport::ST_ENROUTE) {
+            $report->status = WasteReport::ST_COLLECTED;
+            $report->collected_at = now();
+            $report->save();
+
+            // Send notification about status change
+            if ($report->resident) {
                 $report->resident->notify(new ReportStatusUpdated($report, WasteReport::ST_COLLECTED));
             }
 
-            return back()->with('success', 'Marked as collected successfully.');
+            return back()->with('success', 'Report marked as collected.');
         }
 
-        return back()->with('error', 'This report cannot be collected at this time.');
+        return back()->with('error', 'This report cannot be started or completed at this time.');
     }
 
     /**
@@ -353,7 +353,7 @@ class CollectorDashboardController extends Controller
             'address' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $user = Auth::user();
+        $user = Auth::guard('collector')->user();
         $user->name = $request->name;
         $user->email = $request->email;
         $user->contact = $request->phone;
@@ -372,7 +372,7 @@ class CollectorDashboardController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $user = Auth::user();
+        $user = Auth::guard('collector')->user();
         $user->password = Hash::make($request->password);
         $user->save();
 
@@ -388,7 +388,7 @@ class CollectorDashboardController extends Controller
             'profile_image' => 'required|image|mimes:jpeg,png,jpg|max:2048', // 2MB max
         ]);
 
-        $user = Auth::user();
+        $user = Auth::guard('collector')->user();
 
         // Delete old profile image if exists
         if ($user->profile_image && Storage::disk('public')->exists($user->profile_image)) {
@@ -410,7 +410,7 @@ class CollectorDashboardController extends Controller
      */
     public function removeProfilePicture()
     {
-        $user = Auth::user();
+        $user = Auth::guard('collector')->user();
 
         // Delete profile image if exists
         if ($user->profile_image && Storage::disk('public')->exists($user->profile_image)) {

@@ -41,7 +41,7 @@ class LoginController extends Controller
             $request->session()->regenerate();
 
             // Redirect to dashboard
-            return redirect()->route('admin.dashboard');
+            return redirect()->route('admin.dashboard.main');
         }
 
         // Invalid credentials

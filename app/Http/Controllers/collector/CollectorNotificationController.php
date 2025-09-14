@@ -40,7 +40,6 @@ class CollectorNotificationController extends Controller
     public function getRecent(Request $request)
     {
         $collector = $request->user();
-        
         $notifications = $collector->notifications()
             ->latest()
             ->take(5)
@@ -48,17 +47,12 @@ class CollectorNotificationController extends Controller
             ->map(function ($notification) {
                 return [
                     'id' => $notification->id,
-                    'type' => $notification->data['type'] ?? 'general',
-                    'message' => $notification->data['message'] ?? 'New notification',
-                    'reference' => $notification->data['reference'] ?? '',
-                    'urgency' => $notification->data['urgency'] ?? 'normal',
-                    'created_at' => $notification->created_at->diffForHumans(),
-                    'read_at' => $notification->read_at,
-                    'url' => $notification->data['url'] ?? '#'
+                    'type' => $notification->type,
+                    'data' => $notification->data,
+                    'created_at' => $notification->created_at->toJSON(),
                 ];
             });
-
-        return response()->json(['notifications' => $notifications]);
+        return response()->json($notifications);
     }
 
     /**
@@ -104,16 +98,13 @@ class CollectorNotificationController extends Controller
      */
     public function show(Request $request, DatabaseNotification $notification)
     {
-        // Security: ensure the notification belongs to this collector
-        abort_unless($notification->notifiable_id === $request->user()->id, 403);
-
-        // Mark as read
-        $notification->markAsRead();
-
-        // Redirect to the stored URL
-        $url = $notification->data['url'] ?? route('collector.dashboard');
-
-        return redirect()->to($url);
+    // Security: ensure the notification belongs to this collector
+    abort_unless($notification->notifiable_id === $request->user()->id, 403);
+    // Mark as read
+    $notification->markAsRead();
+    // Redirect to the stored URL
+    $url = $notification->data['url'] ?? route('collector.dashboard');
+    return redirect()->to($url);
     }
 
     /**

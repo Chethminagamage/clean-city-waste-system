@@ -4,7 +4,7 @@
     <div class="p-6">
         <div class="mb-6">
             <h1 class="text-3xl font-bold text-gray-800 mb-2">Submitted Bin Reports</h1>
-            <p class="text-gray-600">Manage and track all waste collection reports</p>
+            <p class="text-gray-600">Manage and track all waste collection report</p>
         </div>
 
         <div class="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -90,6 +90,7 @@
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 whitespace-nowrap text-center w-32">
+                                
                                     <!-- Single View Button -->
                                     <a href="{{ route('admin.reports.show', $report->id) }}" 
                                        class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"

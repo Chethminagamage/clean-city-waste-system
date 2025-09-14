@@ -44,7 +44,7 @@ class CollectionScheduleController extends Controller
         $validated = $request->validate([
             'area_id' => 'required|exists:areas,id',
             'waste_type' => 'required|string',
-            'date' => 'required|date',
+            'date' => 'required|date|after_or_equal:today',
             'frequency' => 'required|string|in:weekly,bi-weekly,monthly',
             'notes' => 'nullable|string',
         ]);

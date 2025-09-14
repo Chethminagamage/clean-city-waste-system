@@ -200,6 +200,14 @@ class AnalyticsController extends Controller
         $dateFrom = Carbon::now()->subDays($timeRange);
 
         return [
+            // Required for tests
+            'total_reports' => WasteReport::where('created_at', '>=', $dateFrom)->count(),
+            'completed_reports' => WasteReport::where('status', 'collected')
+                ->where('updated_at', '>=', $dateFrom)->count(),
+            'pending_reports' => WasteReport::whereIn('status', ['pending', 'assigned'])
+                ->where('created_at', '>=', $dateFrom)->count(),
+            
+            // Additional metrics for dashboard
             'total_collectors' => User::where('role', 'collector')->count(),
             'active_collectors' => User::where('role', 'collector')
                 ->whereHas('wasteReports', function($q) use ($dateFrom) {

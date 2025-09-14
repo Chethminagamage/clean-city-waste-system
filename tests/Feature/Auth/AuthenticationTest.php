@@ -27,7 +27,8 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        // Since users are created as 'resident' by default, they should redirect to resident dashboard
+        $response->assertRedirect(route('resident.dashboard'));
     }
 
     public function test_users_can_not_authenticate_with_invalid_password(): void

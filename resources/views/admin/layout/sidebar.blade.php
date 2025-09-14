@@ -33,8 +33,8 @@
                 </h3>
                 <ul class="space-y-1">
                     {{-- Dashboard --}}
-                    <li class="px-3 py-2 rounded-sm {{ request()->routeIs('admin.dashboard') ? 'bg-white bg-opacity-20' : '' }}">
-                        <a class="flex items-center text-white hover:text-green-200 truncate transition duration-150 {{ request()->routeIs('admin.dashboard') ? 'text-green-100' : 'text-green-200' }}" href="{{ route('admin.dashboard') ?? '#' }}">
+                    <li class="px-3 py-2 rounded-sm {{ request()->routeIs('admin.dashboard.main') ? 'bg-white bg-opacity-20' : '' }}">
+                        <a class="flex items-center text-white hover:text-green-200 truncate transition duration-150 {{ request()->routeIs('admin.dashboard.main') ? 'text-green-100' : 'text-green-200' }}" href="{{ route('admin.dashboard.main') ?? '#' }}">
                             <div class="flex items-center justify-center w-6 h-6 shrink-0">
                                 <i class="fas fa-home text-lg"></i>
                             </div>

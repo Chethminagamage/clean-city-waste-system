@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="/Applications/XAMPP/xamppfiles/htdocs/CleanCity/phpunit.dusk.xml" tests="7" assertions="8" errors="1" failures="5" skipped="0" time="11.363223">
+    <testsuite name="Browser Test Suite" tests="7" assertions="8" errors="1" failures="5" skipped="0" time="11.363223">
+      <testsuite name="Tests\Browser\CollectorDashboardTest" file="/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/CollectorDashboardTest.php" tests="7" assertions="8" errors="1" failures="5" skipped="0" time="11.363223">
+        <testcase name="collector_can_view_assigned_reports" file="/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/CollectorDashboardTest.php" line="12" class="Tests\Browser\CollectorDashboardTest" classname="Tests.Browser.CollectorDashboardTest" assertions="1" time="4.259101">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Browser\CollectorDashboardTest::collector_can_view_assigned_reports
+Actual path [/collector/login] does not equal expected path [/collector/dashboard].
+Failed asserting that '/collector/login' matches PCRE pattern "/^\/collector\/dashboard$/u".
+
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/laravel/dusk/src/Concerns/MakesUrlAssertions.php:219
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/CollectorDashboardTest.php:19
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/laravel/dusk/src/Concerns/ProvidesBrowser.php:70
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/CollectorDashboardTest.php:14</failure>
+          <system-out>
+</system-out>
+        </testcase>
+        <testcase name="collector_can_view_report_details" file="/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/CollectorDashboardTest.php" line="25" class="Tests\Browser\CollectorDashboardTest" classname="Tests.Browser.CollectorDashboardTest" assertions="1" time="1.188472">
+          <error type="Facebook\WebDriver\Exception\StaleElementReferenceException">Tests\Browser\CollectorDashboardTest::collector_can_view_report_details
+Facebook\WebDriver\Exception\StaleElementReferenceException: stale element reference: stale element not found
+  (Session info: chrome=140.0.7339.133)
+
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/php-webdriver/webdriver/lib/Exception/WebDriverException.php:132
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/php-webdriver/webdriver/lib/Remote/HttpCommandExecutor.php:359
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/php-webdriver/webdriver/lib/Remote/RemoteWebDriver.php:601
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/php-webdriver/webdriver/lib/Remote/RemoteExecuteMethod.php:23
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/php-webdriver/webdriver/lib/Remote/RemoteWebElement.php:300
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/laravel/dusk/src/Browser.php:331
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/laravel/dusk/src/Concerns/ProvidesBrowser.php:145
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/laravel/framework/src/Illuminate/Collections/Traits/EnumeratesValues.php:271
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/laravel/dusk/src/Concerns/ProvidesBrowser.php:143
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/laravel/dusk/src/Concerns/ProvidesBrowser.php:72
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/CollectorDashboardTest.php:27</error>
+          <system-out>
+</system-out>
+        </testcase>
+        <testcase name="collector_can_confirm_assignment" file="/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/CollectorDashboardTest.php" line="48" class="Tests\Browser\CollectorDashboardTest" classname="Tests.Browser.CollectorDashboardTest" assertions="1" time="2.035795">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Browser\CollectorDashboardTest::collector_can_confirm_assignment
+Actual path [/collector/login] does not equal expected path [/collector/dashboard].
+Failed asserting that '/collector/login' matches PCRE pattern "/^\/collector\/dashboard$/u".
+
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/laravel/dusk/src/Concerns/MakesUrlAssertions.php:219
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/CollectorDashboardTest.php:55
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/laravel/dusk/src/Concerns/ProvidesBrowser.php:70
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/CollectorDashboardTest.php:50</failure>
+          <system-out>
+</system-out>
+        </testcase>
+        <testcase name="collector_can_quick_complete_report" file="/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/CollectorDashboardTest.php" line="70" class="Tests\Browser\CollectorDashboardTest" classname="Tests.Browser.CollectorDashboardTest" assertions="1" time="2.854155">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Browser\CollectorDashboardTest::collector_can_quick_complete_report
+Actual path [/collector/login] does not equal expected path [/collector/dashboard].
+Failed asserting that '/collector/login' matches PCRE pattern "/^\/collector\/dashboard$/u".
+
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/laravel/dusk/src/Concerns/MakesUrlAssertions.php:219
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/CollectorDashboardTest.php:77
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/laravel/dusk/src/Concerns/ProvidesBrowser.php:70
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/CollectorDashboardTest.php:72</failure>
+          <system-out>
+</system-out>
+        </testcase>
+        <testcase name="collector_can_view_all_reports" file="/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/CollectorDashboardTest.php" line="91" class="Tests\Browser\CollectorDashboardTest" classname="Tests.Browser.CollectorDashboardTest" assertions="1" time="0.239560">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Browser\CollectorDashboardTest::collector_can_view_all_reports
+Did not see expected text [All Reports] within element [body].
+Failed asserting that false is true.
+
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/laravel/dusk/src/Concerns/MakesAssertions.php:182
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/laravel/dusk/src/Concerns/MakesAssertions.php:153
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/CollectorDashboardTest.php:96
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/laravel/dusk/src/Concerns/ProvidesBrowser.php:70
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/CollectorDashboardTest.php:93</failure>
+          <system-out>
+</system-out>
+        </testcase>
+        <testcase name="collector_can_view_completed_reports" file="/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/CollectorDashboardTest.php" line="101" class="Tests\Browser\CollectorDashboardTest" classname="Tests.Browser.CollectorDashboardTest" assertions="1" time="0.197484">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Browser\CollectorDashboardTest::collector_can_view_completed_reports
+Did not see expected text [Completed Reports] within element [body].
+Failed asserting that false is true.
+
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/laravel/dusk/src/Concerns/MakesAssertions.php:182
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/laravel/dusk/src/Concerns/MakesAssertions.php:153
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/CollectorDashboardTest.php:106
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/vendor/laravel/dusk/src/Concerns/ProvidesBrowser.php:70
+/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/CollectorDashboardTest.php:103</failure>
+          <system-out>
+</system-out>
+        </testcase>
+        <testcase name="collector_can_access_dashboard_sections" file="/Applications/XAMPP/xamppfiles/htdocs/CleanCity/tests/Browser/CollectorDashboardTest.php" line="111" class="Tests\Browser\CollectorDashboardTest" classname="Tests.Browser.CollectorDashboardTest" assertions="2" time="0.588657">
+          <system-out>
+</system-out>
+        </testcase>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+</testsuites>

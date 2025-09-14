@@ -34,15 +34,31 @@ class TwoFactorController extends Controller
             'otp' => 'required|digits:6'
         ]);
 
+        $userId = session('2fa:user:id');
+        if (!$userId) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'No active 2FA session'], 401);
+            }
+            return redirect()->route('login');
+        }
+
         if ($request->otp == session('2fa:otp')) {
-            $user = User::findOrFail(session('2fa:user:id'));
+            $user = User::findOrFail($userId);
             Auth::login($user);
             $request->session()->regenerate();
 
             // Clear 2FA session values
             session()->forget(['2fa:user:id', '2fa:otp']);
 
+            if ($request->expectsJson()) {
+                return response()->json(['success' => true, 'redirect' => route('resident.dashboard')]);
+            }
+
             return redirect()->route('resident.dashboard');
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['error' => 'Invalid OTP'], 422);
         }
 
         return redirect()->route('login')->with([
@@ -55,6 +71,9 @@ class TwoFactorController extends Controller
     {
         $userId = session('2fa:user:id');
         if (!$userId) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'No active 2FA session'], 401);
+            }
             return redirect()->route('login');
         }
 
@@ -66,6 +85,10 @@ class TwoFactorController extends Controller
 
         // Send email
         Mail::to($user->email)->send(new OTPVerificationMail($otp));
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'OTP sent successfully']);
+        }
 
         return redirect()->route('login')->with([
             'show_2fa_modal' => true,

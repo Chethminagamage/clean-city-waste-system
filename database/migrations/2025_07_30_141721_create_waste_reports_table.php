@@ -21,7 +21,8 @@ return new class extends Migration
             $table->decimal('longitude', 10, 7);
             $table->string('image_path')->nullable();
             $table->date('report_date')->nullable();
-            $table->enum('status', ['pending', 'assigned', 'in_progress', 'collected', 'closed', 'cancelled'])->default('pending');
+            // Use string instead of enum for SQLite compatibility
+            $table->string('status', 50)->default('pending'); 
             $table->string('waste_type')->nullable();
             $table->text('additional_details')->nullable();
             $table->timestamp('assigned_at')->nullable();

@@ -637,7 +637,14 @@
                     Completed
                   </span>
                 </div>
-                <p class="text-gray-600 dark:text-gray-400 text-sm mt-2">{{ $report->collected_at->format('l, M d, Y \a\t H:i') }}</p>
+        <p class="text-gray-600 dark:text-gray-400 text-sm mt-2">
+          @if($report->collected_at)
+            @php
+              $collectedAt = $report->collected_at instanceof \Carbon\Carbon ? $report->collected_at : \Carbon\Carbon::parse($report->collected_at);
+            @endphp
+            {{ $collectedAt->format('l, M d, Y \a\t H:i') }}
+          @endif
+        </p>
                 <p class="text-gray-500 dark:text-gray-500 text-xs mt-1">Your waste has been successfully collected</p>
               </div>
             </div>

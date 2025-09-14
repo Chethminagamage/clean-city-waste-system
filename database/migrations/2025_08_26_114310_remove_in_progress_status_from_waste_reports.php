@@ -15,8 +15,10 @@ return new class extends Migration
         // First update any existing in_progress records to collected
         DB::table('waste_reports')->where('status', 'in_progress')->update(['status' => 'collected']);
         
-        // Then modify the enum to remove in_progress
-        DB::statement("ALTER TABLE waste_reports MODIFY COLUMN status ENUM('pending','assigned','enroute','collected','closed','cancelled')");
+        // Then modify the enum to remove in_progress (skip for SQLite)
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE waste_reports MODIFY COLUMN status ENUM('pending','assigned','enroute','collected','closed','cancelled')");
+        }
     }
 
     /**
@@ -24,6 +26,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE waste_reports MODIFY COLUMN status ENUM('pending','assigned','enroute','in_progress','collected','closed','cancelled')");
+        // Skip for SQLite compatibility
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE waste_reports MODIFY COLUMN status ENUM('pending','assigned','enroute','in_progress','collected','closed','cancelled')");
+        }
     }
 };

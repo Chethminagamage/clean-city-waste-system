@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('waste_reports', function (Blueprint $table) {
-            //
+            $table->boolean('is_urgent')->default(false);
+            $table->timestamp('urgent_reported_at')->nullable();
+            $table->text('urgent_message')->nullable();
         });
     }
 
@@ -22,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('waste_reports', function (Blueprint $table) {
-            //
+            $table->dropColumn(['is_urgent', 'urgent_reported_at', 'urgent_message']);
         });
     }
 };
