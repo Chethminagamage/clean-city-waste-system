@@ -425,7 +425,7 @@
                 </div>
                 <div class="flex items-center">
                     <i class="fas fa-phone mr-2"></i>
-                    +94 81 456 7890
+                    +94 81 455 7890
                 </div>
             </div>
             <div class="flex items-center space-x-3">

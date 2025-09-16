@@ -21,7 +21,7 @@ class GoogleController extends Controller
         $intent = request()->query('intent', 'signin'); // default to signin
         session(['google_auth_intent' => $intent]);
         
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')->stateless()->redirect();
     }
 
     /**
@@ -32,7 +32,7 @@ class GoogleController extends Controller
         try {
             \Log::info('Google callback started');
             
-            $googleUser = Socialite::driver('google')->user();
+            $googleUser = Socialite::driver('google')->stateless()->user();
             \Log::info('Google user data received', [
                 'id' => $googleUser->id,
                 'name' => $googleUser->name,
@@ -138,11 +138,89 @@ class GoogleController extends Controller
             
         } catch (\Laravel\Socialite\Two\InvalidStateException $e) {
             \Log::error('Google OAuth Invalid State Exception: ' . $e->getMessage());
-            $intent = session('google_auth_intent', 'signin');
-            session()->forget('google_auth_intent'); // Clear the intent on error
-            $redirectRoute = $intent === 'signup' ? 'register' : 'login';
-            return redirect()->route($redirectRoute)->with('error', 
-                'Google authentication session expired. Please try again.');
+            \Log::info('Attempting stateless fallback for Invalid State Exception');
+            
+            // Fallback: Try stateless authentication as a recovery mechanism
+            try {
+                $googleUser = Socialite::driver('google')->stateless()->user();
+                \Log::info('Stateless fallback successful for Google OAuth');
+                
+                // Continue with the normal flow if stateless works
+                $intent = session('google_auth_intent', 'signin');
+                $existingUser = User::where('email', $googleUser->email)->first();
+                
+                if ($intent === 'signup') {
+                    if ($existingUser) {
+                        if (!$existingUser->google_id) {
+                            $existingUser->update([
+                                'google_id' => $googleUser->id,
+                                'avatar' => $googleUser->avatar,
+                                'email_verified_at' => $existingUser->email_verified_at ?? now(),
+                            ]);
+                        }
+                        session()->forget('google_auth_intent');
+                        return redirect()->route('login')->with('error', 
+                            'An account with this email already exists. Please sign in instead.');
+                    }
+                    
+                    // Create new user
+                    $user = User::create([
+                        'name' => $googleUser->name,
+                        'email' => $googleUser->email,
+                        'google_id' => $googleUser->id,
+                        'avatar' => $googleUser->avatar,
+                        'password' => Hash::make(Str::random(32)),
+                        'role' => 'resident',
+                        'email_verified_at' => now(),
+                    ]);
+                    
+                    Auth::login($user);
+                    session()->forget('google_auth_intent');
+                    return redirect()->route('resident.dashboard')->with('success', 
+                        'Welcome to CleanCity! Your account has been created and you are now logged in.');
+                        
+                } else {
+                    // Sign in flow
+                    if (!$existingUser) {
+                        session()->forget('google_auth_intent');
+                        return redirect()->route('login')->with('error', 
+                            'No account found with this email. Please create an account first or use a different email.');
+                    }
+                    
+                    if (!$existingUser->google_id) {
+                        $existingUser->update([
+                            'google_id' => $googleUser->id,
+                            'avatar' => $googleUser->avatar,
+                            'email_verified_at' => $existingUser->email_verified_at ?? now(),
+                        ]);
+                    } else {
+                        $existingUser->update([
+                            'avatar' => $googleUser->avatar,
+                            'email_verified_at' => $existingUser->email_verified_at ?? now(),
+                        ]);
+                    }
+                    
+                    Auth::login($existingUser);
+                    
+                    if ($existingUser->role === 'resident') {
+                        session()->forget('google_auth_intent');
+                        return redirect()->route('resident.dashboard')->with('success', 
+                            'Welcome back! You have been logged in with Google.');
+                    } else {
+                        session()->forget('google_auth_intent');
+                        return redirect()->route('login')->with('success', 
+                            'Account found! Please use the regular login for non-resident accounts.');
+                    }
+                }
+                
+            } catch (\Exception $fallbackException) {
+                \Log::error('Stateless fallback also failed: ' . $fallbackException->getMessage());
+                $intent = session('google_auth_intent', 'signin');
+                session()->forget('google_auth_intent');
+                $redirectRoute = $intent === 'signup' ? 'register' : 'login';
+                return redirect()->route($redirectRoute)->with('error', 
+                    'Google authentication session expired. Please try again or use regular login.');
+            }
         } catch (\Exception $e) {
             \Log::error('Google OAuth callback error: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
