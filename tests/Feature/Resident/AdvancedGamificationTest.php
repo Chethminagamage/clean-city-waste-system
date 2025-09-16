@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 class AdvancedGamificationTest extends TestCase
 {
-    use RefreshDatabase;
+   use RefreshDatabase;
 
     protected GamificationService $gamificationService;
 

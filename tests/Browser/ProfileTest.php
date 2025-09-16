@@ -9,7 +9,7 @@ use App\Models\Admin;
 
 class ProfileTest extends DuskTestCase
 {
-    #[\PHPUnit\Framework\Attributes\Test]
+   #[\PHPUnit\Framework\Attributes\Test]
     public function resident_can_access_profile_page()
     {
         $this->browse(function (Browser $browser) {

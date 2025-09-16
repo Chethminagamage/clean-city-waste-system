@@ -11,7 +11,7 @@ use Tests\TestCase;
 
 class WasteReportTest extends TestCase
 {
-    use RefreshDatabase;
+ use RefreshDatabase;
 
     protected function setUp(): void
     {
@@ -176,5 +176,5 @@ class WasteReportTest extends TestCase
 
         $response->assertOk();
         $response->assertViewHas('reports');
-    }
+    }  
 }

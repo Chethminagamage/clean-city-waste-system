@@ -8,10 +8,10 @@ use App\Models\User;
 
 class CollectorDashboardTest extends DuskTestCase
 {
-    #[\PHPUnit\Framework\Attributes\Test]
-    public function collector_can_login_and_view_dashboard()
-    {
-        $this->browse(function (Browser $browser) {
+   #[\PHPUnit\Framework\Attributes\Test]
+   public function collector_can_login_and_view_dashboard()
+   {
+     $this->browse(function (Browser $browser) {
             $collector = User::where('email', 'lavandioshala@gmail.com')->first();
             if (!$collector) {
                 $this->markTestSkipped('Collector user not found');
@@ -21,7 +21,7 @@ class CollectorDashboardTest extends DuskTestCase
                 ->visit('/collector/dashboard')
                 ->assertSee('Quick Actions');
         });
-    }
+   }
 
     #[\PHPUnit\Framework\Attributes\Test]
     public function collector_can_access_dashboard_directly()

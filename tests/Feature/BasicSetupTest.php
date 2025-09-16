@@ -7,7 +7,7 @@ use Tests\TestCase;
 
 class BasicSetupTest extends TestCase
 {
-    use RefreshDatabase;
+      use RefreshDatabase;
 
     protected function setUp(): void
     {
