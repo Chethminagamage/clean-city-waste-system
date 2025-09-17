@@ -11,9 +11,9 @@ use Tests\TestCase;
 
 class CollectorDashboardTest extends TestCase
 {
-    use RefreshDatabase;
+   use RefreshDatabase;
 
-    protected function setUp(): void
+   protected function setUp(): void
     {
         parent::setUp();
         Storage::fake('public');
