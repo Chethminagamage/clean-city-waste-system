@@ -17,11 +17,34 @@ class GoogleController extends Controller
      */
     public function redirectToGoogle()
     {
-        // Store the intent (signup or signin) in session
-        $intent = request()->query('intent', 'signin'); // default to signin
-        session(['google_auth_intent' => $intent]);
-        
-        return Socialite::driver('google')->stateless()->redirect();
+        try {
+            // Validate Google OAuth configuration
+            if (empty(config('services.google.client_id')) || 
+                empty(config('services.google.client_secret')) ||
+                empty(config('services.google.redirect'))) {
+                
+                \Log::error('Google OAuth configuration is incomplete');
+                $intent = request()->query('intent', 'signin');
+                $redirectRoute = $intent === 'signup' ? 'register' : 'login';
+                return redirect()->route($redirectRoute)->with('error', 
+                    'Google authentication is not properly configured. Please use regular registration.');
+            }
+            
+            // Store the intent (signup or signin) in session
+            $intent = request()->query('intent', 'signin'); // default to signin
+            session(['google_auth_intent' => $intent]);
+            
+            \Log::info('Redirecting to Google OAuth', ['intent' => $intent]);
+            
+            return Socialite::driver('google')->stateless()->redirect();
+            
+        } catch (\Exception $e) {
+            \Log::error('Error initiating Google OAuth: ' . $e->getMessage());
+            $intent = request()->query('intent', 'signin');
+            $redirectRoute = $intent === 'signup' ? 'register' : 'login';
+            return redirect()->route($redirectRoute)->with('error', 
+                'Unable to connect to Google authentication. Please use regular registration.');
+        }
     }
 
     /**
@@ -32,7 +55,23 @@ class GoogleController extends Controller
         try {
             \Log::info('Google callback started');
             
-            $googleUser = Socialite::driver('google')->stateless()->user();
+            // Check network connectivity first
+            $this->checkNetworkConnectivity();
+            
+            // Try to get Google user with specific error handling for cURL issues
+            try {
+                $googleUser = Socialite::driver('google')->stateless()->user();
+            } catch (\GuzzleHttp\Exception\ConnectException $e) {
+                if (str_contains($e->getMessage(), 'cURL error 6') || str_contains($e->getMessage(), 'Could not resolve host')) {
+                    \Log::error('DNS resolution issue for Google OAuth: ' . $e->getMessage());
+                    $intent = session('google_auth_intent', 'signin');
+                    session()->forget('google_auth_intent');
+                    $redirectRoute = $intent === 'signup' ? 'register' : 'login';
+                    return redirect()->route($redirectRoute)->with('error', 
+                        'Unable to connect to Google servers. Please check your internet connection and try again, or use regular registration.');
+                }
+                throw $e; // Re-throw if it's a different connection error
+            }
             \Log::info('Google user data received', [
                 'id' => $googleUser->id,
                 'name' => $googleUser->name,
@@ -136,6 +175,31 @@ class GoogleController extends Controller
                 }
             }
             
+        } catch (\GuzzleHttp\Exception\ConnectException $e) {
+            \Log::error('Google OAuth Network Connection Error: ' . $e->getMessage());
+            
+            // Handle network connectivity issues specifically
+            if (str_contains($e->getMessage(), 'Could not resolve host') || 
+                str_contains($e->getMessage(), 'Connection refused') ||
+                str_contains($e->getMessage(), 'cURL error')) {
+                
+                \Log::error('Network connectivity issue detected for Google OAuth');
+                $intent = session('google_auth_intent', 'signin');
+                session()->forget('google_auth_intent');
+                
+                $redirectRoute = $intent === 'signup' ? 'register' : 'login';
+                $message = 'Unable to connect to Google servers. Please check your internet connection and try again, or use regular registration.';
+                
+                return redirect()->route($redirectRoute)->with('error', $message);
+            }
+            
+            // Fallback for other connection errors
+            $intent = session('google_auth_intent', 'signin');
+            session()->forget('google_auth_intent');
+            $redirectRoute = $intent === 'signup' ? 'register' : 'login';
+            return redirect()->route($redirectRoute)->with('error', 
+                'Network connection error. Please try again or use regular registration.');
+                
         } catch (\Laravel\Socialite\Two\InvalidStateException $e) {
             \Log::error('Google OAuth Invalid State Exception: ' . $e->getMessage());
             \Log::info('Attempting stateless fallback for Invalid State Exception');
@@ -227,11 +291,58 @@ class GoogleController extends Controller
                 'file' => $e->getFile(),
                 'line' => $e->getLine()
             ]);
+            
             $intent = session('google_auth_intent', 'signin');
             session()->forget('google_auth_intent'); // Clear the intent on error
             $redirectRoute = $intent === 'signup' ? 'register' : 'login';
-            return redirect()->route($redirectRoute)->with('error', 
-                'Something went wrong with Google authentication. Please try again.');
+            
+            // Provide specific error messages based on the error type
+            $errorMessage = 'Something went wrong with Google authentication. Please try again.';
+            
+            if (str_contains($e->getMessage(), 'Could not resolve host') || 
+                str_contains($e->getMessage(), 'cURL error 6')) {
+                $errorMessage = 'Network connection issue. Please check your internet connection and try again, or use regular registration instead.';
+            } elseif (str_contains($e->getMessage(), 'invalid_grant') || 
+                     str_contains($e->getMessage(), 'invalid_request')) {
+                $errorMessage = 'Google authentication session expired. Please try the Google sign-up again.';
+            } elseif (str_contains($e->getMessage(), 'access_denied')) {
+                $errorMessage = 'Google authentication was cancelled. Please try again or use regular registration.';
+            }
+            
+            return redirect()->route($redirectRoute)->with('error', $errorMessage);
+        }
+    }
+    
+    /**
+     * Check network connectivity to Google services
+     */
+    private function checkNetworkConnectivity()
+    {
+        try {
+            // Try to resolve googleapis.com
+            $ip = gethostbyname('www.googleapis.com');
+            if ($ip === 'www.googleapis.com') {
+                throw new \Exception('Cannot resolve googleapis.com');
+            }
+            
+            // Try to make a simple connection test
+            $context = stream_context_create([
+                'http' => [
+                    'timeout' => 5, // 5 seconds timeout
+                    'method' => 'HEAD'
+                ]
+            ]);
+            
+            $headers = @get_headers('https://www.googleapis.com', false, $context);
+            if ($headers === false) {
+                throw new \Exception('Cannot connect to googleapis.com');
+            }
+            
+            \Log::info('Network connectivity to Google services verified');
+            
+        } catch (\Exception $e) {
+            \Log::warning('Network connectivity check failed: ' . $e->getMessage());
+            // Don't throw here, let the main OAuth flow handle the error
         }
     }
 }
