@@ -111,6 +111,11 @@
     @include('partials.chat-widget')
     @include('partials.floating-theme-picker')
     
+    <!-- Auto-logout functionality for authenticated users -->
+    @auth
+        <x-auto-logout />
+    @endauth
+    
     <!-- Theme Management Script -->
     <script src="{{ asset('js/theme.js') }}"></script>
     </body>

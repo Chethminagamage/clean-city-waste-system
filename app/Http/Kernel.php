@@ -37,11 +37,13 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\AutoLogoutMiddleware::class, // Auto-logout for inactivity
             \App\Http\Middleware\TrackDailyLogin::class,
+            \App\Http\Middleware\ActivityLogger::class,
         ],
 
         'api' => [
-            // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
@@ -67,7 +69,15 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'locale' => \App\Http\Middleware\SetLocale::class, // Register as a named middleware as well
-        'role' => \App\Http\Middleware\CheckUserRole::class,
+        'role' => \App\Http\Middleware\RoleMiddleware::class,
         'multi_auth' => \App\Http\Middleware\MultiGuardAuth::class,
+        'activity.log' => \App\Http\Middleware\ActivityLogger::class,
+        'auto.logout' => \App\Http\Middleware\AutoLogoutMiddleware::class, // Auto-logout middleware alias
+        'no.cache' => \App\Http\Middleware\NoCache::class,
+        'security.headers' => \App\Http\Middleware\SecurityHeadersMiddleware::class,
+        'ip.blocking' => \App\Http\Middleware\IpBlockingMiddleware::class,
+        'session.security' => \App\Http\Middleware\SessionSecurityMiddleware::class,
+        'admin.ip.security' => \App\Http\Middleware\AdminIPSecurity::class,
+        'admin.session.security' => \App\Http\Middleware\AdminSessionSecurity::class,
     ];
 }

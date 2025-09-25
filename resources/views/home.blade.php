@@ -149,6 +149,21 @@
 </head>
 <body class="font-sans text-gray-800">
 
+    <!-- Error/Success Messages -->
+    @if(session('error'))
+        <div class="bg-red-500 text-white px-4 py-3 text-center font-medium">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            {{ session('error') }}
+        </div>
+    @endif
+
+    @if(session('success'))
+        <div class="bg-green-500 text-white px-4 py-3 text-center font-medium">
+            <i class="fas fa-check-circle mr-2"></i>
+            {{ session('success') }}
+        </div>
+    @endif
+
     <!-- Top Contact Bar -->
     <!-- Desktop/Tablet -->
     <div class="bg-green-700 text-white py-2 text-sm hidden sm:block">

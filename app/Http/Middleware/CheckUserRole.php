@@ -22,7 +22,21 @@ class CheckUserRole
         }
 
         if (auth()->user()->role !== $role) {
-            abort(403, 'Unauthorized access.');
+            // Log for debugging
+            \Log::info('CheckUserRole: Access denied', [
+                'user_role' => auth()->user()->role,
+                'required_role' => $role,
+                'url' => $request->url(),
+                'user_id' => auth()->user()->id
+            ]);
+            
+            // Return a proper response instead of abort
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Forbidden. You do not have permission to access this resource.'], 403);
+            }
+            
+            // For web requests, redirect with error message
+            return redirect('/')->with('error', 'Access Denied: You do not have permission to access that page.');
         }
 
         return $next($request);

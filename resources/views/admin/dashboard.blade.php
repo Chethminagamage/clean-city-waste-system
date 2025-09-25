@@ -232,22 +232,33 @@
     </header>
     <div class="p-5">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <button class="bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm font-medium flex items-center justify-center space-x-2 transition-colors">
-                <i class="fas fa-plus"></i>
-                <span>Schedule Pickup</span>
-            </button>
-            <button class="bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg text-sm font-medium flex items-center justify-center space-x-2 transition-colors">
-                <i class="fas fa-file-alt"></i>
-                <span>Generate Report</span>
-            </button>
-            <button class="bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-700 px-4 py-3 rounded-lg text-sm font-medium flex items-center justify-center space-x-2 transition-colors">
-                <i class="fas fa-user-plus"></i>
-                <span>Add Collector</span>
-            </button>
-            <button class="bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-700 px-4 py-3 rounded-lg text-sm font-medium flex items-center justify-center space-x-2 transition-colors">
-                <i class="fas fa-cog"></i>
-                <span>System Settings</span>
-            </button>
+            <!-- Bin Reports -->
+            <a href="{{ route('admin.binreports') }}" 
+               class="bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm font-medium flex items-center justify-center space-x-2 transition-colors">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Bin Reports</span>
+            </a>
+
+            <!-- Collectors -->
+            <a href="{{ route('admin.collectors') }}" 
+               class="bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg text-sm font-medium flex items-center justify-center space-x-2 transition-colors">
+                <i class="fas fa-users"></i>
+                <span>Collectors</span>
+            </a>
+
+            <!-- Users -->
+            <a href="{{ route('admin.users') }}" 
+               class="bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-700 px-4 py-3 rounded-lg text-sm font-medium flex items-center justify-center space-x-2 transition-colors">
+                <i class="fas fa-user-friends"></i>
+                <span>Users</span>
+            </a>
+
+            <!-- Collection Schedules -->
+            <a href="{{ route('admin.schedules.index') }}" 
+               class="bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-700 px-4 py-3 rounded-lg text-sm font-medium flex items-center justify-center space-x-2 transition-colors">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Schedules</span>
+            </a>
         </div>
     </div>
 </div>
@@ -317,6 +328,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
 </script>
 
 <style>

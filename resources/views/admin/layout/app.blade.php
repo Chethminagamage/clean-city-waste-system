@@ -493,6 +493,11 @@
         };
     </script>
 
+    {{-- Auto-logout functionality for authenticated admins --}}
+    @auth('admin')
+        <x-auto-logout />
+    @endauth
+
     {{-- Additional page-specific scripts --}}
     @stack('scripts')
 </body>

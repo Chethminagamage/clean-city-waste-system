@@ -5,6 +5,10 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use App\View\Composers\AdminNotificationComposer;
+use App\Models\User;
+use App\Models\WasteReport;
+use App\Observers\UserObserver;
+use App\Observers\WasteReportObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,5 +32,9 @@ class AppServiceProvider extends ServiceProvider
     {
         // Register view composer for admin notifications
         View::composer('admin.*', AdminNotificationComposer::class);
+        
+        // Register model observers for activity logging
+        User::observe(UserObserver::class);
+        WasteReport::observe(WasteReportObserver::class);
     }
 }

@@ -215,6 +215,133 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- 2FA Security Settings Card -->
+            <div class="bg-white rounded-lg shadow-sm mt-6">
+                <div class="p-6 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-shield-alt text-green-600 mr-2"></i>
+                        Security Settings
+                    </h3>
+                </div>
+                
+                <div class="p-6">
+                    <div class="space-y-4">
+                        <!-- 2FA Status -->
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-gray-900 font-medium">Two-Factor Authentication</span>
+                                <p class="text-sm text-gray-500">
+                                    @if($admin->two_factor_enabled)
+                                        Your account is protected with 2FA
+                                    @else
+                                        Add extra security to your account
+                                    @endif
+                                </p>
+                            </div>
+                            <div>
+                                @if($admin->two_factor_enabled)
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <span class="w-1.5 h-1.5 mr-1 bg-green-400 rounded-full"></span>
+                                        Enabled
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        <span class="w-1.5 h-1.5 mr-1 bg-red-400 rounded-full"></span>
+                                        Disabled
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+
+                        @if($admin->two_factor_enabled)
+                            <!-- 2FA Enabled - Disable Option -->
+                            <div class="pt-4 border-t border-gray-200">
+                                <form method="POST" action="{{ route('admin.profile.2fa.disable') }}" class="space-y-3">
+                                    @csrf
+                                    <p class="text-sm text-gray-600">
+                                        Two-factor authentication is currently protecting your account. 
+                                        Disabling it will reduce your account security.
+                                    </p>
+                                    <button type="submit" 
+                                            class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                            onclick="return confirm('Are you sure you want to disable 2FA? This will make your account less secure.')">
+                                        <i class="fas fa-times-circle mr-2"></i>
+                                        Disable 2FA
+                                    </button>
+                                </form>
+                            </div>
+                        @else
+                            <!-- 2FA Disabled - Setup Option -->
+                            <div class="pt-4 border-t border-gray-200" id="2fa-setup">
+                                <div class="space-y-4">
+                                    <!-- Instructions -->
+                                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                        <div class="flex">
+                                            <div class="flex-shrink-0">
+                                                <i class="fas fa-info-circle text-blue-400"></i>
+                                            </div>
+                                            <div class="ml-3">
+                                                <h4 class="text-sm font-medium text-blue-800">Setup Instructions</h4>
+                                                <div class="mt-2 text-sm text-blue-700">
+                                                    <ol class="list-decimal list-inside space-y-1">
+                                                        <li>Install Google Authenticator or similar app</li>
+                                                        <li>Scan the QR code below</li>
+                                                        <li>Enter the 6-digit verification code</li>
+                                                    </ol>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    @if($qrCode && $secret)
+                                        <!-- QR Code -->
+                                        <div class="text-center">
+                                            <div class="inline-block p-3 bg-white border border-gray-200 rounded-lg">
+                                                {!! $qrCode !!}
+                                            </div>
+                                        </div>
+
+                                        <!-- Manual Entry Key -->
+                                        <div class="text-center">
+                                            <p class="text-sm text-gray-600 mb-2">Manual entry key:</p>
+                                            <code class="text-xs bg-gray-100 px-2 py-1 rounded border">{{ $secret }}</code>
+                                        </div>
+
+                                        <!-- Verification Form -->
+                                        <form method="POST" action="{{ route('admin.profile.2fa.enable') }}" class="space-y-3">
+                                            @csrf
+                                            <input type="hidden" name="secret" value="{{ $secret }}">
+                                            
+                                            <div>
+                                                <label for="2fa-code" class="block text-sm font-medium text-gray-700 mb-1">
+                                                    Verification Code
+                                                </label>
+                                                <input type="text" 
+                                                       name="code" 
+                                                       id="2fa-code" 
+                                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 @error('code') border-red-500 @enderror" 
+                                                       placeholder="123456" 
+                                                       maxlength="6" 
+                                                       required>
+                                                @error('code')
+                                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                            
+                                            <button type="submit" 
+                                                    class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                                <i class="fas fa-shield-alt mr-2"></i>
+                                                Enable 2FA
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

@@ -130,6 +130,27 @@
                             <span class="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200 whitespace-nowrap">Analytics</span>
                         </a>
                     </li>
+                    {{-- Activity Audit Trail --}}
+                    <li class="px-3 py-2 rounded-sm {{ request()->routeIs('admin.audit-trail.*') ? 'bg-white bg-opacity-20' : '' }}">
+                        <a class="flex items-center justify-between text-white hover:text-green-200 truncate transition duration-150 {{ request()->routeIs('admin.audit-trail.*') ? 'text-green-100' : 'text-green-200' }}" href="{{ route('admin.audit-trail.index') ?? '#' }}">
+                            <div class="flex items-center">
+                                <div class="flex items-center justify-center w-6 h-6 shrink-0">
+                                    <i class="fas fa-shield-alt text-lg"></i>
+                                </div>
+                                <span class="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200 whitespace-nowrap">Activity Audit Trail</span>
+                            </div>
+                            @php
+                                $criticalEventsCount = \App\Models\ActivityLog::where('severity', 'critical')
+                                    ->where('created_at', '>=', now()->subDays(7))
+                                    ->count();
+                            @endphp
+                            @if($criticalEventsCount > 0)
+                                <div class="flex shrink-0 ml-2 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+                                    <span class="inline-flex items-center justify-center h-5 w-5 text-xs font-medium text-white bg-red-500 rounded-full">{{ $criticalEventsCount }}</span>
+                                </div>
+                            @endif
+                        </a>
+                    </li>
                     {{-- Feedback Management --}}
                     <li class="px-3 py-2 rounded-sm {{ request()->routeIs('admin.feedback.*') ? 'bg-white bg-opacity-20' : '' }}">
                         <a class="flex items-center text-white hover:text-green-200 truncate transition duration-150 {{ request()->routeIs('admin.feedback.*') ? 'text-green-100' : 'text-green-200' }}" href="{{ route('admin.feedback.index') ?? '#' }}">
@@ -139,13 +160,25 @@
                             <span class="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200 whitespace-nowrap">Feedback</span>
                         </a>
                     </li>
+
                     {{-- My Profile --}}
                     <li class="px-3 py-2 rounded-sm {{ request()->routeIs('admin.profile.edit') ? 'bg-white bg-opacity-20' : '' }}">
-                        <a class="flex items-center text-white hover:text-green-200 truncate transition duration-150 {{ request()->routeIs('admin.profile.edit') ? 'text-green-100' : 'text-green-200' }}" href="{{ route('admin.profile.edit') ?? '#' }}">
-                            <div class="flex items-center justify-center w-6 h-6 shrink-0">
-                                <i class="fas fa-user-cog text-lg"></i>
+                        <a class="flex items-center justify-between text-white hover:text-green-200 truncate transition duration-150 {{ request()->routeIs('admin.profile.edit') ? 'text-green-100' : 'text-green-200' }}" href="{{ route('admin.profile.edit') ?? '#' }}">
+                            <div class="flex items-center">
+                                <div class="flex items-center justify-center w-6 h-6 shrink-0">
+                                    <i class="fas fa-user-cog text-lg"></i>
+                                </div>
+                                <span class="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200 whitespace-nowrap">My Profile</span>
                             </div>
-                            <span class="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200 whitespace-nowrap">My Profile</span>
+                            @php
+                                $currentAdmin = auth('admin')->user();
+                                $has2FA = $currentAdmin && $currentAdmin->two_factor_enabled;
+                            @endphp
+                            @if(!$has2FA)
+                                <div class="flex shrink-0 ml-2 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+                                    <span class="inline-flex items-center justify-center h-5 w-5 text-xs font-medium text-white bg-yellow-500 rounded-full" title="Enable 2FA in profile settings">!</span>
+                                </div>
+                            @endif
                         </a>
                     </li>
                 </ul>
