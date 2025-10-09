@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Services\AuthService;
-use App\Services\CaptchaService;
+
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,12 +18,10 @@ use Illuminate\Support\Facades\Hash;
 class AuthenticatedSessionController extends Controller
 {
     protected $authService;
-    protected $captchaService;
 
-    public function __construct(AuthService $authService, CaptchaService $captchaService)
+    public function __construct(AuthService $authService)
     {
         $this->authService = $authService;
-        $this->captchaService = $captchaService;
     }
     
     public function create(): View
@@ -39,12 +37,6 @@ class AuthenticatedSessionController extends Controller
 
     public function store(LoginRequest $request): RedirectResponse
     {
-        // Validate reCAPTCHA first
-        if (!$this->captchaService->verifyRecaptcha($request->input('g-recaptcha-response'))) {
-            return back()->withErrors(['captcha' => 'Please complete the reCAPTCHA verification.'])
-                         ->withInput($request->only('email'));
-        }
-
         $user = User::where('email', $request->email)->first();
 
         // Use AuthService to validate login attempt
@@ -95,7 +87,6 @@ class AuthenticatedSessionController extends Controller
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
-            'g-recaptcha-response' => ['required', new \App\Rules\RecaptchaRule()],
         ]);
 
         $user = User::where('email', $request->email)->first();

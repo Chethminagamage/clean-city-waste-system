@@ -36,24 +36,9 @@ class PasswordResetController extends Controller
     {
         $request->validate([
             'email' => ['required', 'email', 'exists:admins,email'],
-            'g-recaptcha-response' => ['required'],
         ], [
             'email.exists' => 'We can\'t find an admin with that email address.',
-            'g-recaptcha-response.required' => 'Please complete the reCAPTCHA verification.'
         ]);
-
-        // Verify reCAPTCHA
-        $recaptchaResponse = $request->input('g-recaptcha-response');
-        $recaptchaSecret = config('services.recaptcha.secret_key');
-        
-        if ($recaptchaSecret) {
-            $response = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret={$recaptchaSecret}&response={$recaptchaResponse}");
-            $responseData = json_decode($response);
-            
-            if (!$responseData->success) {
-                return back()->withErrors(['g-recaptcha-response' => 'reCAPTCHA verification failed. Please try again.']);
-            }
-        }
 
         // Check if admin account is active
         $admin = Admin::where('email', $request->email)->first();

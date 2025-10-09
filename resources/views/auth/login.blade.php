@@ -14,8 +14,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <!-- Google reCAPTCHA -->
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
     
     <!-- PWA Meta Tags for Browser Detection -->
     <meta name="theme-color" content="#10b981">
@@ -419,27 +418,7 @@
                                         @endif
                                     </div>
 
-                                    <!-- Google reCAPTCHA -->
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-3">
-                                            Security Verification
-                                        </label>
-                                        <div class="flex justify-center">
-                                            <div class="g-recaptcha" 
-                                                 data-sitekey="{{ config('services.recaptcha.site_key') }}"
-                                                 data-theme="light"
-                                                 data-size="normal"
-                                                 data-callback="enableSubmitBtn"
-                                                 data-expired-callback="disableSubmitBtn">
-                                            </div>
-                                        </div>
-                                        @if($errors->has('captcha'))
-                                            <p class="mt-2 text-sm text-red-600 text-center">{{ $errors->first('captcha') }}</p>
-                                        @endif
-                                        @if($errors->has('g-recaptcha-response'))
-                                            <p class="mt-2 text-sm text-red-600 text-center">{{ $errors->first('g-recaptcha-response') }}</p>
-                                        @endif
-                                    </div>
+
 
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center">
@@ -462,7 +441,6 @@
                                         id="submit-btn"
                                         type="submit" dusk="login-button"
                                         class="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 focus:ring-4 focus:ring-green-200"
-                                        disabled
                                     >
                                         <i class="fas fa-sign-in-alt mr-2"></i>
                                         Login
@@ -667,24 +645,7 @@
             document.body.style.opacity = '1';
         });
 
-        // reCAPTCHA callback functions
-        function enableSubmitBtn() {
-            const submitBtn = document.getElementById('submit-btn');
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
-                submitBtn.classList.add('bg-green-600', 'hover:bg-green-700');
-            }
-        }
 
-        function disableSubmitBtn() {
-            const submitBtn = document.getElementById('submit-btn');
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
-                submitBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
-            }
-        }
     </script>
 </body>
 </html>

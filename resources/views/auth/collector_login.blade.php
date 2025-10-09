@@ -12,8 +12,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
-    <!-- Google reCAPTCHA -->
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
     <style>
         /* Smooth scroll behavior */
         html {
@@ -404,25 +403,12 @@
                                         </a>
                                     </div>
 
-                                    <!-- reCAPTCHA -->
-                                    <div class="flex justify-center">
-                                        <div class="g-recaptcha" 
-                                             data-sitekey="{{ config('services.recaptcha.site_key') }}"
-                                             data-callback="enableSubmitBtn"
-                                             data-expired-callback="disableSubmitBtn">
-                                        </div>
-                                    </div>
-                                    @error('g-recaptcha-response')
-                                        <div class="text-red-500 text-sm text-center mt-2">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
+
 
                                     <button 
                                         type="submit" 
                                         id="submit-btn"
-                                        disabled
-                                        class="w-full bg-gray-400 text-white py-3 rounded-lg font-semibold text-lg cursor-not-allowed transition-all duration-300"
+                                        class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold text-lg transition-all duration-300"
                                     >
                                         <i class="fas fa-sign-in-alt mr-2"></i>
                                         Access Dashboard
@@ -556,20 +542,7 @@
             document.body.style.opacity = '1';
         });
 
-        // reCAPTCHA callback functions
-        function enableSubmitBtn() {
-            const submitBtn = document.getElementById('submit-btn');
-            submitBtn.disabled = false;
-            submitBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
-            submitBtn.classList.add('bg-orange-500', 'hover:bg-orange-600', 'transform', 'hover:scale-105', 'focus:ring-4', 'focus:ring-orange-200');
-        }
 
-        function disableSubmitBtn() {
-            const submitBtn = document.getElementById('submit-btn');
-            submitBtn.disabled = true;
-            submitBtn.classList.remove('bg-orange-500', 'hover:bg-orange-600', 'transform', 'hover:scale-105', 'focus:ring-4', 'focus:ring-orange-200');
-            submitBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
-        }
     </script>
 </body>
 </html>

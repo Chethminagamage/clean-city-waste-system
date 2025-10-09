@@ -12,8 +12,7 @@
     <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google reCAPTCHA -->
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
 </head>
 <body class="bg-gray-50 min-h-screen flex items-center justify-center px-4">
     <div class="max-w-md w-full space-y-8">
@@ -84,10 +83,7 @@
                     </p>
                 </div>
 
-                <!-- reCAPTCHA -->
-                <div class="flex justify-center">
-                    <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
-                </div>
+
 
                 <!-- Send Reset Link Button -->
                 <div>
@@ -135,14 +131,7 @@
             const btnLoading = document.getElementById('btn-loading');
             const emailInput = document.getElementById('email');
             
-            // Validate reCAPTCHA
-            if (typeof grecaptcha !== 'undefined') {
-                const recaptchaResponse = grecaptcha.getResponse();
-                if (!recaptchaResponse) {
-                    alert('Please complete the reCAPTCHA verification.');
-                    return false;
-                }
-            }
+
             
             // Show loading state
             btn.disabled = true;

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Services\AuthService;
-use App\Services\CaptchaService;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Admin;
@@ -13,14 +13,9 @@ class LoginController extends Controller
 {
 
     protected $authService;
-    protected $captchaService;
 
-    public function __construct(
-        AuthService $authService,
-        CaptchaService $captchaService
-    ) {
+    public function __construct(AuthService $authService) {
         $this->authService = $authService;
-        $this->captchaService = $captchaService;
     }
     /**
      * Show the admin login form.
@@ -35,17 +30,11 @@ class LoginController extends Controller
      */
     public function login(Request $request)
     {
-        // Validate input including reCAPTCHA
+        // Validate input
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
-            'g-recaptcha-response' => 'required',
         ]);
-
-        // Verify reCAPTCHA
-        if (!$this->captchaService->verifyRecaptcha($request->input('g-recaptcha-response'))) {
-            return back()->with('error', 'Please complete the reCAPTCHA verification');
-        }
 
         // Find admin by email
         $admin = Admin::where('email', $request->email)->first();

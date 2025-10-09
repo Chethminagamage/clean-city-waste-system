@@ -30,10 +30,30 @@
                 Go Back
             </a>
             
-            <a href="{{ route('dashboard') }}" 
-               class="group relative w-full flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
-                Go to Dashboard
-            </a>
+            @auth('web')
+                <a href="{{ route('dashboard.main') }}" 
+                   class="group relative w-full flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                    Go to Dashboard
+                </a>
+            @endauth
+            @auth('collector')
+                <a href="{{ route('collector.dashboard') }}" 
+                   class="group relative w-full flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                    Go to Dashboard
+                </a>
+            @endauth
+            @auth('admin')
+                <a href="{{ route('admin.dashboard.main') }}" 
+                   class="group relative w-full flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                    Go to Dashboard
+                </a>
+            @endauth
+            @guest
+                <a href="{{ route('landing.home') }}" 
+                   class="group relative w-full flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                    Go to Home
+                </a>
+            @endguest
         </div>
     </div>
 </div>
