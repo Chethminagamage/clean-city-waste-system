@@ -255,7 +255,7 @@ class CollectorDashboardController extends Controller
      */
     public function show($id)
     {
-        $collector = Auth::user();
+        $collector = Auth::guard('collector')->user();
         
         // Find the report, ensuring it belongs to this collector
         $report = WasteReport::with('resident')
@@ -288,18 +288,38 @@ class CollectorDashboardController extends Controller
      */
     public function allReports()
     {
-        $collector = Auth::user();
+        try {
+            $collector = Auth::guard('collector')->user();
+            
+            if (!$collector) {
+                throw new \Exception('Collector not authenticated');
+            }
+            
+            if ($collector->role !== 'collector') {
+                throw new \Exception('User is not a collector: ' . $collector->role);
+            }
 
-        $assignedReports = WasteReport::with('resident')
-            ->forCollector($collector->id)
-            ->orderByDesc('created_at')
-            ->get();
+            $assignedReports = WasteReport::with('resident')
+                ->forCollector($collector->id)
+                ->orderByDesc('created_at')
+                ->get();
 
-        return view('collector.all-reports', [
-            'assignedReports' => $assignedReports,
-            'collectorLat' => $collector->latitude,
-            'collectorLng' => $collector->longitude,
-        ]);
+            return view('collector.all-reports', [
+                'assignedReports' => $assignedReports,
+                'collectorLat' => $collector->latitude ?? 0,
+                'collectorLng' => $collector->longitude ?? 0,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Collector All Reports Error: ' . $e->getMessage(), [
+                'user' => Auth::guard('collector')->user(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->view('errors.500', [
+                'message' => 'Unable to load reports. Please try again.',
+                'error' => app()->environment('local') ? $e->getMessage() : null
+            ], 500);
+        }
     }
 
     /**
@@ -307,18 +327,38 @@ class CollectorDashboardController extends Controller
      */
     public function completedReports()
     {
-        $collector = Auth::user();
+        try {
+            $collector = Auth::guard('collector')->user();
+            
+            if (!$collector) {
+                throw new \Exception('Collector not authenticated');
+            }
+            
+            if ($collector->role !== 'collector') {
+                throw new \Exception('User is not a collector: ' . $collector->role);
+            }
 
-        $completedReports = WasteReport::with('resident')
-            ->completedForCollector($collector->id)
-            ->orderByDesc('updated_at')
-            ->get();
+            $completedReports = WasteReport::with('resident')
+                ->completedForCollector($collector->id)
+                ->orderByDesc('updated_at')
+                ->get();
 
-        return view('collector.completed-reports', [
-            'completedReports' => $completedReports,
-            'collectorLat' => $collector->latitude,
-            'collectorLng' => $collector->longitude,
-        ]);
+            return view('collector.completed-reports', [
+                'completedReports' => $completedReports,
+                'collectorLat' => $collector->latitude ?? 0,
+                'collectorLng' => $collector->longitude ?? 0,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Collector Completed Reports Error: ' . $e->getMessage(), [
+                'user' => Auth::guard('collector')->user(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->view('errors.500', [
+                'message' => 'Unable to load completed reports. Please try again.',
+                'error' => app()->environment('local') ? $e->getMessage() : null
+            ], 500);
+        }
     }
 
     /**
@@ -326,7 +366,7 @@ class CollectorDashboardController extends Controller
      */
     public function profile()
     {
-        $collector = Auth::user();
+        $collector = Auth::guard('collector')->user();
 
         // Get stats for the profile
         $allReports = WasteReport::forCollector($collector->id)->get();

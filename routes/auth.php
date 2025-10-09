@@ -16,20 +16,25 @@ use Illuminate\Http\Request;
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
-    Route::post('register', [RegisteredUserController::class, 'store']);
+    Route::post('register', [RegisteredUserController::class, 'store'])->middleware('throttle:3,1'); // 3 registrations per minute
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
-    Route::post('login', [AuthenticatedSessionController::class, 'store']);
+    Route::post('login', [AuthenticatedSessionController::class, 'store'])->middleware('throttle:5,1'); // 5 login attempts per minute
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
-    Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
+    Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email')->middleware('throttle:3,1'); // 3 password reset attempts per minute
 
     Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
-    Route::post('reset-password', [NewPasswordController::class, 'store'])->name('password.store');
+    Route::post('reset-password', [NewPasswordController::class, 'store'])->name('password.store')->middleware('throttle:3,1'); // 3 password reset completions per minute
 
-    // Google OAuth routes (sign up only)
-    Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.redirect');
-    Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
+    // Google OAuth routes with security middleware
+    Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])
+        ->name('google.redirect')
+        ->middleware('throttle:10,1'); // 10 OAuth redirects per minute
+    
+    Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])
+        ->name('google.callback')
+        ->middleware('throttle:15,1'); // 15 OAuth callbacks per minute (slightly higher for retries)
 });
 
 Route::middleware('auth')->group(function () {

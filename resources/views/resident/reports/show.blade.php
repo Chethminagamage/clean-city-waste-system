@@ -116,7 +116,7 @@
       </div>
 
       <!-- Progress Timeline -->
-      <div class="px-6 sm:px-8 py-8 bg-gradient-to-r from-gray-50 to-white dark:from-gray-700 dark:to-gray-800">
+      <div class="px-3 sm:px-6 lg:px-8 py-6 sm:py-8 bg-gradient-to-r from-gray-50 to-white dark:from-gray-700 dark:to-gray-800">
         @php
           $statuses = ['pending', 'assigned', 'enroute', 'collected', 'closed'];
           $current = array_search(strtolower($report->status), $statuses);
@@ -145,34 +145,34 @@
                     : 'text-gray-500 bg-gray-100');
               @endphp
               
-              <div class="flex flex-col items-center flex-1">
+              <div class="flex flex-col items-center flex-1 w-full max-w-[70px] sm:max-w-[80px] mx-auto">
                 <!-- Status Icon -->
-                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center mb-3 {{ $iconClasses }}">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mb-1 sm:mb-2 {{ $iconClasses }}">
                   @if($idx == 0)
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                   @elseif($idx == 1)
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                     </svg>
                   @elseif($idx == 2)
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                   @elseif($idx == 3)
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                   @else
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
                   @endif
                 </div>
                 
                 <!-- Status Label -->
-                <span class="text-xs sm:text-sm font-semibold text-center capitalize px-2 py-1 rounded-full {{ $labelClasses }}">
+                <span class="text-xs sm:text-sm font-medium text-center capitalize px-1.5 py-0.5 rounded-full leading-tight {{ $labelClasses }}" style="min-height: 20px; line-height: 1.2;">
                   @if($status === 'enroute')
                     En Route
                   @else
@@ -187,7 +187,7 @@
                       ? 'bg-gradient-to-r from-green-400 to-green-500'
                       : 'bg-gray-300';
                   @endphp
-                  <div class="hidden sm:block absolute top-6 left-1/2 w-full h-1 -z-10 transform translate-x-1/2 rounded-full {{ $lineClasses }}">
+                  <div class="hidden sm:block absolute top-5 sm:top-6 left-1/2 w-full h-0.5 sm:h-1 -z-10 transform translate-x-1/2 rounded-full {{ $lineClasses }}">
                   </div>
                 @endif
               </div>

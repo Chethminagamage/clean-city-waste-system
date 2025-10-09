@@ -8,9 +8,15 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use App\Models\WasteReport;
 use App\Models\User;
 use Carbon\Carbon;
+use PragmaRX\Google2FA\Google2FA;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 
 class AdminProfileController extends Controller
 {
@@ -18,7 +24,31 @@ class AdminProfileController extends Controller
     {
         $admin = Auth::guard('admin')->user();
         
-        return view('admin.profile', compact('admin'));
+        // Generate QR code and secret if 2FA is not enabled
+        $secret = null;
+        $qrCode = null;
+        
+        if (!$admin->two_factor_enabled) {
+            $google2fa = new Google2FA();
+            $secret = $google2fa->generateSecretKey();
+            
+            // Generate QR Code
+            $qrCodeUrl = $google2fa->getQRCodeUrl(
+                'CleanCity Admin',
+                $admin->email,
+                $secret
+            );
+            
+            $renderer = new ImageRenderer(
+                new RendererStyle(150),
+                new SvgImageBackEnd()
+            );
+            
+            $writer = new Writer($renderer);
+            $qrCode = $writer->writeString($qrCodeUrl);
+        }
+        
+        return view('admin.profile', compact('admin', 'secret', 'qrCode'));
     }
 
     public function update(Request $request)
@@ -76,5 +106,56 @@ class AdminProfileController extends Controller
         }
         
         return redirect()->route('admin.profile.edit')->with('error', 'No profile photo to remove.');
+    }
+
+    public function enableTwoFactor(Request $request)
+    {
+        $request->validate([
+            'secret' => 'required|string',
+            'code' => 'required|string|size:6'
+        ]);
+
+        $admin = Auth::guard('admin')->user();
+        $google2fa = new Google2FA();
+
+        $valid = $google2fa->verifyKey($request->secret, $request->code);
+
+        if (!$valid) {
+            throw ValidationException::withMessages([
+                'code' => 'The verification code is invalid.'
+            ]);
+        }
+
+        $admin->update([
+            'two_factor_enabled' => 1,
+            'two_factor_secret' => $request->secret,
+            'two_factor_recovery_codes' => json_encode($this->generateRecoveryCodes())
+        ]);
+
+        return redirect()->route('admin.profile.edit')
+            ->with('success', 'Two-factor authentication has been enabled successfully!');
+    }
+
+    public function disableTwoFactor()
+    {
+        $admin = Auth::guard('admin')->user();
+        
+        $admin->update([
+            'two_factor_enabled' => 0,
+            'two_factor_secret' => null,
+            'two_factor_recovery_codes' => null
+        ]);
+
+        return redirect()->route('admin.profile.edit')
+            ->with('success', 'Two-factor authentication has been disabled.');
+    }
+
+    private function generateRecoveryCodes()
+    {
+        $codes = [];
+        for ($i = 0; $i < 8; $i++) {
+            $codes[] = strtoupper(substr(md5(rand()), 0, 8));
+        }
+        return $codes;
     }
 }

@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Mail;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -38,6 +38,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'last_login_at',     // Add for daily login tracking
         'google_id',        // ✅ Google ID for Google signup
         'avatar',           // ✅ Google profile picture
+        'failed_login_attempts', // ✅ Security: Failed login tracking
+        'locked_until',         // ✅ Security: Account lockout timestamp
+        'last_login_ip',        // ✅ Security: Track login IP addresses
     ];
 
     /**
@@ -65,6 +68,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'two_factor_enabled' => 'boolean',
             'password' => 'hashed',
             'last_login_at' => 'datetime',
+            'locked_until' => 'datetime', // ✅ Security: Cast lockout timestamp
         ];
     }
 
@@ -156,5 +160,22 @@ class User extends Authenticatable implements MustVerifyEmail
             return $this->gamification()->create([]);
         }
         return $this->gamification;
+    }
+
+    /**
+     * Basic accessor: Check if account has a lock timestamp set
+     * Business logic is handled in AuthService
+     */
+    public function hasLockTimestamp(): bool
+    {
+        return !is_null($this->locked_until);
+    }
+
+    /**
+     * Basic accessor: Get the lock timestamp
+     */
+    public function getLockTimestamp()
+    {
+        return $this->locked_until;
     }
 }

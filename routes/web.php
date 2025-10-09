@@ -14,6 +14,8 @@ use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\Admin\Auth\LoginController as AdminLoginController;
+use App\Http\Controllers\Admin\Auth\TwoFactorController as AdminTwoFactorController;
+
 use App\Http\Controllers\Admin\BinReportController;
 use App\Http\Controllers\Admin\CollectorController;
 use App\Http\Controllers\Collector\CollectorDashboardController;
@@ -45,6 +47,16 @@ Route::get('/company', [PublicPagesController::class, 'company'])->name('public.
 Route::get('/blog', [PublicPagesController::class, 'blog'])->name('public.blog');
 Route::get('/contact', [PublicPagesController::class, 'contact'])->name('public.contact');
 
+/*
+|--------------------------------------------------------------------------
+| Activity Tracking Routes (Auto-logout)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['web'])->group(function () {
+    Route::post('/activity-ping', [App\Http\Controllers\ActivityController::class, 'ping'])->name('activity.ping');
+    Route::get('/activity-status', [App\Http\Controllers\ActivityController::class, 'status'])->name('activity.status');
+    Route::post('/activity-extend', [App\Http\Controllers\ActivityController::class, 'extend'])->name('activity.extend');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -104,12 +116,11 @@ Route::middleware(['auth', 'role:resident'])->prefix('resident')->name('resident
     Route::post('/toggle-2fa', [ResidentProfileController::class, 'toggle2FA'])->name('2fa.toggle');
 });
 
-Route::middleware(['auth'])->group(function () {
+// Additional resident routes - properly secured with role-based middleware
+Route::middleware(['auth', 'role:resident'])->group(function () {
     Route::get('/resident/dashboard', [\App\Http\Controllers\Resident\DashboardController::class, 'index'])
         ->name('resident.dashboard');
-});
-
-Route::middleware(['auth'])->group(function () {
+        
     // Report routes
     Route::get('/resident/reports', [ReportHistoryController::class,'index'])->name('resident.reports.index');
     Route::get('/resident/reports/data', [ReportHistoryController::class,'data'])->name('resident.reports.data'); // filters+search JSON
@@ -131,7 +142,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/resident/feedback/mark-responses-read', [ResidentFeedbackController::class, 'markResponsesRead'])->name('resident.feedback.mark_responses_read');
     Route::post('/resident/feedback/{id}/rate-response', [ResidentFeedbackController::class, 'rateResponse'])->name('resident.feedback.rate_response');
     
-    // Individual report view and PDF (moved inside auth middleware)
+    // Individual report view and PDF
     Route::get('/resident/reports/{report}', [ReportHistoryController::class,'show'])
         ->name('resident.reports.show');
     Route::get('/resident/reports/{report}/pdf', [ReportHistoryController::class, 'pdf'])
@@ -164,7 +175,7 @@ Route::middleware('auth')->group(function () {
         ->name('theme.current');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'role:resident'])->group(function () {
     Route::get('/resident/schedule', [CollectionScheduleController::class, 'index'])
         ->name('resident.schedule.index');
 });
@@ -183,15 +194,13 @@ Route::middleware(['auth', 'role:resident'])->prefix('resident')->name('resident
         ->name('gamification.api.stats');
 });
 
-
-
 /*
 |--------------------------------------------------------------------------
 | Two-Factor Authentication Routes (Modal Flow)
 |--------------------------------------------------------------------------
 */
-Route::post('/2fa/verify', [TwoFactorController::class, 'verifyOtp'])->name('2fa.verify');
-Route::post('/2fa/resend', [TwoFactorController::class, 'resendOtp'])->name('2fa.resend');
+Route::post('/2fa/verify', [TwoFactorController::class, 'verifyOtp'])->name('2fa.verify')->middleware('throttle:10,1'); // 10 2FA attempts per minute
+Route::post('/2fa/resend', [TwoFactorController::class, 'resendOtp'])->name('2fa.resend')->middleware('throttle:3,1'); // 3 2FA resend attempts per minute
 
 /*
 |--------------------------------------------------------------------------
@@ -200,13 +209,32 @@ Route::post('/2fa/resend', [TwoFactorController::class, 'resendOtp'])->name('2fa
 */
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AdminLoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [AdminLoginController::class, 'login'])->name('login.submit');
+    Route::post('/login', [AdminLoginController::class, 'login'])->name('login.submit')->middleware('throttle:5,1'); // 5 admin login attempts per minute
+
+    // Password Reset Routes
+    Route::get('/forgot-password', [App\Http\Controllers\Admin\Auth\PasswordResetController::class, 'showForgotPasswordForm'])->name('password.request');
+    Route::post('/forgot-password', [App\Http\Controllers\Admin\Auth\PasswordResetController::class, 'sendResetLinkEmail'])->name('password.email')->middleware('throttle:3,1'); // 3 reset attempts per minute
+    Route::get('/reset-password/{token}', [App\Http\Controllers\Admin\Auth\PasswordResetController::class, 'showResetPasswordForm'])->name('password.reset');
+    Route::post('/reset-password', [App\Http\Controllers\Admin\Auth\PasswordResetController::class, 'resetPassword'])->name('password.update')->middleware('throttle:5,1'); // 5 reset attempts per minute
+
+    // Two-Factor Authentication Routes
+    Route::get('/2fa/verify', [AdminTwoFactorController::class, 'showVerifyForm'])->name('2fa.verify');
+    Route::post('/2fa/verify', [AdminTwoFactorController::class, 'verify'])->name('2fa.verify.submit');
+    
+    // 2FA Management Routes (require authentication)
+    Route::middleware(['auth:admin'])->group(function () {
+
+    });
 
     Route::middleware(['auth:admin'])->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard.main');
         Route::get('/profile', [AdminProfileController::class, 'edit'])->name('profile.edit');
         Route::post('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
         Route::delete('/profile/photo', [AdminProfileController::class, 'removePhoto'])->name('profile.remove-photo');
+        
+        // 2FA Routes for Profile
+        Route::post('/profile/2fa/enable', [AdminProfileController::class, 'enableTwoFactor'])->name('profile.2fa.enable');
+        Route::post('/profile/2fa/disable', [AdminProfileController::class, 'disableTwoFactor'])->name('profile.2fa.disable');
 
         Route::get('/binreports', [BinReportController::class, 'index'])->name('binreports');
         Route::get('/collectors', [CollectorController::class, 'index'])->name('collectors');
@@ -245,6 +273,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/feedback/{id}', [\App\Http\Controllers\Admin\FeedbackController::class, 'show'])->name('feedback.show');
         Route::post('/feedback/{id}/respond', [\App\Http\Controllers\Admin\FeedbackController::class, 'respond'])->name('feedback.respond');
         Route::post('/feedback/{id}/resolve', [\App\Http\Controllers\Admin\FeedbackController::class, 'markResolved'])->name('feedback.resolve');
+        
+        // Audit Trail Routes
+        Route::get('/audit-trail', [\App\Http\Controllers\Admin\AuditTrailController::class, 'index'])->name('audit-trail.index');
+        Route::get('/audit-trail/export', [\App\Http\Controllers\Admin\AuditTrailController::class, 'export'])->name('audit-trail.export');
+        Route::get('/audit-trail/{id}', [\App\Http\Controllers\Admin\AuditTrailController::class, 'show'])->name('audit-trail.show');
+        Route::get('/security-events', [\App\Http\Controllers\Admin\AuditTrailController::class, 'securityEvents'])->name('security-events');
+        Route::get('/suspicious-activities', [\App\Http\Controllers\Admin\AuditTrailController::class, 'suspiciousActivities'])->name('suspicious-activities');
     });
 });
 
@@ -255,7 +290,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 */
 Route::prefix('collector')->name('collector.')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'showCollectorLogin'])->name('login');
-    Route::post('/login', [AuthenticatedSessionController::class, 'loginCollector'])->name('login.submit');
+    Route::post('/login', [AuthenticatedSessionController::class, 'loginCollector'])->name('login.submit')->middleware('throttle:5,1'); // 5 collector login attempts per minute
     Route::post('/logout', [AuthenticatedSessionController::class, 'logoutCollector'])->name('logout');
     
     // Collector Password Reset Routes
@@ -264,12 +299,14 @@ Route::prefix('collector')->name('collector.')->group(function () {
                 ->name('password.request');
     Route::post('/forgot-password', [\App\Http\Controllers\Collector\Auth\CollectorPasswordResetLinkController::class, 'store'])
                 ->middleware('guest')
+                ->middleware('throttle:3,1') // 3 password reset attempts per minute
                 ->name('password.email');
     Route::get('/reset-password/{token}', [\App\Http\Controllers\Collector\Auth\CollectorNewPasswordController::class, 'create'])
                 ->middleware('guest')
                 ->name('password.reset');
     Route::post('/reset-password', [\App\Http\Controllers\Collector\Auth\CollectorNewPasswordController::class, 'store'])
                 ->middleware('guest')
+                ->middleware('throttle:3,1') // 3 password reset completions per minute
                 ->name('password.store');
 
     // Register dashboard route as collector.dashboard

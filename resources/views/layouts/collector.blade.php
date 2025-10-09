@@ -258,6 +258,11 @@
         };
     </script>
     
+    {{-- Auto-logout functionality for authenticated collectors --}}
+    @auth('collector')
+        <x-auto-logout />
+    @endauth
+    
     <!-- Google Maps API -->
     <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_KEY', '') }}&libraries=places"></script>
 </body>

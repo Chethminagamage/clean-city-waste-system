@@ -14,6 +14,19 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <!-- Google reCAPTCHA -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    
+    <!-- PWA Meta Tags for Browser Detection -->
+    <meta name="theme-color" content="#10b981">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Clean City">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    
+    <!-- PWA Service Worker Registration (no custom install UI) -->
+    <script src="{{ asset('js/pwa.js') }}" defer></script>
     <style>
         /* Smooth scroll behavior */
         html {
@@ -297,21 +310,49 @@
                                     <p class="text-gray-600">Login to manage waste smartly in your community</p>
                                 </div>
 
-                                @if(session('success'))
-    <div class="mb-4 text-green-700 bg-green-100 border border-green-300 px-4 py-3 rounded">
-        {{ session('success') }}
+                                {{-- Session Status Messages --}}
+{{-- Check for session expired parameter from auto-logout --}}
+@if(request()->get('session_expired'))
+    <div class="mb-4 text-red-700 bg-red-50 border border-red-200 px-4 py-3 rounded-lg shadow-sm">
+        <div class="flex items-center">
+            <svg class="w-5 h-5 text-red-400 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="font-medium">Session expired! Please login again.</span>
+        </div>
+    </div>
+@endif
+
+@if(session('success'))
+    <div class="mb-4 text-green-700 bg-green-50 border border-green-200 px-4 py-3 rounded-lg shadow-sm">
+        <div class="flex items-center">
+            <svg class="w-5 h-5 text-green-400 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="font-medium">{{ session('success') }}</span>
+        </div>
     </div>
 @endif
 
 @if(session('error'))
-    <div class="mb-4 text-red-700 bg-red-100 border border-red-300 px-4 py-3 rounded">
-        {{ session('error') }}
+    <div class="mb-4 text-red-700 bg-red-50 border border-red-200 px-4 py-3 rounded-lg shadow-sm">
+        <div class="flex items-center">
+            <svg class="w-5 h-5 text-red-400 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="font-medium">{{ session('error') }}</span>
+        </div>
     </div>
 @endif
 
 @if(session('status'))
-    <div class="mb-4 text-blue-700 bg-blue-100 border border-blue-300 px-4 py-3 rounded">
-        {{ session('status') }}
+    <div class="mb-4 text-blue-700 bg-blue-50 border border-blue-200 px-4 py-3 rounded-lg shadow-sm">
+        <div class="flex items-center">
+            <svg class="w-5 h-5 text-blue-400 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="font-medium">{{ session('status') }}</span>
+        </div>
     </div>
 @endif
 
@@ -378,6 +419,28 @@
                                         @endif
                                     </div>
 
+                                    <!-- Google reCAPTCHA -->
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-3">
+                                            Security Verification
+                                        </label>
+                                        <div class="flex justify-center">
+                                            <div class="g-recaptcha" 
+                                                 data-sitekey="{{ config('services.recaptcha.site_key') }}"
+                                                 data-theme="light"
+                                                 data-size="normal"
+                                                 data-callback="enableSubmitBtn"
+                                                 data-expired-callback="disableSubmitBtn">
+                                            </div>
+                                        </div>
+                                        @if($errors->has('captcha'))
+                                            <p class="mt-2 text-sm text-red-600 text-center">{{ $errors->first('captcha') }}</p>
+                                        @endif
+                                        @if($errors->has('g-recaptcha-response'))
+                                            <p class="mt-2 text-sm text-red-600 text-center">{{ $errors->first('g-recaptcha-response') }}</p>
+                                        @endif
+                                    </div>
+
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center">
                                             <input 
@@ -396,8 +459,10 @@
                                     </div>
 
                                     <button 
+                                        id="submit-btn"
                                         type="submit" dusk="login-button"
                                         class="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 focus:ring-4 focus:ring-green-200"
+                                        disabled
                                     >
                                         <i class="fas fa-sign-in-alt mr-2"></i>
                                         Login
@@ -601,6 +666,25 @@
         window.addEventListener('load', () => {
             document.body.style.opacity = '1';
         });
+
+        // reCAPTCHA callback functions
+        function enableSubmitBtn() {
+            const submitBtn = document.getElementById('submit-btn');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                submitBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+            }
+        }
+
+        function disableSubmitBtn() {
+            const submitBtn = document.getElementById('submit-btn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                submitBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+            }
+        }
     </script>
 </body>
 </html>

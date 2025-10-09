@@ -30,9 +30,12 @@ return [
     | to expire immediately when the browser is closed then you may
     | indicate that via the expire_on_close configuration option.
     |
+    | For auto-logout feature, we set lifetime to 30 minutes to allow
+    | for activity tracking, while the actual logout is handled by middleware.
+    |
     */
 
-    'lifetime' => (int) env('SESSION_LIFETIME', 120),
+    'lifetime' => (int) env('SESSION_LIFETIME', 30), // Changed from 120 to 30 minutes for auto-logout
 
     'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
 
