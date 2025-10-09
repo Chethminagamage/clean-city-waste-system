@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA Test - Clean City</title>
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#10b981">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Clean City">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen p-6">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-green-600 mb-6">Clean City PWA Test Page</h1>
+        
+        <!-- PWA Status Dashboard -->
+        <div class="grid md:grid-cols-2 gap-6">
+            <!-- Installation Status -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fas fa-download mr-2 text-blue-500"></i>
+                    Installation Status
+                </h2>
+                <div id="install-status" class="space-y-2">
+                    <div class="flex justify-between">
+                        <span>Service Worker:</span>
+                        <span id="sw-status" class="font-mono text-sm">Checking...</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Install Prompt:</span>
+                        <span id="install-prompt-status" class="font-mono text-sm">Checking...</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Installed:</span>
+                        <span id="installed-status" class="font-mono text-sm">Checking...</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Display Mode:</span>
+                        <span id="display-mode" class="font-mono text-sm">Checking...</span>
+                    </div>
+                </div>
+                <button id="manual-install-btn" 
+                        class="mt-4 w-full bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded font-semibold hidden">
+                    Install PWA
+                </button>
+            </div>
+            
+            <!-- Network Status -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fas fa-wifi mr-2 text-green-500"></i>
+                    Network Status
+                </h2>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span>Connection:</span>
+                        <span id="connection-status" class="font-mono text-sm">Online</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Connection Type:</span>
+                        <span id="connection-type" class="font-mono text-sm">Unknown</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Effective Type:</span>
+                        <span id="effective-type" class="font-mono text-sm">Unknown</span>
+                    </div>
+                </div>
+                <button id="test-offline-btn" 
+                        class="mt-4 w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded font-semibold">
+                    Test Offline Page
+                </button>
+            </div>
+            
+            <!-- Cache Status -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fas fa-database mr-2 text-purple-500"></i>
+                    Cache Status
+                </h2>
+                <div id="cache-status" class="space-y-2 mb-4">
+                    <div class="text-sm text-gray-600">Checking cache storage...</div>
+                </div>
+                <button id="clear-cache-btn" 
+                        class="w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded font-semibold">
+                    Clear Cache
+                </button>
+            </div>
+            
+            <!-- Features Test -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fas fa-cogs mr-2 text-indigo-500"></i>
+                    PWA Features
+                </h2>
+                <div class="space-y-3">
+                    <button id="test-notification-btn" 
+                            class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded font-semibold">
+                        Test Notification
+                    </button>
+                    <button id="cache-pages-btn" 
+                            class="w-full bg-purple-500 hover:bg-purple-600 text-white py-2 px-4 rounded font-semibold">
+                        Cache Important Pages
+                    </button>
+                    <button id="update-sw-btn" 
+                            class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded font-semibold">
+                        Check for Updates
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Logs -->
+        <div class="mt-6 bg-black text-green-400 p-4 rounded-lg">
+            <h3 class="text-lg font-semibold mb-2">Console Logs</h3>
+            <div id="console-logs" class="font-mono text-sm h-48 overflow-y-auto">
+                <div class="opacity-75">PWA Test Console initialized...</div>
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="mt-6 text-center">
+            <a href="/" class="inline-block bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-semibold mr-4">
+                ← Back to Clean City
+            </a>
+            <a href="/login" class="inline-block bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold">
+                Login
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        // PWA Test Suite
+        let pwaTestSuite = {
+            logs: [],
+            
+            log(message, type = 'info') {
+                const timestamp = new Date().toLocaleTimeString();
+                this.logs.push({ timestamp, message, type });
+                this.updateConsole();
+                console.log(`[PWA Test] ${message}`);
+            },
+            
+            updateConsole() {
+                const consoleEl = document.getElementById('console-logs');
+                const latest = this.logs.slice(-20); // Keep last 20 logs
+                consoleEl.innerHTML = latest.map(log => 
+                    `<div class="${log.type === 'error' ? 'text-red-400' : log.type === 'success' ? 'text-green-400' : 'text-gray-300'}">
+                        <span class="opacity-50">[${log.timestamp}]</span> ${log.message}
+                    </div>`
+                ).join('');
+                consoleEl.scrollTop = consoleEl.scrollHeight;
+            },
+            
+            async checkServiceWorker() {
+                if ('serviceWorker' in navigator) {
+                    try {
+                        const registration = await navigator.serviceWorker.getRegistration();
+                        if (registration) {
+                            document.getElementById('sw-status').textContent = '✅ Registered';
+                            document.getElementById('sw-status').className = 'font-mono text-sm text-green-600';
+                            this.log('Service Worker registered successfully', 'success');
+                            return registration;
+                        } else {
+                            document.getElementById('sw-status').textContent = '❌ Not Found';
+                            document.getElementById('sw-status').className = 'font-mono text-sm text-red-600';
+                            this.log('Service Worker not registered', 'error');
+                            return null;
+                        }
+                    } catch (error) {
+                        document.getElementById('sw-status').textContent = '❌ Error';
+                        document.getElementById('sw-status').className = 'font-mono text-sm text-red-600';
+                        this.log(`Service Worker error: ${error.message}`, 'error');
+                        return null;
+                    }
+                } else {
+                    document.getElementById('sw-status').textContent = '❌ Not Supported';
+                    document.getElementById('sw-status').className = 'font-mono text-sm text-red-600';
+                    this.log('Service Worker not supported', 'error');
+                    return null;
+                }
+            },
+            
+            checkInstallPrompt() {
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    window.deferredPrompt = e;
+                    document.getElementById('install-prompt-status').textContent = '✅ Available';
+                    document.getElementById('install-prompt-status').className = 'font-mono text-sm text-green-600';
+                    document.getElementById('manual-install-btn').classList.remove('hidden');
+                    this.log('Install prompt available', 'success');
+                });
+                
+                if (!window.deferredPrompt) {
+                    document.getElementById('install-prompt-status').textContent = '❌ Not Available';
+                    document.getElementById('install-prompt-status').className = 'font-mono text-sm text-yellow-600';
+                }
+            },
+            
+            checkInstallStatus() {
+                const isInstalled = window.matchMedia('(display-mode: standalone)').matches || 
+                                   window.navigator.standalone === true;
+                
+                if (isInstalled) {
+                    document.getElementById('installed-status').textContent = '✅ Installed';
+                    document.getElementById('installed-status').className = 'font-mono text-sm text-green-600';
+                    this.log('App is installed and running in standalone mode', 'success');
+                } else {
+                    document.getElementById('installed-status').textContent = '❌ Browser Mode';
+                    document.getElementById('installed-status').className = 'font-mono text-sm text-yellow-600';
+                    this.log('App running in browser mode', 'info');
+                }
+                
+                // Display mode
+                const displayMode = window.matchMedia('(display-mode: standalone)').matches ? 'standalone' :
+                                   window.matchMedia('(display-mode: minimal-ui)').matches ? 'minimal-ui' :
+                                   window.matchMedia('(display-mode: fullscreen)').matches ? 'fullscreen' : 'browser';
+                
+                document.getElementById('display-mode').textContent = displayMode;
+                this.log(`Display mode: ${displayMode}`, 'info');
+            },
+            
+            checkNetworkStatus() {
+                const updateNetworkStatus = () => {
+                    document.getElementById('connection-status').textContent = navigator.onLine ? '✅ Online' : '❌ Offline';
+                    document.getElementById('connection-status').className = `font-mono text-sm ${navigator.onLine ? 'text-green-600' : 'text-red-600'}`;
+                    
+                    if (navigator.connection) {
+                        document.getElementById('connection-type').textContent = navigator.connection.type || 'Unknown';
+                        document.getElementById('effective-type').textContent = navigator.connection.effectiveType || 'Unknown';
+                    }
+                    
+                    this.log(`Network status: ${navigator.onLine ? 'Online' : 'Offline'}`, 'info');
+                };
+                
+                updateNetworkStatus();
+                window.addEventListener('online', updateNetworkStatus);
+                window.addEventListener('offline', updateNetworkStatus);
+            },
+            
+            async checkCacheStatus() {
+                if ('caches' in window) {
+                    try {
+                        const cacheNames = await caches.keys();
+                        const cacheEl = document.getElementById('cache-status');
+                        
+                        if (cacheNames.length > 0) {
+                            let cacheInfo = '';
+                            for (const cacheName of cacheNames) {
+                                const cache = await caches.open(cacheName);
+                                const keys = await cache.keys();
+                                cacheInfo += `<div class="flex justify-between text-sm">
+                                    <span>${cacheName}:</span>
+                                    <span class="font-mono">${keys.length} items</span>
+                                </div>`;
+                            }
+                            cacheEl.innerHTML = cacheInfo;
+                            this.log(`Found ${cacheNames.length} caches`, 'success');
+                        } else {
+                            cacheEl.innerHTML = '<div class="text-sm text-gray-600">No caches found</div>';
+                            this.log('No caches found', 'info');
+                        }
+                    } catch (error) {
+                        document.getElementById('cache-status').innerHTML = '<div class="text-sm text-red-600">Cache access error</div>';
+                        this.log(`Cache error: ${error.message}`, 'error');
+                    }
+                } else {
+                    document.getElementById('cache-status').innerHTML = '<div class="text-sm text-red-600">Cache API not supported</div>';
+                    this.log('Cache API not supported', 'error');
+                }
+            },
+            
+            async init() {
+                this.log('Initializing PWA test suite...');
+                
+                await this.checkServiceWorker();
+                this.checkInstallPrompt();
+                this.checkInstallStatus();
+                this.checkNetworkStatus();
+                await this.checkCacheStatus();
+                
+                this.log('PWA test suite initialization complete', 'success');
+            }
+        };
+        
+        // Event Handlers
+        document.getElementById('manual-install-btn').addEventListener('click', async () => {
+            if (window.deferredPrompt) {
+                window.deferredPrompt.prompt();
+                const { outcome } = await window.deferredPrompt.userChoice;
+                pwaTestSuite.log(`Install prompt result: ${outcome}`, 'info');
+                window.deferredPrompt = null;
+            }
+        });
+        
+        document.getElementById('test-offline-btn').addEventListener('click', () => {
+            window.open('/offline.html', '_blank');
+        });
+        
+        document.getElementById('clear-cache-btn').addEventListener('click', async () => {
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                for (const cacheName of cacheNames) {
+                    await caches.delete(cacheName);
+                }
+                pwaTestSuite.log(`Cleared ${cacheNames.length} caches`, 'success');
+                await pwaTestSuite.checkCacheStatus();
+            }
+        });
+        
+        document.getElementById('test-notification-btn').addEventListener('click', async () => {
+            if ('Notification' in window) {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    new Notification('Clean City PWA Test', {
+                        body: 'PWA notifications are working!',
+                        icon: '/images/icons/icon-192x192.png'
+                    });
+                    pwaTestSuite.log('Test notification sent', 'success');
+                } else {
+                    pwaTestSuite.log('Notification permission denied', 'error');
+                }
+            }
+        });
+        
+        document.getElementById('cache-pages-btn').addEventListener('click', async () => {
+            if (window.cleanCityPWA) {
+                try {
+                    await window.cleanCityPWA.cacheImportantData([
+                        '/resident/dashboard',
+                        '/resident/collections',
+                        '/resident/payments'
+                    ]);
+                    pwaTestSuite.log('Important pages cached', 'success');
+                    await pwaTestSuite.checkCacheStatus();
+                } catch (error) {
+                    pwaTestSuite.log(`Caching error: ${error.message}`, 'error');
+                }
+            }
+        });
+        
+        document.getElementById('update-sw-btn').addEventListener('click', async () => {
+            if ('serviceWorker' in navigator) {
+                const registration = await navigator.serviceWorker.getRegistration();
+                if (registration) {
+                    await registration.update();
+                    pwaTestSuite.log('Service Worker update check completed', 'success');
+                }
+            }
+        });
+        
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            pwaTestSuite.init();
+        });
+    </script>
+    
+    <!-- Load PWA script -->
+    <script src="/js/pwa.js" defer></script>
+</body>
+</html>

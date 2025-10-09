@@ -16,6 +16,17 @@
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <!-- Google reCAPTCHA -->
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    
+    <!-- PWA Meta Tags for Browser Detection -->
+    <meta name="theme-color" content="#10b981">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Clean City">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    
+    <!-- PWA Service Worker Registration (no custom install UI) -->
+    <script src="{{ asset('js/pwa.js') }}" defer></script>
     <style>
         /* Smooth scroll behavior */
         html {
@@ -415,9 +426,11 @@
                                         </label>
                                         <div class="flex justify-center">
                                             <div class="g-recaptcha" 
-                                                 data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"
+                                                 data-sitekey="{{ config('services.recaptcha.site_key') }}"
                                                  data-theme="light"
-                                                 data-size="normal">
+                                                 data-size="normal"
+                                                 data-callback="enableSubmitBtn"
+                                                 data-expired-callback="disableSubmitBtn">
                                             </div>
                                         </div>
                                         @if($errors->has('captcha'))
@@ -446,8 +459,10 @@
                                     </div>
 
                                     <button 
+                                        id="submit-btn"
                                         type="submit" dusk="login-button"
                                         class="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 focus:ring-4 focus:ring-green-200"
+                                        disabled
                                     >
                                         <i class="fas fa-sign-in-alt mr-2"></i>
                                         Login
@@ -651,6 +666,25 @@
         window.addEventListener('load', () => {
             document.body.style.opacity = '1';
         });
+
+        // reCAPTCHA callback functions
+        function enableSubmitBtn() {
+            const submitBtn = document.getElementById('submit-btn');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                submitBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+            }
+        }
+
+        function disableSubmitBtn() {
+            const submitBtn = document.getElementById('submit-btn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                submitBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+            }
+        }
     </script>
 </body>
 </html>

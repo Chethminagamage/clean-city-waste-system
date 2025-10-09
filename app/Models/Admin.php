@@ -174,4 +174,25 @@ class Admin extends Authenticatable
     {
         return $this->two_factor_enabled && !is_null($this->two_factor_secret);
     }
+
+    /**
+     * Send the password reset notification.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new \App\Notifications\AdminResetPassword($token));
+    }
+
+    /**
+     * Get the email address where password reset links are sent.
+     *
+     * @return string
+     */
+    public function getEmailForPasswordReset()
+    {
+        return $this->email;
+    }
 }

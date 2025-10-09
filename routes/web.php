@@ -211,6 +211,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AdminLoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AdminLoginController::class, 'login'])->name('login.submit')->middleware('throttle:5,1'); // 5 admin login attempts per minute
 
+    // Password Reset Routes
+    Route::get('/forgot-password', [App\Http\Controllers\Admin\Auth\PasswordResetController::class, 'showForgotPasswordForm'])->name('password.request');
+    Route::post('/forgot-password', [App\Http\Controllers\Admin\Auth\PasswordResetController::class, 'sendResetLinkEmail'])->name('password.email')->middleware('throttle:3,1'); // 3 reset attempts per minute
+    Route::get('/reset-password/{token}', [App\Http\Controllers\Admin\Auth\PasswordResetController::class, 'showResetPasswordForm'])->name('password.reset');
+    Route::post('/reset-password', [App\Http\Controllers\Admin\Auth\PasswordResetController::class, 'resetPassword'])->name('password.update')->middleware('throttle:5,1'); // 5 reset attempts per minute
+
     // Two-Factor Authentication Routes
     Route::get('/2fa/verify', [AdminTwoFactorController::class, 'showVerifyForm'])->name('2fa.verify');
     Route::post('/2fa/verify', [AdminTwoFactorController::class, 'verify'])->name('2fa.verify.submit');

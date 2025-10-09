@@ -120,9 +120,11 @@
                 <!-- reCAPTCHA -->
                 <div class="flex justify-center">
                     <div class="g-recaptcha" 
-                         data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"
+                         data-sitekey="{{ config('services.recaptcha.site_key') }}"
                          data-theme="light"
-                         data-size="normal">
+                         data-size="normal"
+                         data-callback="enableSubmitBtn"
+                         data-expired-callback="disableSubmitBtn">
                     </div>
                 </div>
 
@@ -140,7 +142,7 @@
                         </label>
                     </div>
                     <div class="text-sm">
-                        <a href="#" class="text-green-600 hover:text-green-500 transition duration-200">
+                        <a href="{{ route('admin.password.request') }}" class="text-green-600 hover:text-green-500 transition duration-200">
                             Forgot password?
                         </a>
                     </div>
@@ -149,8 +151,10 @@
                 <!-- Login Button -->
                 <div>
                     <button 
+                        id="submit-btn"
                         type="submit" 
                         class="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200 font-medium"
+                        disabled
                     >
                         Sign In
                     </button>
@@ -175,5 +179,26 @@
             </a>
         </div>
     </div>
+
+    <script>
+        // reCAPTCHA callback functions
+        function enableSubmitBtn() {
+            const submitBtn = document.getElementById('submit-btn');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                submitBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+            }
+        }
+
+        function disableSubmitBtn() {
+            const submitBtn = document.getElementById('submit-btn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                submitBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+            }
+        }
+    </script>
 </body>
 </html>

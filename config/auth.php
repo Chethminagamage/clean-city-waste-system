@@ -118,6 +118,13 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+        
+        'admins' => [
+            'provider' => 'admins',
+            'table' => 'admin_password_reset_tokens',
+            'expire' => 60, // Token expires in 60 minutes
+            'throttle' => 60, // 60 seconds between reset requests
+        ],
     ],
 
     /*

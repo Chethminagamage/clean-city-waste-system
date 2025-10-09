@@ -12,6 +12,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- PWA Meta Tags for Browser Detection -->
+    <meta name="theme-color" content="#10b981">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Clean City">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    
+    <!-- PWA Service Worker Registration (no custom install UI) -->
+    <script src="{{ asset('js/pwa.js') }}" defer></script>
+    
     <style>
         /* Smooth scroll behavior */
         html {

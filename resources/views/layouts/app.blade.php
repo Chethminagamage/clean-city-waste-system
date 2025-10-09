@@ -13,6 +13,30 @@
         <link rel="shortcut icon" href="{{ asset('images/logo.png') }}">
         <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
         
+        <!-- PWA Meta Tags -->
+        <meta name="theme-color" content="#10b981">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="default">
+        <meta name="apple-mobile-web-app-title" content="Clean City">
+        <meta name="application-name" content="Clean City">
+        <meta name="msapplication-TileColor" content="#10b981">
+        <meta name="msapplication-config" content="{{ asset('browserconfig.xml') }}">
+        
+        <!-- PWA Manifest -->
+        <link rel="manifest" href="{{ asset('manifest.json') }}">
+        
+        <!-- Apple Touch Icons -->
+        <link rel="apple-touch-icon" sizes="57x57" href="{{ asset('images/icons/icon-57x57.png') }}">
+        <link rel="apple-touch-icon" sizes="60x60" href="{{ asset('images/icons/icon-60x60.png') }}">
+        <link rel="apple-touch-icon" sizes="72x72" href="{{ asset('images/icons/icon-72x72.png') }}">
+        <link rel="apple-touch-icon" sizes="76x76" href="{{ asset('images/icons/icon-76x76.png') }}">
+        <link rel="apple-touch-icon" sizes="114x114" href="{{ asset('images/icons/icon-114x114.png') }}">
+        <link rel="apple-touch-icon" sizes="120x120" href="{{ asset('images/icons/icon-120x120.png') }}">
+        <link rel="apple-touch-icon" sizes="144x144" href="{{ asset('images/icons/icon-144x144.png') }}">
+        <link rel="apple-touch-icon" sizes="152x152" href="{{ asset('images/icons/icon-152x152.png') }}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/icons/icon-180x180.png') }}">
+        
         <style>[x-cloak]{display:none !important}</style>
 
         <!-- Fonts -->
@@ -87,6 +111,9 @@
         
         <!-- Theme Management Script -->
         <script src="{{ asset('js/theme.js') }}" defer></script>
+        
+        <!-- PWA Installation Script -->
+        <script src="{{ asset('js/pwa.js') }}" defer></script>
     </head>
     <body class="font-sans antialiased bg-gradient-to-br from-gray-50 to-green-50 dark:from-gray-900 dark:to-gray-800 min-h-screen transition-colors duration-300">
         <div class="min-h-screen dark:bg-gray-900 transition-colors duration-300">
@@ -118,5 +145,8 @@
     
     <!-- Theme Management Script -->
     <script src="{{ asset('js/theme.js') }}"></script>
+    
+    <!-- PWA Script -->
+    <script src="{{ asset('js/pwa.js') }}" defer></script>
     </body>
 </html>
